@@ -568,6 +568,61 @@
       border-radius: 12px;
     }
 
+    /*Оконные формы*/
+    /* overlay */
+    #modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+
+      display: none;
+      /* скрыто по умолчанию */
+      align-items: center;
+      justify-content: center;
+
+      z-index: 1000;
+    }
+
+    #modal-body form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #modal-body form input {
+      min-width: 50%;
+      border-radius: 5px;
+      height: 40px;
+    }
+
+    #modal-body form * {
+      margin-bottom: 6px;
+    }
+
+    /* открытое состояние */
+    #modal.open {
+      display: flex;
+    }
+
+    /* окно */
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+
+      max-width: 500px;
+      width: 100%;
+
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* кнопки */
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
     /* Адаптив */
     @media (max-width:900px) {
       .game-page {
@@ -822,7 +877,8 @@
               <button class="btn btn-primary" style="margin-top: 12px;">
                 Добавить в коллекцию
               </button>
-              <button class="btn btn-primary" style="margin-top: 12px; margin-left: auto;">
+              <button class="btn btn-primary" style="margin-top: 12px; margin-left: auto;" data-action="open-modal"
+                data-modal="edit_game">
                 Редактировать (разраб)
               </button>
             </div>
@@ -843,9 +899,10 @@
               <option>1.3</option>
             </select>
             <div style="display: flex;">
-              <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;">Добавить</button>
-              <button class="btn btn-primary"
-                style="margin-left: 8px; margin-bottom: 12px; max-width: fit-content;">Удалить</button>
+              <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;"
+                data-action="open-modal" data-modal="add_game_ver">Добавить</button>
+              <button class="btn btn-primary" style="margin-left: 8px; margin-bottom: 12px; max-width: fit-content;"
+                data-action="open-modal" data-modal="delete_game_ver">Удалить</button>
             </div>
 
           </div>
@@ -853,7 +910,7 @@
           <div class="card reviews-wide">
             <h3>Отзывы</h3>
             <button style="max-width: fit-content;" class="btn btn-primary" data-action="open-modal"
-              data-modal="review-modal">
+              data-modal="review">
               Написать отзыв
             </button>
             <article style="margin-top: 8px;" class="review-card">
@@ -909,9 +966,9 @@
           <div class="muted">role: пользователь</div>
           <div class="badges"><span class="badge">Автор</span><span class="badge">Модерация: 0</span></div>
           <div style="margin-top:12px;display:flex;gap:8px">
-            <button class="btn btn-primary" data-action="open-modal" data-modal="edit-profile-modal">Редактировать
+            <button class="btn btn-primary" data-action="open-modal" data-modal="edit_profile">Редактировать
               профиль</button>
-            <button class="btn btn-ghost" data-action="open-modal" data-modal="logout-modal">Выйти</button>
+            <button class="btn btn-ghost" data-action="open-modal" data-modal="logout">Выйти</button>
           </div>
         </div>
       </div>
@@ -921,11 +978,13 @@
         <button class="tab-btn active" data-target="collections-section">Коллекции</button>
         <button class="tab-btn" data-target="reviews-section">Отзывы</button>
         <button class="tab-btn" data-target="notifications-section">Уведомления</button>
+        <button class="btn" data-action="open-modal" data-modal="become_dev">Стать разработчиком</button>
       </div>
 
       <div style="display: flex;">
         <button class="tab-btn" data-target="games-section">Мои игры (разраб)</button>
-        <button class="tab-btn" style="margin-left: 8px;">Опубликовать игру (разраб)</button>
+        <button class="tab-btn" style="margin-left: 8px;" data-action="open-modal" data-modal="publish">Опубликовать
+          игру (разраб)</button>
         <button class="tab-btn" style="margin-left: 8px;">Подлежащее модерации (модер)</button>
         <button class="tab-btn" style="margin-left: 8px;">Лог модераций (админ)</button>
       </div>
@@ -933,19 +992,24 @@
       <!-- ===== Раздел: Коллекции ===== -->
       <div id="collections-section" class="section-block active">
         <h3 class="section-title">Мои коллекции</h3>
-        <button class="btn btn-primary" style="margin-bottom: 12px;">Создать коллекцию</button>
+        <button class="btn btn-primary" style="margin-bottom: 12px;" data-action="open-modal"
+          data-modal="create_collection">Создать коллекцию</button>
         <div class="catalog-grid">
           <article class="card">
             <div class="img-placeholder"></div>
             <h3>Моя коллекция 1</h3>
-            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;">Редактировать</button>
-            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;">Удалить</button>
+            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;"
+              data-action="open-modal" data-modal="edit_collection">Редактировать</button>
+            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;"
+              data-action="open-modal" data-modal="delete_collection">Удалить</button>
           </article>
           <article class="card">
             <div class="img-placeholder"></div>
             <h3>Моя коллекция 2</h3>
-            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;">Редактировать</button>
-            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;">Удалить</button>
+            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;"
+              data-action="open-modal" data-modal="edit_collection">Редактировать</button>
+            <button class="btn btn-primary" style="margin-bottom: 12px; max-width: fit-content;"
+              data-action="open-modal" data-modal="delete_collection">Удалить</button>
           </article>
         </div>
       </div>
@@ -1116,7 +1180,7 @@
                 <button class="btn btn-primary" data-action="open-modal" data-modal="modal_entity_to_moderate">
                   Принять
                 </button>
-                <button class="btn btn-ghost" data-action="open-modal" data-modal="reject-201">
+                <button class="btn btn-ghost" data-action="open-modal" data-modal="decline">
                   Отклонить
                 </button>
               </td>
@@ -1243,15 +1307,18 @@
             <td>ivan</td>
             <td>user</td>
             <td>active</td>
-            <td><button class="btn btn-ghost" data-action="open-modal" data-modal="change-role-modal">Изменить
-                роль</button> <button class="btn btn-ghost" data-action="open-modal"
-                data-modal="block-modal">Блокировать</button></td>
+            <td>
+              <button class="btn btn-ghost" data-action="open-modal" data-modal="change_role">Изменить
+                роль</button>
+              <button class="btn btn-ghost" data-action="open-modal" data-modal="block">Блокировать</button>
+              <button class="btn btn-ghost" data-action="open-modal" data-modal="unblock">Разблокировать</button>
+            </td>
           </tr>
           <tr>
             <td>masha</td>
             <td>dev</td>
             <td>active</td>
-            <td><button class="btn btn-ghost" data-action="open-modal" data-modal="warn-modal">Предупредить</button>
+            <td><button class="btn btn-ghost" data-action="open-modal" data-modal="warn">Предупредить</button>
             </td>
           </tr>
         </tbody>
@@ -1259,39 +1326,182 @@
     </section>
   </main>
 
-  <!-- МОДАЛЫ (заглушки для оконных форм) -->
-  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="sheet" role="document" aria-labelledby="modal-title">
-      <h3 id="modal-title">Оконная форма — заглушка</h3>
-      <p class="muted" id="modal-desc">Тут будет содержимое модалки: формы добавления версии, отзыв, публикации и т.д.
-      </p>
+  <!-- МОДАЛ (основная оболочка вокруг оконных форм) -->
+  <div id="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h2 id="modal-title"></h2>
 
-      <form style="margin-top:12px" id="modal-form">
-        <label>Заголовок<input type="text" name="title"></label>
-        <label>Текст<textarea name="body"></textarea></label>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn btn-primary" type="button" id="modal-save">Сохранить</button>
-          <button class="btn btn-ghost" type="button" id="modal-cancel">Отмена</button>
-        </div>
-      </form>
+      <div id="modal-body"></div>
+
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Отмена</button>
+        <button class="btn-primary" id="modal-save">Подтвердить</button>
+      </div>
     </div>
   </div>
 
-  <div id="modal_entity_to_moderate" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="sheet" role="document" aria-labelledby="modal-title">
-      <h3 id="modal-title">Оконная форма — заглушка</h3>
-      <p class="muted" id="modal-desc">Тут будет содержимое модалки: формы добавления версии, отзыв, публикации и т.д.
-      </p>
+  <!-- Шаблоны оконных форм -->
+  <template id="tpl-review">
+    <form data-form="review">
+      <label>
+        Отзыв
+        <textarea name="text" required></textarea>
+      </label>
 
-      <form style="margin-top:12px" id="modal-form">
-        <label>Текст<textarea name="body"></textarea></label>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn btn-primary" type="button" id="modal-save">Сохранить</button>
-          <button class="btn btn-ghost" type="button" id="modal-cancel">Отмена</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      <label>
+        Оценка
+        <select name="rating">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★</option>
+          <option value="3">★★★</option>
+          <option value="2">★★</option>
+          <option value="1">★</option>
+        </select>
+      </label>
+    </form>
+  </template>
+
+  <template id="tpl-publish">
+    <label>
+      Публикация игры
+    </label>
+    <form data-form="publish">
+      <input name="title" placeholder="Название игры">
+      <input name="main_pic" placeholder="Аватар">
+      <textarea name="description" placeholder="Описание"></textarea>
+      <select name="genre">
+        <option value="action">Экшн</option>
+        <option value="adventure">Приключения</option>
+        <option value="rpg">RPG</option>
+        <option value="simulation">Симулятор</option>
+        <option value="strategy">Стратегия</option>
+        <option value="sports">Спортивная игра</option>
+        <option value="puzzle">Головоломка</option>
+        <option value="horror">Хоррор</option>
+        <option value="platformer">Платформер</option>
+        <option value="sandbox">Песочница</option>
+        <option value="visual-novel">Визуальная новелла</option>
+        <option value="roguelike">Roguelike</option>
+      </select>
+      <input name="repo_link" placeholder="Ссылка на репозиторий">
+      <input name="commit_hash" placeholder="Хэш коммита">
+      <textarea name="files" placeholder="Список файлов"></textarea>
+      <textarea name="tags" placeholder="Теги"></textarea>
+      <input name="game_ver" placeholder="Версия игры">
+    </form>
+  </template>
+
+  <template id="tpl-delete-game-ver">
+    <label>
+      Подтвердите удаление версии игры
+    </label>
+    <form data-form="delete-game-ver">
+    </form>
+  </template>
+
+  <template id="tpl-add-game-ver">
+    <form data-form="publish">
+      <input name="repo_link" placeholder="Ссылка на репозиторий">
+      <input name="commit_hash" placeholder="Хэш коммита">
+      <input name="game_ver" placeholder="Версия игры">
+      <textarea name="files" placeholder="Список файлов"></textarea>
+      <textarea name="files" placeholder="Список изменений"></textarea>
+    </form>
+  </template>
+
+  <template id="tpl-edit-game">
+    <form data-form="edit_game">
+      <input name="title" placeholder="Название игры">
+      <input type="file" name="main_pic" placeholder="Аватар">
+      <textarea name="description" placeholder="Описание"></textarea>
+    </form>
+  </template>
+
+  <template id="tpl-logout">
+    <label>
+      Подтвердите выход из аккаунта
+    </label>
+    <form data-form="logout">
+    </form>
+  </template>
+
+  <template id="tpl-edit-profile">
+    <form data-form="edit_profile">
+      <input name="title" placeholder="username">
+      <input type="file" name="main_pic" placeholder="Аватар">
+      <textarea name="about_me" placeholder="Обо мне"></textarea>
+    </form>
+  </template>
+
+  <template id="tpl-delete-collection">
+    <label>
+      Подтвердите удаление коллекции
+    </label>
+    <form data-form="delete_collection">
+    </form>
+  </template>
+
+  <template id="tpl-create-collection">
+    <form data-form="edit_game">
+      <input name="title" placeholder="Название коллекции">
+    </form>
+  </template>
+
+  <template id="tpl-edit-collection">
+    <form data-form="edit_game">
+      <input name="title" placeholder="Название коллекции">
+      <button class="btn btn-primary" style="width: fit-content;">Добавить игру</button>
+    </form>
+  </template>
+
+  <template id="tpl-become-dev">
+    <form data-form="become_dev">
+      <input name="title" placeholder="Github username">
+      <textarea name="about_me" placeholder="Расскажите о себе как о разработчике"></textarea>
+    </form>
+  </template>
+
+  <template id="tpl-change-role">
+    <form data-form="change_role">
+      <label>
+        Укажите роль
+        <select name="rating">
+          <option value="user">Пользователь</option>
+          <option value="dev">Разработчик</option>
+          <option value="mod">Модератор</option>
+          <option value="admin">Администратор</option>
+        </select>
+      </label>
+    </form>
+  </template>
+
+  <template id="tpl-block">
+    <label>
+      Подтвердите блокировку пользователя
+    </label>
+    <form data-form="block">
+    </form>
+  </template>
+
+  <template id="tpl-unblock">
+    <label>
+      Подтвердите разблокировку пользователя
+    </label>
+    <form data-form="unblock">
+    </form>
+  </template>
+
+  <template id="tpl-warn">
+    <form data-form="become_dev">
+      <textarea name="reason" placeholder="Причина предупреждения"></textarea>
+    </form>
+  </template>
+
+  <template id="tpl-decline">
+    <form data-form="decline">
+      <textarea name="reason" placeholder="Причина отклонения"></textarea>
+    </form>
+  </template>
 
   <footer class="site-footer" style="margin-top: auto;">
     <div class="container">© 2025 MyNG — макеты и заглушки для верстки</div>
@@ -1305,6 +1515,136 @@
       const modal = document.getElementById('modal');
       const modalCancel = document.getElementById('modal-cancel');
       const modalSave = document.getElementById('modal-save');
+
+      const MODALS = {
+        review: {
+          title: 'Оставить отзыв',
+          template: 'tpl-review',
+          onSubmit(data) {
+            console.log('Отзыв:', data);
+          }
+        },
+
+        publish: {
+          title: 'Опубликовать игру',
+          template: 'tpl-publish',
+          onSubmit(data) {
+            console.log('Публикация:', data);
+          }
+        },
+
+        delete_game_ver: {
+          title: 'Удалить версию игры',
+          template: 'tpl-delete-game-ver',
+          onSubmit(data) {
+            console.log('Удаление:', data);
+          }
+        },
+
+        add_game_ver: {
+          title: 'Добавить версию игры',
+          template: 'tpl-add-game-ver',
+          onSubmit(data) {
+            console.log('Добавление:', data);
+          }
+        },
+
+        edit_game: {
+          title: 'Редактировать игру',
+          template: 'tpl-edit-game',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        logout: {
+          title: 'Выйти из аккаунта',
+          template: 'tpl-logout',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        edit_profile: {
+          title: 'Редактировать профиль',
+          template: 'tpl-edit-profile',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        delete_collection: {
+          title: 'Удалить коллекцию',
+          template: 'tpl-delete-collection',
+          onSubmit(data) {
+            console.log('Удаление:', data);
+          }
+        },
+
+        create_collection: {
+          title: 'Создать коллекцию',
+          template: 'tpl-create-collection',
+          onSubmit(data) {
+            console.log('Создание:', data);
+          }
+        },
+
+        edit_collection: {
+          title: 'Редактировать коллекцию',
+          template: 'tpl-edit-collection',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        become_dev: {
+          title: 'Подать заявку на становление разработчиком',
+          template: 'tpl-become-dev',
+          onSubmit(data) {
+            console.log('Создание:', data);
+          }
+        },
+
+        change_role: {
+          title: 'Изменить роль',
+          template: 'tpl-change-role',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        block: {
+          title: 'Заблокировать пользователя',
+          template: 'tpl-block',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        unblock: {
+          title: 'Разблокировать пользователя',
+          template: 'tpl-unblock',
+          onSubmit(data) {
+            console.log('Редактирование:', data);
+          }
+        },
+
+        warn: {
+          title: 'Предупредить пользователя',
+          template: 'tpl-warn',
+          onSubmit(data) {
+            console.log('Создание:', data);
+          }
+        },
+
+        decline: {
+          title: 'Отклонить',
+          template: 'tpl-decline',
+          onSubmit(data) {
+            console.log('Создание:', data);
+          }
+        }
+      };
 
       function showPage(id, pushState = true) {
         // скрыть все
@@ -1360,26 +1700,43 @@
       });
 
       function openModal(name) {
+        const config = MODALS[name];
+        if (!config) return;
+
         modal.classList.add('open');
         modal.removeAttribute('aria-hidden');
-        // можно менять содержимое модалки в зависимости от name
-        document.getElementById('modal-title').textContent = 'Форма: ' + name;
-        document.getElementById('modal-desc').textContent = 'Это заглушка модального окна для: ' + name;
-        // фокус внутрь
+
+        document.getElementById('modal-title').textContent = config.title;
+
+        const body = document.getElementById('modal-body');
+        body.innerHTML = '';
+
+        const tpl = document.getElementById(config.template);
+        body.append(tpl.content.cloneNode(true));
+
         setTimeout(() => {
-          modal.querySelector('input, textarea, button')?.focus();
+          body.querySelector('input, textarea, select')?.focus();
         }, 50);
       }
+
       function closeModal() {
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden', 'true');
       }
 
       modalCancel.addEventListener('click', closeModal);
-      modalSave.addEventListener('click', function () {
-        // здесь можно валидировать/собирать данные
+      modalSave.addEventListener('click', () => {
+        const form = modal.querySelector('form');
+        if (!form) return;
+
+        const name = form.dataset.form;
+        const config = MODALS[name];
+
+        const data = Object.fromEntries(new FormData(form).entries());
+
+        config?.onSubmit?.(data);
+
         closeModal();
-        alert('Данные сохранены (заглушка)');
       });
 
       // close modal on overlay click
@@ -1412,15 +1769,15 @@
         const text = button.textContent.trim();
 
         if (text.includes('Подлежащее модерации')) {
-          window.location.href = 'Site_v3.html#entities';
+          window.location.href = 'Site.html#entities';
         }
 
         if (text.includes('Лог модераций')) {
-          window.location.href = 'Site_v3.html#moderation';
+          window.location.href = 'Site.html#moderation';
         }
 
         if (text.includes("Опубликовать игру")) {
-          window.location.href = "Site_v3.html#publish";
+          window.location.href = "Site.html#publish";
         }
       });
     });
