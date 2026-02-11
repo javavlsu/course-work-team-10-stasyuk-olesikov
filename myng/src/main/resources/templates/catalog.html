@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Каталог игр — Indie Games Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Дополнительные кастомные стили при необходимости -->
+    <style>
+      /* Минимальные кастомные стили, если нужно переопределить что-то */
+      .img-placeholder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Каталог игр -->
+    <section
+      id="catalog"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      role="region"
+      aria-labelledby="catalog-title"
+    >
+      <!-- Заголовок -->
+      <h2
+        id="catalog-title"
+        class="text-3xl md:text-4xl font-bold text-gray-900 mb-8"
+      >
+        Каталог игр
+      </h2>
+
+      <!-- Фильтры и поиск -->
+      <div class="flex flex-col sm:flex-row gap-4 mb-8">
+        <!-- Поле поиска -->
+        <div class="flex-1">
+          <input
+            type="text"
+            placeholder="Поиск по названию..."
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+          />
+        </div>
+
+        <!-- Селект жанров -->
+        <div class="sm:w-48">
+          <select
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+          >
+            <option>Все жанры</option>
+            <option>Платформеры</option>
+            <option>Roguelike</option>
+            <option>Головоломки</option>
+            <option>Шутеры</option>
+            <option>Симуляторы</option>
+            <option>Стратегии</option>
+            <option>Приключения</option>
+          </select>
+        </div>
+
+        <!-- Кнопка фильтра -->
+        <button
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow"
+        >
+          Фильтр
+        </button>
+      </div>
+
+      <!-- Сетка игр -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
+        <!-- Карточка игры 1 -->
+        <article
+          class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+        >
+          <!-- Плейсхолдер изображения -->
+          <div
+            class="img-placeholder w-full h-48 bg-gradient-to-br from-purple-500 to-indigo-600"
+          ></div>
+
+          <!-- Контент -->
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Cyber Knight</h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Киберпанк-платформер с уникальной механикой взлома
+            </p>
+
+            <!-- Мета-информация и кнопка -->
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"
+              >
+                Платформер
+              </span>
+              <a
+                href="#game"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                data-action="open-page"
+                data-target="game"
+              >
+                Играть
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Карточка игры 2 -->
+        <article
+          class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+        >
+          <div
+            class="img-placeholder w-full h-48 bg-gradient-to-br from-green-500 to-emerald-600"
+          ></div>
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Lost in Space</h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Исследуйте космос, выживайте и стройте свою базу
+            </p>
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"
+              >
+                Выживание
+              </span>
+              <a
+                href="#game"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                data-action="open-page"
+                data-target="game"
+              >
+                Играть
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Карточка игры 3 -->
+        <article
+          class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+        >
+          <div
+            class="img-placeholder w-full h-48 bg-gradient-to-br from-orange-500 to-red-600"
+          ></div>
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Pixel Dungeon</h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Классический рогалик с пиксельной графикой
+            </p>
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"
+              >
+                Roguelike
+              </span>
+              <a
+                href="#game"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                data-action="open-page"
+                data-target="game"
+              >
+                Играть
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Карточка игры 4 -->
+        <article
+          class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+        >
+          <div
+            class="img-placeholder w-full h-48 bg-gradient-to-br from-cyan-500 to-blue-600"
+          ></div>
+          <div class="p-5">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Eco Builder</h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Стройте экологичный город будущего
+            </p>
+            <div class="flex items-center justify-between">
+              <span
+                class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"
+              >
+                Стратегия
+              </span>
+              <a
+                href="#game"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                data-action="open-page"
+                data-target="game"
+              >
+                Играть
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Пагинация (добавил для полноты) -->
+      <div class="flex justify-center mt-12">
+        <nav class="flex items-center gap-2">
+          <a
+            href="#"
+            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+            >Назад</a
+          >
+          <a
+            href="#"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >1</a
+          >
+          <a
+            href="#"
+            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >2</a
+          >
+          <a
+            href="#"
+            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >3</a
+          >
+          <a
+            href="#"
+            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+            >Вперед</a
+          >
+        </nav>
+      </div>
+    </section>
+  </body>
+</html>
