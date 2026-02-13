@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/main.css" rel="stylesheet">
+    <title>Запущенная игра</title>
+</head>
+<body>
+<section
+        id="game-run"
+        class="page flex flex-col items-center justify-start min-h-screen bg-gray-100 p-4"
+        role="region"
+        aria-labelledby="game-run-title"
+>
+    <h2 id="game-run-title" class="sr-only">Запущенная игра</h2>
+
+    <!-- Game container -->
+    <div
+            class="bg-black rounded-xl overflow-hidden relative shadow-lg"
+            style="
+      width: 90%;
+      max-width: 1200px;
+      min-width: 600px;
+      aspect-ratio: 16/9;
+    "
+    >
+        <!-- Toolbar -->
+        <div class="w-full flex justify-between items-center max-w-[1200px] mb-6">
+            <button
+                    class="px-4 py-2 rounded-lg border border-slate-300 text-slate-800 font-medium hover:bg-slate-50 transition"
+                    id="exit-game-btn"
+                    onclick="window.location.href = 'Site.html#game';"
+            >
+                ⟵ Выйти
+            </button>
+
+            <button
+                    class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                    id="fullscreen-btn"
+            >
+                ⛶ В полный экран
+            </button>
+        </div>
+
+        <!-- Placeholder / Game content -->
+        <div class="w-full h-full flex items-center justify-center text-white text-2xl font-bold bg-gray-800">
+            Игровое поле
+        </div>
+    </div>
+</section>
+
+
+</body>
+</html>

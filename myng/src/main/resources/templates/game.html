@@ -1,147 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../static/main.css" rel="stylesheet">
-    <title>Main</title>
+    <title>Game — Indie Games Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
 </head>
-<body>
-    <section
-            id="game"
-            class="page"
-            role="article"
-            aria-labelledby="game-title"
-    >
-        <h2 id="game-title" class="section-title">Название игры</h2>
+<body class="bg-gray-50">
 
-        <div class="game-page-layout">
-            <!-- ===== ЛЕВАЯ КОЛОНКА ===== -->
-            <div class="game-left">
-                <!-- Большой аватар игры -->
-                <div class="game-cover card hover:shadow-lg transition-shadow duration-200">
-                    <div class="big-img-placeholder"></div>
-                </div>
+<section id="game" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" role="region" aria-labelledby="game-title">
+    <!-- Title -->
+    <h2 id="game-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
+        Название игры
+    </h2>
 
-                <!-- Метаданные -->
-                <div class="game-meta-block card">
-                    <div class="info-line"><strong>Дата публикации:</strong> 12 янв 2025</div>
-                    <div class="info-line"><strong>Теги:</strong> Приключения, RPG, Онлайн</div>
-                    <div class="info-line"><strong>Последняя версия:</strong> 1.3</div>
-                </div>
+    <!-- Main Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
 
-                <!-- Галерея мини-изображений -->
-                <div class="game-thumbs">
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
-                    <div class="thumb"></div>
+        <!-- ===== LEFT COLUMN ===== -->
+        <div class="flex flex-col gap-6">
+
+            <!-- Big Cover -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div class="w-full h-[380px] bg-gray-300 flex items-center justify-center text-gray-500 font-bold text-xl">
+                    Превью игры
                 </div>
             </div>
 
-            <!-- ===== ПРАВАЯ КОЛОНКА ===== -->
-            <div class="game-right">
-                <!-- Описание и действия -->
-                <div class="card game-description-block">
-                    <div class="game-meta">Автор • Жанр • Онлайн</div>
+            <!-- Meta Block -->
+            <div class="bg-white rounded-2xl shadow-md p-4 text-sm text-gray-700 space-y-2">
+                <div><strong>Дата публикации:</strong> 12 янв 2025</div>
+                <div><strong>Теги:</strong> Приключения, RPG, Онлайн</div>
+                <div><strong>Последняя версия:</strong> 1.3</div>
+            </div>
 
-                    <div class="flex flex-col gap-3 mt-3">
-                        <button
-                                class="btn btn-primary hover:brightness-105 transition"
-                                onclick="window.location.href='Site.html#game-run'"
-                        >
-                            Играть
-                        </button>
-                        <button class="btn btn-primary hover:brightness-105 transition">
-                            Добавить в коллекцию
-                        </button>
-                        <button
-                                class="btn btn-primary self-end hover:brightness-105 transition"
-                                data-action="open-modal"
-                                data-modal="edit_game"
-                        >
-                            Редактировать (разраб)
-                        </button>
-                    </div>
-
-                    <p class="muted mt-3">
-                        Подробное описание игры. Здесь текст о механиках, особенностях,
-                        сюжете и т.п.
-                    </p>
-                </div>
-
-                <!-- Блок версий -->
-                <div class="card mt-3">
-                    <h4 class="font-semibold mb-2">Версии</h4>
-                    <select
-                            style="
-                max-width: max-content;
-                min-width: 150px;
-                padding: 10px;
-                border-radius: 10px;
-                border: 1px solid #eee;
-              "
-                    >
-                        <option>1.0</option>
-                        <option>1.1</option>
-                        <option>1.2</option>
-                        <option>1.3</option>
-                    </select>
-                    <div class="flex gap-2 mt-2">
-                        <button
-                                class="btn btn-primary"
-                                data-action="open-modal"
-                                data-modal="add_game_ver"
-                        >
-                            Добавить
-                        </button>
-                        <button
-                                class="btn btn-primary"
-                                data-action="open-modal"
-                                data-modal="delete_game_ver"
-                        >
-                            Удалить
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Отзывы -->
-                <div class="card reviews-wide mt-3">
-                    <h3 class="font-semibold mb-2">Отзывы</h3>
-                    <button
-                            class="btn btn-primary mb-2"
-                            data-action="open-modal"
-                            data-modal="review"
-                    >
-                        Написать отзыв
-                    </button>
-
-                    <div class="reviews-list">
-                        <article class="review-card">
-                            <div class="review-header">
-                                <div class="flex items-center">
-                                    <div class="review-avatar">AB</div>
-                                    <div class="review-meta">
-                                        <div class="review-author">Александр</div>
-                                        <div class="review-date">12 янв 2025</div>
-                                    </div>
-                                </div>
-                                <div class="review-rating">★★★★☆</div>
-                            </div>
-                            <div class="review-body">
-                                Отличная игра! Механики интересные, играл с удовольствием.
-                            </div>
-                        </article>
-                    </div>
-                </div>
+            <!-- Thumbnails -->
+            <div class="grid grid-cols-5 gap-2">
+                <!-- Repeat thumbnail -->
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
             </div>
         </div>
-    </section>
+
+        <!-- ===== RIGHT COLUMN ===== -->
+        <div class="flex flex-col gap-6">
+
+            <!-- Description Block -->
+            <div class="bg-white rounded-2xl shadow-md p-6 space-y-4">
+                <div class="text-sm text-gray-500 flex items-center gap-2">
+                    <i class="fas fa-user-circle"></i>
+                    Автор • Жанр • Онлайн
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-wrap gap-3">
+                    <button
+                            onclick="window.location.href='Site.html#game-run';"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+
+                    <button
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-plus-circle"></i> Добавить в коллекцию
+                    </button>
+
+                    <button
+                            data-action="open-modal"
+                            data-modal="edit_game"
+                            class="ml-auto px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-500 hover:opacity-90 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-edit"></i> Редактировать (разраб)
+                    </button>
+                </div>
+
+                <p class="text-gray-700">
+                    Подробное описание игры. Здесь текст о механиках, особенностях, сюжете и т.п.
+                </p>
+            </div>
+
+            <!-- Versions Block -->
+            <div class="bg-white rounded-2xl shadow-md p-6 space-y-3">
+                <h4 class="text-lg font-semibold">Версии</h4>
+
+                <select class="px-3 py-2 rounded-lg border border-gray-200 min-w-[150px]">
+                    <option>1.0</option>
+                    <option>1.1</option>
+                    <option>1.2</option>
+                    <option>1.3</option>
+                </select>
+
+                <div class="flex gap-3">
+                    <button
+                            data-action="open-modal"
+                            data-modal="add_game_ver"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-plus"></i> Добавить
+                    </button>
+
+                    <button
+                            data-action="open-modal"
+                            data-modal="delete_game_ver"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                    >
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="bg-white rounded-2xl shadow-md p-6 space-y-4">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-500"></i> Отзывы
+                </h3>
+
+                <button
+                        data-action="open-modal"
+                        data-modal="review"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                >
+                    <i class="fas fa-pen"></i> Написать отзыв
+                </button>
+
+                <!-- Review Card -->
+                <article class="border border-gray-200 rounded-2xl p-4 shadow-sm space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                                AB
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Александр</div>
+                                <div class="text-sm text-gray-500">12 янв 2025</div>
+                            </div>
+                        </div>
+                        <div class="text-yellow-500 text-lg">★★★★☆</div>
+                    </div>
+
+                    <p class="text-gray-700 text-sm leading-relaxed">
+                        Отличная игра! Механики интересные, играл с удовольствием.
+                    </p>
+                </article>
+
+            </div>
+        </div>
+    </div>
+</section>
+
 </body>
 </html>
