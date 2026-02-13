@@ -1,199 +1,430 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game — Indie Games Platform</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Название игры — Indie Games Platform</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome для иконок -->
     <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-</head>
-<body class="bg-gray-50">
+    <!-- Google Fonts - Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <section
+      id="game"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      role="region"
+      aria-labelledby="game-title"
+    >
+      <!-- Шапка с навигацией -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div>
+            <h1
+              id="game-title"
+              class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
+            >
+              <i class="fas fa-gamepad text-blue-500"></i>
+              Cyber Knight
+            </h1>
+            <p class="text-gray-600 flex items-center gap-2">
+              <i class="fas fa-user-circle text-blue-500"></i>
+              Автор: @dev_studio • Платформер, RPG
+            </p>
+          </div>
+        </div>
+      </div>
 
-<section id="game" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" role="region" aria-labelledby="game-title">
-    <!-- Title -->
-    <h2 id="game-title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-        Название игры
-    </h2>
-
-    <!-- Main Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
-
+      <!-- Main Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
         <!-- ===== LEFT COLUMN ===== -->
         <div class="flex flex-col gap-6">
-
-            <!-- Big Cover -->
-            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                <div class="w-full h-[380px] bg-gray-300 flex items-center justify-center text-gray-500 font-bold text-xl">
-                    Превью игры
-                </div>
-            </div>
-
-            <!-- Meta Block -->
-            <div class="bg-white rounded-2xl shadow-md p-4 text-sm text-gray-700 space-y-2">
-                <div><strong>Дата публикации:</strong> 12 янв 2025</div>
-                <div><strong>Теги:</strong> Приключения, RPG, Онлайн</div>
-                <div><strong>Последняя версия:</strong> 1.3</div>
-            </div>
-
-            <!-- Thumbnails -->
-            <div class="grid grid-cols-5 gap-2">
-                <!-- Repeat thumbnail -->
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
-                <div class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"></div>
+          <!-- Big Cover -->
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div
+              class="w-full h-[400px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl"
+            >
+              <i class="fas fa-play text-6xl opacity-50"></i>
             </div>
           </div>
 
-          <!-- Отзывы -->
-          <div class="card reviews-wide mt-3">
-            <h3 class="font-semibold mb-2">Отзывы</h3>
-            <button
-              class="btn btn-primary mb-2"
-              data-action="open-modal"
-              data-modal="review"
-            >
-              Написать отзыв
-            </button>
+          <!-- Meta Block -->
+          <div class="bg-white rounded-xl shadow-lg p-5 text-sm text-gray-700">
+            <div class="space-y-3">
+              <div class="flex justify-between pb-2 border-b border-gray-100">
+                <span class="text-gray-500">Дата публикации</span>
+                <span class="font-medium">12 января 2025</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b border-gray-100">
+                <span class="text-gray-500">Теги</span>
+                <span class="font-medium">Приключения, RPG, Онлайн</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b border-gray-100">
+                <span class="text-gray-500">Последняя версия</span>
+                <span class="font-medium">1.3</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Всего версий</span>
+                <span class="font-medium">4</span>
+              </div>
+            </div>
+          </div>
 
-            <div class="reviews-list">
-              <article class="review-card">
-                <div class="review-header">
-                  <div class="flex items-center">
-                    <div class="review-avatar">AB</div>
-                    <div class="review-meta">
-                      <div class="review-author">Александр</div>
-                      <div class="review-date">12 янв 2025</div>
-                    </div>
-                  </div>
-                  <div class="review-rating">★★★★☆</div>
-                </div>
-                <div class="review-body">
-                  Отличная игра! Механики интересные, играл с удовольствием.
-                </div>
-              </article>
+          <!-- Thumbnails -->
+          <div class="bg-white rounded-xl shadow-lg p-5">
+            <h4
+              class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
+            >
+              <i class="fas fa-images text-blue-500"></i>
+              Скриншоты
+            </h4>
+            <div class="grid grid-cols-5 gap-2">
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
+              <div
+                class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+              ></div>
             </div>
           </div>
         </div>
 
         <!-- ===== RIGHT COLUMN ===== -->
         <div class="flex flex-col gap-6">
-
-            <!-- Description Block -->
-            <div class="bg-white rounded-2xl shadow-md p-6 space-y-4">
-                <div class="text-sm text-gray-500 flex items-center gap-2">
-                    <i class="fas fa-user-circle"></i>
-                    Автор • Жанр • Онлайн
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex flex-wrap gap-3">
-                    <button
-                            onclick="window.location.href='Site.html#game-run';"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-play"></i> Играть
-                    </button>
-
-                    <button
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-plus-circle"></i> Добавить в коллекцию
-                    </button>
-
-                    <button
-                            data-action="open-modal"
-                            data-modal="edit_game"
-                            class="ml-auto px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-500 hover:opacity-90 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-edit"></i> Редактировать (разраб)
-                    </button>
-                </div>
-
-                <p class="text-gray-700">
-                    Подробное описание игры. Здесь текст о механиках, особенностях, сюжете и т.п.
-                </p>
+          <!-- Description Block -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Описание</h3>
             </div>
 
-            <!-- Versions Block -->
-            <div class="bg-white rounded-2xl shadow-md p-6 space-y-3">
-                <h4 class="text-lg font-semibold">Версии</h4>
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-3 mb-6">
+              <button
+                onclick="window.location.href = 'Site.html#game-run'"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+              >
+                <i class="fas fa-play"></i> Играть
+              </button>
 
-                <select class="px-3 py-2 rounded-lg border border-gray-200 min-w-[150px]">
-                    <option>1.0</option>
-                    <option>1.1</option>
-                    <option>1.2</option>
-                    <option>1.3</option>
-                </select>
+              <button
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+              >
+                <i class="fas fa-plus-circle"></i> В коллекцию
+              </button>
 
-                <div class="flex gap-3">
-                    <button
-                            data-action="open-modal"
-                            data-modal="add_game_ver"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-plus"></i> Добавить
-                    </button>
-
-                    <button
-                            data-action="open-modal"
-                            data-modal="delete_game_ver"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-trash-alt"></i> Удалить
-                    </button>
-                </div>
+              <button
+                data-action="open-modal"
+                data-modal="edit_game"
+                class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+              >
+                <i class="fas fa-edit"></i> Редактировать
+              </button>
             </div>
 
-            <!-- Reviews -->
-            <div class="bg-white rounded-2xl shadow-md p-6 space-y-4">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-star text-yellow-500"></i> Отзывы
-                </h3>
+            <p class="text-gray-700 leading-relaxed">
+              Cyber Knight — это киберпанк-платформер с элементами RPG. Игроку
+              предстоит исследовать мрачный мир будущего, взламывать системы и
+              сражаться с корпорациями. Уникальная механика взлома в реальном
+              времени, более 20 уровней, множество улучшений и несколько
+              концовок.
+            </p>
 
+            <div class="mt-4 flex items-center gap-4 text-sm">
+              <span class="flex items-center gap-1 text-gray-600">
+                <i class="fas fa-star text-yellow-500"></i> 4.5 (128 отзывов)
+              </span>
+            </div>
+          </div>
+
+          <!-- Versions Block -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h4
+              class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+            >
+              <i class="fas fa-code-branch text-blue-500"></i>
+              Версии игры
+            </h4>
+
+            <div
+              class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4"
+            >
+              <select
+                class="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white text-sm"
+              >
+                <option>Версия 1.3 (текущая)</option>
+                <option>Версия 1.2</option>
+                <option>Версия 1.1</option>
+                <option>Версия 1.0</option>
+              </select>
+
+              <div class="flex gap-2">
                 <button
-                        data-action="open-modal"
-                        data-modal="review"
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                  data-action="open-modal"
+                  data-modal="add_game_ver"
+                  class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
                 >
-                    <i class="fas fa-pen"></i> Написать отзыв
+                  <i class="fas fa-plus"></i> Добавить
                 </button>
-
-                <!-- Review Card -->
-                <article class="border border-gray-200 rounded-2xl p-4 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-                                AB
-                            </div>
-                            <div>
-                                <div class="font-semibold text-gray-900">Александр</div>
-                                <div class="text-sm text-gray-500">12 янв 2025</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-500 text-lg">★★★★☆</div>
-                    </div>
-
-                    <p class="text-gray-700 text-sm leading-relaxed">
-                        Отличная игра! Механики интересные, играл с удовольствием.
-                    </p>
-                </article>
-
+                <button
+                  data-action="open-modal"
+                  data-modal="delete_game_ver"
+                  class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
+                >
+                  <i class="fas fa-trash-alt"></i> Удалить
+                </button>
+              </div>
             </div>
-        </div>
-    </div>
-</section>
 
-</body>
+            <!-- Changelog preview -->
+            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+              <span class="font-medium text-gray-700">v1.3 — 10 фев 2025</span>
+              <p class="text-gray-600 text-xs mt-1">
+                • Добавлен новый уровень<br />• Исправлены баги физики<br />•
+                Улучшена производительность
+              </p>
+            </div>
+          </div>
+
+          <!-- Reviews -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3
+                class="text-xl font-bold text-gray-900 flex items-center gap-2"
+              >
+                <i class="fas fa-star text-yellow-500"></i>
+                Отзывы
+                <span class="text-sm font-normal text-gray-500 ml-2"
+                  >128 отзывов</span
+                >
+              </h3>
+
+              <button
+                data-action="open-modal"
+                data-modal="review"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+              >
+                <i class="fas fa-pen"></i> Написать
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Review Card 1 -->
+              <article
+                class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      АБ
+                    </div>
+                    <div>
+                      <div class="font-semibold text-gray-900">Александр</div>
+                      <div class="text-xs text-gray-500">12 января 2025</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                  </div>
+                </div>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                  Отличная игра! Механики интересные, графика на высоте.
+                  Особенно понравилась боевая система и сюжетные повороты. Жду
+                  новых обновлений!
+                </p>
+                <div class="flex items-center gap-3 mt-3 text-xs">
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-up mr-1"></i> 12
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-down mr-1"></i> 2
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-flag mr-1"></i> Пожаловаться
+                  </button>
+                </div>
+              </article>
+
+              <!-- Review Card 2 -->
+              <article
+                class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      ЕК
+                    </div>
+                    <div>
+                      <div class="font-semibold text-gray-900">Екатерина</div>
+                      <div class="text-xs text-gray-500">10 февраля 2025</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                  </div>
+                </div>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                  Шедевр! Прошел за выходные, очень увлекательно. Музыка
+                  отдельный восторг, советую всем любителям киберпанка.
+                </p>
+                <div class="flex items-center gap-3 mt-3 text-xs">
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-up mr-1"></i> 8
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-down mr-1"></i> 0
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-flag mr-1"></i> Пожаловаться
+                  </button>
+                </div>
+              </article>
+
+              <!-- Review Card 3 -->
+              <article
+                class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      ДМ
+                    </div>
+                    <div>
+                      <div class="font-semibold text-gray-900">Дмитрий</div>
+                      <div class="text-xs text-gray-500">5 февраля 2025</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                  </div>
+                </div>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                  Хорошая игра, но есть баги с управлением. Надеюсь,
+                  разработчики исправят в следующих версиях.
+                </p>
+                <div class="flex items-center gap-3 mt-3 text-xs">
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-up mr-1"></i> 3
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-down mr-1"></i> 1
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-flag mr-1"></i> Пожаловаться
+                  </button>
+                </div>
+              </article>
+
+              <!-- Review Card 4 -->
+              <article
+                class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      СК
+                    </div>
+                    <div>
+                      <div class="font-semibold text-gray-900">Сергей</div>
+                      <div class="text-xs text-gray-500">28 января 2025</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                  </div>
+                </div>
+                <p class="text-gray-700 text-sm leading-relaxed">
+                  Отличный киберпанк, атмосфера бесподобная. Немного не хватает
+                  мультиплеера, но в целом очень достойно.
+                </p>
+                <div class="flex items-center gap-3 mt-3 text-xs">
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-up mr-1"></i> 6
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-thumbs-down mr-1"></i> 0
+                  </button>
+                  <button class="text-gray-500 hover:text-blue-600">
+                    <i class="far fa-flag mr-1"></i> Пожаловаться
+                  </button>
+                </div>
+              </article>
+            </div>
+
+            <!-- Кнопка "Показать еще" -->
+            <div class="mt-4 text-center">
+              <button
+                class="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                Показать еще отзывы <i class="fas fa-chevron-down ml-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
 </html>
