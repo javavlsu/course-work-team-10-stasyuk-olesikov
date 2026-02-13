@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/main.css" rel="stylesheet">
+    <title>Main</title>
+</head>
+<body>
+    <main class="container mx-auto px-6" id="app">
+        <!-- ========== Главная страница ========== -->
+        <section id="home" class="page block" role="main" aria-labelledby="home-title">
+            <h1 id="home-title" class="mt-0 text-3xl font-bold mb-6">
+                Публикуй свои инди-игры и находи игроков
+            </h1>
+
+            <div class="flex flex-wrap max-w-[1020px] gap-3 mb-8">
+                <!-- Popular Game Card -->
+                <div class="card bg-white rounded-xl shadow-md p-4 flex flex-col w-full sm:w-[300px]">
+                    <h3 class="text-lg font-semibold mb-2">Популярная игра недели</h3>
+                    <div class="bg-gray-300 rounded-lg h-32 animate-pulse mb-2"></div>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание. Жанр, рейтинг, автор.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span>Рейтинг: ★★★★☆</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">
+                            Открыть
+                        </a>
+                    </div>
+                </div>
+
+                <!-- New Game Card -->
+                <div class="card bg-white rounded-xl shadow-md p-4 flex flex-col w-full sm:w-[300px]">
+                    <h3 class="text-lg font-semibold mb-2">Новинка</h3>
+                    <div class="bg-gray-300 rounded-lg h-32 animate-pulse mb-2"></div>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание. Жанр, рейтинг, автор.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span>Рейтинг: ★★★★☆</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">
+                            Открыть
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Best Game Card -->
+                <div class="card bg-white rounded-xl shadow-md p-4 flex flex-col w-full sm:w-[300px]">
+                    <h3 class="text-lg font-semibold mb-2">Лучшее</h3>
+                    <div class="bg-gray-300 rounded-lg h-32 animate-pulse mb-2"></div>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание. Жанр, рейтинг, автор.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span>Рейтинг: ★★★★☆</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">
+                            Открыть
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-semibold mb-4">Мини каталог популярных игр</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" aria-hidden="true">
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Название игры</h3>
+                    <p class="text-gray-500 text-sm mb-2">Краткое описание — 1-2 строки.</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Жанр • 1.2k игроков</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Игра B</h3>
+                    <p class="text-gray-500 text-sm mb-2">Описание</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Платформа</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Игра C</h3>
+                    <p class="text-gray-500 text-sm mb-2">Описание</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Платформа</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ========== Страница каталога ========== -->
+        <section id="catalog" class="page hidden" role="region" aria-labelledby="catalog-title">
+            <h2 id="catalog-title" class="text-2xl font-semibold mb-4">Каталог игр</h2>
+
+            <div class="flex flex-wrap gap-3 mb-4 items-center">
+                <input type="text" placeholder="Поиск по названию" class="flex-1 px-4 py-2 rounded-xl border border-gray-200" />
+                <select class="px-4 py-2 rounded-xl border border-gray-200">
+                    <option>Все жанры</option>
+                    <option>Платформеры</option>
+                </select>
+                <button class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold">Фильтр</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="catalog-grid">
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Game 1</h3>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Жанр</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Game 2</h3>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Жанр</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+
+                <article class="card bg-white rounded-xl shadow-md p-4 flex flex-col">
+                    <div class="bg-gray-300 h-32 rounded-lg animate-pulse mb-2"></div>
+                    <h3 class="text-lg font-semibold mb-1">Game 3</h3>
+                    <p class="text-gray-500 text-sm mb-2">Короткое описание</p>
+                    <div class="mt-auto flex justify-between items-center text-gray-500 text-sm">
+                        <span>Жанр</span>
+                        <a href="#game" data-action="open-page" data-target="game" class="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">Открыть</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
