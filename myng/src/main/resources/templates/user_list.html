@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/main.css" rel="stylesheet">
+    <title>Main</title>
+</head>
+<body>
+    <section
+            id="users"
+            class="page active"
+            role="region"
+            aria-labelledby="users-title"
+    >
+        <h2
+                id="users-title"
+                class="text-2xl font-semibold mt-6 mb-6 text-slate-800"
+        >
+            Список пользователей
+        </h2>
+
+        <!-- Search & Filters -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+            <!-- Search -->
+            <div class="flex-1">
+                <label for="user-search" class="text-left text-slate-600 uppercase text-xs tracking-wider sr-only">Поиск пользователей</label>
+                <input
+                        type="text"
+                        id="user-search"
+                        placeholder="Поиск пользователей..."
+                        class="w-full md:w-64 px-4 py-2 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                />
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-2">
+                <!-- Role Filter -->
+                <div>
+                    <label for="role-filter" class="text-left text-slate-600 uppercase text-xs tracking-wider sr-only">Фильтр по роли</label>
+                    <select
+                            id="role-filter"
+                            class="px-4 py-2 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition text-left text-slate-600 uppercase text-xs tracking-wider"
+                    >
+                        <option value="">Все роли</option>
+                        <option value="user">User</option>
+                        <option value="dev">Dev</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label for="status-filter" class="text-left text-slate-600 uppercase text-xs tracking-wider sr-only">Фильтр по статусу</label>
+                    <select
+                            id="status-filter"
+                            class="px-4 py-2 border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition text-left text-slate-600 uppercase text-xs tracking-wider"
+                    >
+                        <option value="">Все статусы</option>
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <table class="w-full text-sm">
+                <caption
+                        id="users-desc"
+                        class="caption-bottom text-left px-6 py-3 text-slate-500 text-sm"
+                >
+                    Таблица демонстрационная
+                </caption>
+
+                <thead class="bg-slate-50 border-b border-slate-200">
+                <tr class="text-left text-slate-600 uppercase text-xs tracking-wider">
+                    <th class="px-6 py-4 font-semibold">Пользователь</th>
+                    <th class="px-6 py-4 font-semibold">Роль</th>
+                    <th class="px-6 py-4 font-semibold">Статус</th>
+                    <th class="px-6 py-4 font-semibold">Действия</th>
+                </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-medium text-slate-800">ivan</td>
+                    <td class="px-6 py-4 text-slate-600">user</td>
+                    <td class="px-6 py-4">
+                <span
+                        class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700"
+                >
+                  active
+                </span>
+                    </td>
+                    <td class="px-6 py-4 flex flex-wrap gap-2">
+                        <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                                data-action="open-modal"
+                                data-modal="change_role"
+                        >
+                            Изменить роль
+                        </button>
+
+                        <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                data-action="open-modal"
+                                data-modal="block"
+                        >
+                            Блокировать
+                        </button>
+
+                        <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                                data-action="open-modal"
+                                data-modal="unblock"
+                        >
+                            Разблокировать
+                        </button>
+                    </td>
+                </tr>
+
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-medium text-slate-800">masha</td>
+                    <td class="px-6 py-4 text-slate-600">dev</td>
+                    <td class="px-6 py-4">
+                <span
+                        class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700"
+                >
+                  active
+                </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button
+                                class="px-3 py-1.5 text-xs font-medium rounded-md border border-amber-200 text-amber-600 hover:bg-amber-50 transition"
+                                data-action="open-modal"
+                                data-modal="warn"
+                        >
+                            Предупредить
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>
