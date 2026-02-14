@@ -1,55 +1,259 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../static/main.css" rel="stylesheet">
-    <title>Запущенная игра</title>
-</head>
-<body>
-<section
-        id="game-run"
-        class="page flex flex-col items-center justify-start min-h-screen bg-gray-100 p-4"
-        role="region"
-        aria-labelledby="game-run-title"
->
-    <h2 id="game-run-title" class="sr-only">Запущенная игра</h2>
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Запущенная игра MYNG</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome для иконок -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <!-- Google Fonts - Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
 
-    <!-- Game container -->
-    <div
-            class="bg-black rounded-xl overflow-hidden relative shadow-lg"
-            style="
-      width: 90%;
-      max-width: 1200px;
-      min-width: 600px;
-      aspect-ratio: 16/9;
-    "
+      /* Стили для полноэкранного режима */
+      .game-container:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+        background: black;
+      }
+
+      .game-container:-webkit-full-screen .game-content {
+        height: calc(100vh - 60px);
+      }
+
+      .game-container:-webkit-full-screen .game-toolbar {
+        padding: 1rem 2rem;
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .game-container:fullscreen {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+        background: black;
+      }
+
+      .game-container:fullscreen .game-content {
+        height: calc(100vh - 60px);
+      }
+
+      .game-container:fullscreen .game-toolbar {
+        padding: 1rem 2rem;
+        background: rgba(0, 0, 0, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <section
+      id="game-run"
+      class="flex flex-col items-center justify-start min-h-screen p-4"
+      role="region"
+      aria-labelledby="game-run-title"
     >
+      <h2 id="game-run-title" class="sr-only">Запущенная игра</h2>
+
+      <!-- Game container -->
+      <div
+        class="game-container bg-black rounded-xl overflow-hidden relative shadow-2xl border border-gray-700"
+        style="
+          width: 90%;
+          max-width: 1200px;
+          min-width: 600px;
+          aspect-ratio: 16/9;
+        "
+      >
         <!-- Toolbar -->
-        <div class="w-full flex justify-between items-center max-w-[1200px] mb-6">
-            <button
-                    class="px-4 py-2 rounded-lg border border-slate-300 text-slate-800 font-medium hover:bg-slate-50 transition"
-                    id="exit-game-btn"
-                    onclick="window.location.href = 'Site.html#game';"
-            >
-                ⟵ Выйти
-            </button>
+        <div
+          class="game-toolbar w-full flex justify-between items-center p-4 bg-gray-900/90 backdrop-blur-sm border-b border-gray-700"
+        >
+          <button
+            class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition-colors flex items-center gap-2 border border-gray-600"
+            id="exit-game-btn"
+            onclick="window.location.href = 'game.html'"
+          >
+            <i class="fas fa-arrow-left"></i>
+            Выйти из игры
+          </button>
 
+          <div class="flex items-center gap-3">
+            <span class="text-gray-400 text-sm flex items-center gap-2">
+              <i class="fas fa-gamepad"></i>
+              Cyber Knight v1.3
+            </span>
             <button
-                    class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
-                    id="fullscreen-btn"
+              class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors flex items-center gap-2"
+              id="fullscreen-btn"
             >
-                ⛶ В полный экран
+              <i class="fas fa-expand"></i>
+              Полный экран
             </button>
+          </div>
         </div>
 
-        <!-- Placeholder / Game content -->
-        <div class="w-full h-full flex items-center justify-center text-white text-2xl font-bold bg-gray-800">
-            Игровое поле
+        <!-- Game content with screenshot -->
+        <div
+          class="game-content w-full h-full flex items-center justify-center relative"
+          style="background: linear-gradient(45deg, #1a1a1a, #2d2d2d)"
+        >
+          <!-- Скриншот игры -->
+          <img
+            src="../images/kyber.jpg"
+            alt="Game screenshot"
+            class="w-full h-full object-cover"
+            onerror="
+              this.style.display = 'none';
+              this.nextElementSibling.style.display = 'flex';
+            "
+          />
+
+          <!-- Заглушка, если скриншот не загрузится -->
+          <div
+            class="hidden absolute inset-0 flex items-center justify-center text-white text-2xl font-bold flex-col gap-4"
+          >
+            <i class="fas fa-gamepad text-6xl text-gray-600"></i>
+            <span class="text-gray-500">Игровое поле</span>
+          </div>
+
+          <!-- Оверлей с подсказкой управления -->
+          <div
+            class="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2 text-white text-xs flex items-center gap-3"
+          >
+            <span class="flex items-center gap-1">
+              <i class="fas fa-arrow-up"></i>
+              <i class="fas fa-arrow-down"></i>
+              <i class="fas fa-arrow-left"></i>
+              <i class="fas fa-arrow-right"></i>
+              <span class="ml-1">— перемещение</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fas fa-mouse-pointer"></i>
+              <span>— взаимодействие</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span>esc — выход из полноэкранного режима</span>
+            </span>
+          </div>
         </div>
-    </div>
-</section>
+      </div>
 
+      <!-- Дополнительная информация -->
+      <div class="mt-6 text-black/70 text-sm flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-star text-yellow-500"></i>
+          <span>Средняя оценка: 4.5</span>
+        </div>
+      </div>
+    </section>
 
-</body>
+    <script>
+      (function () {
+        const fullscreenBtn = document.getElementById("fullscreen-btn");
+        const gameContainer = document.querySelector(".game-container");
+        const exitBtn = document.getElementById("exit-game-btn");
+
+        // Функция проверки полноэкранного режима
+        function isFullscreen() {
+          return (
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+          );
+        }
+
+        // Функция выхода из полноэкранного режима
+        function exitFullscreen() {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+
+        // Обработчик кнопки полного экрана
+        fullscreenBtn.addEventListener("click", function () {
+          if (!isFullscreen()) {
+            // Войти в полноэкранный режим
+            if (gameContainer.requestFullscreen) {
+              gameContainer.requestFullscreen();
+            } else if (gameContainer.webkitRequestFullscreen) {
+              gameContainer.webkitRequestFullscreen();
+            } else if (gameContainer.mozRequestFullScreen) {
+              gameContainer.mozRequestFullScreen();
+            } else if (gameContainer.msRequestFullscreen) {
+              gameContainer.msRequestFullscreen();
+            }
+
+            // Меняем иконку и текст кнопки
+            fullscreenBtn.innerHTML =
+              '<i class="fas fa-compress"></i> Выйти из полного экрана';
+          } else {
+            // Выйти из полноэкранного режима
+            exitFullscreen();
+
+            // Меняем иконку и текст кнопки обратно
+            fullscreenBtn.innerHTML =
+              '<i class="fas fa-expand"></i> Полный экран';
+          }
+        });
+
+        // Обработчик кнопки выхода
+        exitBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          // Если в полноэкранном режиме, сначала выйти из него
+          if (isFullscreen()) {
+            exitFullscreen();
+            // Небольшая задержка перед переходом, чтобы выход из полноэкранного режима успел выполниться
+            setTimeout(() => {
+              window.location.href = "game.html";
+            }, 100);
+          } else {
+            window.location.href = "game.html";
+          }
+        });
+
+        // Обработчик клавиши Escape для обновления текста кнопки
+        document.addEventListener("fullscreenchange", updateButtonText);
+        document.addEventListener("webkitfullscreenchange", updateButtonText);
+        document.addEventListener("mozfullscreenchange", updateButtonText);
+        document.addEventListener("MSFullscreenChange", updateButtonText);
+
+        function updateButtonText() {
+          if (isFullscreen()) {
+            fullscreenBtn.innerHTML =
+              '<i class="fas fa-compress"></i> Выйти из полного экрана';
+          } else {
+            fullscreenBtn.innerHTML =
+              '<i class="fas fa-expand"></i> Полный экран';
+          }
+        }
+
+        // Обработчик клавиши Escape
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && isFullscreen()) {
+            updateButtonText();
+          }
+        });
+      })();
+    </script>
+  </body>
 </html>
