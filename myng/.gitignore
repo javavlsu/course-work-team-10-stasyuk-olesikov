@@ -32,5 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
+#Node_mod
 /myng/src/main/frontend/node_modules/
-/myng/src/main/resources/credentials.properties
+
+# Credentials
+credentials.properties
+application-local.properties
+application-secret.properties
