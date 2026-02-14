@@ -21,6 +21,14 @@
         font-family: "Inter", sans-serif;
         background-color: #f9fafb;
       }
+
+        .editable-active {
+        outline: 2px dashed #9333ea;
+        padding: 4px;
+        border-radius: 6px;
+        background-color: #faf5ff;
+        cursor: text;
+      }
     </style>
   </head>
   <body class="bg-gray-50">
@@ -41,7 +49,7 @@
               class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
             >
               <i class="fas fa-gamepad text-blue-500"></i>
-              Cyber Knight
+              <span id="game-name">Cyber Knight</span>
             </h1>
             <p class="text-gray-600 flex items-center gap-2">
               <i class="fas fa-user-circle text-blue-500"></i>
@@ -56,13 +64,32 @@
         <!-- ===== LEFT COLUMN ===== -->
         <div class="flex flex-col gap-6">
           <!-- Big Cover -->
-          <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div
-              class="w-full h-[400px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl"
-            >
-              <i class="fas fa-play text-6xl opacity-50"></i>
+            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden">
+                <div
+                        id="game-avatar"
+                        class="w-full h-[400px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white cursor-pointer"
+                >
+                    <i class="fas fa-play text-6xl opacity-50"></i>
+                </div>
+
+                <!-- Edit overlay -->
+                <div
+                        id="avatarOverlay"
+                        class="absolute inset-0 bg-black/60 hidden items-center justify-center cursor-pointer"
+                >
+                    <div class="text-white text-center">
+                        <i class="fas fa-plus text-6xl mb-2"></i>
+                        <div class="text-sm font-medium">Загрузить изображение</div>
+                    </div>
+                </div>
+
+                <input
+                        type="file"
+                        id="avatarInput"
+                        accept="image/*"
+                        class="hidden"
+                />
             </div>
-          </div>
 
           <!-- Meta Block -->
           <div class="bg-white rounded-xl shadow-lg p-5 text-sm text-gray-700">
@@ -153,15 +180,15 @@
               </button>
 
               <button
-                data-action="open-modal"
-                data-modal="edit_game"
+                id = "editBtn"
                 class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
               >
-                <i class="fas fa-edit"></i> Редактировать
+                <i class="fas fa-edit"></i>
+                <span id="editBtnText">Редактировать</span>
               </button>
             </div>
 
-            <p class="text-gray-700 leading-relaxed">
+            <p id="game-description" class="text-gray-700 leading-relaxed">
               Cyber Knight — это киберпанк-платформер с элементами RPG. Игроку
               предстоит исследовать мрачный мир будущего, взламывать системы и
               сражаться с корпорациями. Уникальная механика взлома в реальном
@@ -426,5 +453,87 @@
         </div>
       </div>
     </section>
+
+
+    <script>
+        const editBtn = document.getElementById("editBtn");
+        const editBtnText = document.getElementById("editBtnText");
+
+        const nameEl = document.getElementById("game-name");
+        const descEl = document.getElementById("game-description");
+        const avatarEl = document.getElementById("game-avatar");
+
+        const avatarOverlay = document.getElementById("avatarOverlay");
+        const avatarInput = document.getElementById("avatarInput");
+
+        let isEditing = false;
+
+        editBtn.addEventListener("click", () => {
+          isEditing = !isEditing;
+
+          if (isEditing) {
+            enableEditing();
+          } else {
+            disableEditing();
+          }
+        });
+
+        function enableEditing() {
+          editBtnText.textContent = "Сохранить";
+          editBtn.classList.remove("bg-purple-600");
+          editBtn.classList.add("bg-green-600");
+
+          nameEl.contentEditable = true;
+          descEl.contentEditable = true;
+
+          nameEl.classList.add("editable-active");
+          descEl.classList.add("editable-active");
+
+          avatarOverlay.classList.remove("hidden");
+          avatarOverlay.classList.add("flex");
+        }
+
+        function disableEditing() {
+          editBtnText.textContent = "Редактировать";
+          editBtn.classList.remove("bg-green-600");
+          editBtn.classList.add("bg-purple-600");
+
+          nameEl.contentEditable = false;
+          descEl.contentEditable = false;
+
+          nameEl.classList.remove("editable-active");
+          descEl.classList.remove("editable-active");
+
+          avatarOverlay.classList.add("hidden");
+          avatarOverlay.classList.remove("flex");
+
+          console.log("Saved:", {
+            name: nameEl.textContent.trim(),
+            description: descEl.textContent.trim()
+          });
+        }
+
+        avatarOverlay.addEventListener("click", () => {
+          if (!isEditing) return;
+          avatarInput.click();
+        });
+
+        avatarInput.addEventListener("change", () => {
+          const file = avatarInput.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            avatarEl.style.backgroundImage = `url(${e.target.result})`;
+            avatarEl.style.backgroundSize = "cover";
+            avatarEl.style.backgroundPosition = "center";
+            document.getElementById("avatarContent").innerHTML = "";
+          };
+
+          reader.readAsDataURL(file);
+        });
+
+    </script>
   </body>
 </html>
