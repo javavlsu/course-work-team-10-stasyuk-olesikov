@@ -430,86 +430,6 @@
       </div>
     </section>
 
-    <script>
-      const editBtn = document.getElementById("editBtn");
-      const editBtnText = document.getElementById("editBtnText");
-
-      const nameEl = document.getElementById("game-name");
-      const descEl = document.getElementById("game-description");
-      const avatarEl = document.getElementById("game-avatar");
-
-      const avatarOverlay = document.getElementById("avatarOverlay");
-      const avatarInput = document.getElementById("avatarInput");
-
-      let isEditing = false;
-
-      editBtn.addEventListener("click", () => {
-        isEditing = !isEditing;
-
-        if (isEditing) {
-          enableEditing();
-        } else {
-          disableEditing();
-        }
-      });
-
-      function enableEditing() {
-        editBtnText.textContent = "Сохранить";
-        editBtn.classList.remove("bg-purple-600");
-        editBtn.classList.add("bg-green-600");
-
-        nameEl.contentEditable = true;
-        descEl.contentEditable = true;
-
-        nameEl.classList.add("editable-active");
-        descEl.classList.add("editable-active");
-
-        avatarOverlay.classList.remove("hidden");
-        avatarOverlay.classList.add("flex");
-      }
-
-      function disableEditing() {
-        editBtnText.textContent = "Редактировать";
-        editBtn.classList.remove("bg-green-600");
-        editBtn.classList.add("bg-purple-600");
-
-        nameEl.contentEditable = false;
-        descEl.contentEditable = false;
-
-        nameEl.classList.remove("editable-active");
-        descEl.classList.remove("editable-active");
-
-        avatarOverlay.classList.add("hidden");
-        avatarOverlay.classList.remove("flex");
-
-        console.log("Saved:", {
-          name: nameEl.textContent.trim(),
-          description: descEl.textContent.trim(),
-        });
-      }
-
-      avatarOverlay.addEventListener("click", () => {
-        if (!isEditing) return;
-        avatarInput.click();
-      });
-
-      avatarInput.addEventListener("change", () => {
-        const file = avatarInput.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-          avatarEl.style.backgroundImage = `url(${e.target.result})`;
-          avatarEl.style.backgroundSize = "cover";
-          avatarEl.style.backgroundPosition = "center";
-          document.getElementById("avatarContent").innerHTML = "";
-        };
-
-        reader.readAsDataURL(file);
-      });
-    </script>
-
     <!-- Модальное окно для отзыва -->
     <div
       id="reviewModal"
@@ -774,6 +694,86 @@
         </div>
       </div>
     </div>
+
+    <script>
+      const editBtn = document.getElementById("editBtn");
+      const editBtnText = document.getElementById("editBtnText");
+
+      const nameEl = document.getElementById("game-name");
+      const descEl = document.getElementById("game-description");
+      const avatarEl = document.getElementById("game-avatar");
+
+      const avatarOverlay = document.getElementById("avatarOverlay");
+      const avatarInput = document.getElementById("avatarInput");
+
+      let isEditing = false;
+
+      editBtn.addEventListener("click", () => {
+        isEditing = !isEditing;
+
+        if (isEditing) {
+          enableEditing();
+        } else {
+          disableEditing();
+        }
+      });
+
+      function enableEditing() {
+        editBtnText.textContent = "Сохранить";
+        editBtn.classList.remove("bg-purple-600");
+        editBtn.classList.add("bg-green-600");
+
+        nameEl.contentEditable = true;
+        descEl.contentEditable = true;
+
+        nameEl.classList.add("editable-active");
+        descEl.classList.add("editable-active");
+
+        avatarOverlay.classList.remove("hidden");
+        avatarOverlay.classList.add("flex");
+      }
+
+      function disableEditing() {
+        editBtnText.textContent = "Редактировать";
+        editBtn.classList.remove("bg-green-600");
+        editBtn.classList.add("bg-purple-600");
+
+        nameEl.contentEditable = false;
+        descEl.contentEditable = false;
+
+        nameEl.classList.remove("editable-active");
+        descEl.classList.remove("editable-active");
+
+        avatarOverlay.classList.add("hidden");
+        avatarOverlay.classList.remove("flex");
+
+        console.log("Saved:", {
+          name: nameEl.textContent.trim(),
+          description: descEl.textContent.trim(),
+        });
+      }
+
+      avatarOverlay.addEventListener("click", () => {
+        if (!isEditing) return;
+        avatarInput.click();
+      });
+
+      avatarInput.addEventListener("change", () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          avatarEl.style.backgroundImage = `url(${e.target.result})`;
+          avatarEl.style.backgroundSize = "cover";
+          avatarEl.style.backgroundPosition = "center";
+          document.getElementById("avatarContent").innerHTML = "";
+        };
+
+        reader.readAsDataURL(file);
+      });
+    </script>
 
     <script>
       // Функции для работы с модальными окнами
