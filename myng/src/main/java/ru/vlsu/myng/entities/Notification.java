@@ -1,0 +1,34 @@
+package ru.vlsu.myng.entities;
+
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.*;
+
+@Entity
+@Table(name = "notification")
+public class Notification {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private Instant createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
+    @Lob
+    private String text;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_notification",
+            joinColumns = @JoinColumn(name = "fk_notification"),
+            inverseJoinColumns = @JoinColumn(name = "fk_user")
+    )
+    private Set<User> users = new HashSet<>();
+
+    public enum Type {
+        system, warning, moderation, news
+    }
+}
