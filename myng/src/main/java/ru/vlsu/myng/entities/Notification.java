@@ -17,7 +17,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @ManyToMany

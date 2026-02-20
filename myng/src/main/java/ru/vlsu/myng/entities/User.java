@@ -24,7 +24,7 @@ public class User
     @Column(length = 255)
     private String bio;
 
-    @Lob
+    @Column(nullable = false, columnDefinition = "LONGBLOB")
     private byte[] profilePic;
 
     private Instant registeredAt;

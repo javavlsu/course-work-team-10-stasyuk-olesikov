@@ -14,14 +14,15 @@ public class Review
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private Short rating;
+    @Column(nullable = false, columnDefinition = "TINYINT UNSIGNED")
+    private Byte rating;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     private Instant createdAt;
 
+    @Column(nullable = false, columnDefinition = "SMALLINT UNSIGNED")
     private Integer reportCount = 0;
 
     @ManyToOne(optional = false)

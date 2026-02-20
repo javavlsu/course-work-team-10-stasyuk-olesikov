@@ -17,7 +17,7 @@ public class DevApplication {
 
     private String githubUsername;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @OneToOne(optional = false)

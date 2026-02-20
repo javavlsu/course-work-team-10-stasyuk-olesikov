@@ -16,7 +16,7 @@ public class Game
     @Column(nullable = false)
     private String name;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String descr;
 
     @Column(nullable = false, unique = true)

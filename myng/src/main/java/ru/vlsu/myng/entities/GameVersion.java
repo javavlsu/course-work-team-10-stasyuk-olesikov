@@ -19,14 +19,13 @@ public class GameVersion
     @Column(nullable = false)
     private String commitHash;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String changelog;
 
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGBLOB")
     private byte[] archiveFile;
 
     @ManyToOne(optional = false)
