@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class GameController {
+public class ModerationLogController {
 
-    @GetMapping("/game")
-    public String indexPage() {
-        return "game";
+    @GetMapping("/moderation-log")
+    public String moderationLogPage() {
+        return "moderation_log";
     }
 }

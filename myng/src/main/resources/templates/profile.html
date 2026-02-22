@@ -1,29 +1,6 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Профиль MYNG</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome для иконок (опционально, для красоты) -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <style>
-      /* Кастомные стили для сложных состояний */
-      .tab-btn.active {
-        @apply bg-blue-600 text-white border-blue-600;
-      }
-      .review-rating {
-        color: #fbbf24;
-        letter-spacing: 2px;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
-    <!-- Профиль -->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::section})">
     <section
       id="profile"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
@@ -906,138 +883,137 @@
           </article>
         </div>
       </div>
+
+        <script>
+            // Простая логика для вкладок
+            document.addEventListener("DOMContentLoaded", function () {
+              const tabs = document.querySelectorAll(".tab-btn");
+              const sections = {
+                "collections-section": document.getElementById("collections-section"),
+                "reviews-section": document.getElementById("reviews-section"),
+                "notifications-section": document.getElementById(
+                  "notifications-section",
+                ),
+                "games-section": document.getElementById("games-section"),
+              };
+
+              tabs.forEach((tab) => {
+                tab.addEventListener("click", function () {
+                  const targetId = this.dataset.target;
+
+                  // Убираем активный класс у всех табов
+                  tabs.forEach((t) => {
+                    t.classList.remove(
+                      "bg-blue-600",
+                      "text-white",
+                      "border-blue-600",
+                    );
+                    t.classList.add("text-gray-600", "hover:bg-gray-100");
+                  });
+
+                  // Добавляем активный класс текущему табу
+                  this.classList.add("bg-blue-600", "text-white", "border-blue-600");
+                  this.classList.remove("text-gray-600", "hover:bg-gray-100");
+
+                  // Скрываем все секции
+                  Object.values(sections).forEach((section) => {
+                    if (section) section.classList.add("hidden");
+                  });
+
+                  // Показываем нужную секцию
+                  if (sections[targetId]) {
+                    sections[targetId].classList.remove("hidden");
+                  }
+                });
+              });
+            });
+
+              const editBtn = document.getElementById("edit-profile-btn");
+              const cancelBtn = document.getElementById("cancel-edit-btn");
+              const saveBtn = document.getElementById("save-profile-btn");
+
+              const usernameText = document.getElementById("username-text");
+              const usernameInput = document.getElementById("username-input");
+
+              const aboutText = document.getElementById("about-text");
+              const aboutInput = document.getElementById("about-input");
+
+              const avatarInput = document.getElementById("avatar-input");
+              const avatarText = document.getElementById("avatar-text");
+              const avatarImg = document.getElementById("avatar-img");
+
+              // Enable edit mode
+              editBtn.addEventListener("click", () => {
+                usernameInput.value = usernameText.textContent;
+                aboutInput.value = aboutText.textContent.replace("Обо мне: ", "");
+
+                [usernameText, aboutText].forEach(el => el.classList.add("hidden"));
+                [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
+                editBtn.classList.add("hidden");
+              });
+
+              // Cancel edit
+              cancelBtn.addEventListener("click", () => {
+                [usernameText, aboutText].forEach(el => el.classList.remove("hidden"));
+                [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.add("hidden"));
+                editBtn.classList.remove("hidden");
+
+                // reset avatar preview
+                if (avatarImg.src) avatarImg.classList.add("hidden");
+                avatarText.classList.remove("hidden");
+              });
+
+              // Save changes
+              saveBtn.addEventListener("click", () => {
+                usernameText.textContent = usernameInput.value;
+                aboutText.textContent = `Обо мне: ${aboutInput.value}`;
+
+                // Toggle visibility
+                cancelBtn.click();
+
+                // TODO: send data to server via fetch/AJAX
+                console.log({
+                  username: usernameInput.value,
+                  about: aboutInput.value,
+                  avatar: avatarInput.files[0]
+                });
+              });
+
+              // Avatar preview
+              avatarInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  avatarImg.src = reader.result;
+                  avatarImg.classList.remove("hidden");
+                  avatarText.classList.add("hidden");
+                };
+                reader.readAsDataURL(file);
+              });
+
+              document.addEventListener("DOMContentLoaded", () => {
+                const tabs = document.querySelectorAll('[data-target]');
+                const sections = document.querySelectorAll(".section-block");
+
+                tabs.forEach(tab => {
+                  tab.addEventListener("click", () => {
+                    const targetId = tab.dataset.target;
+
+                    // Hide all sections
+                    sections.forEach(sec => sec.classList.add("hidden"));
+
+                    // Show only the clicked section
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) targetSection.classList.remove("hidden");
+
+                    // Optional: toggle active styling
+                    tabs.forEach(t => t.classList.remove("bg-blue-600", "text-white", "border-blue-600"));
+                    tab.classList.add("bg-blue-600", "text-white", "border-blue-600");
+                  });
+                });
+              });
+
+        </script>
     </section>
-
-    <script>
-      // Простая логика для вкладок
-      document.addEventListener("DOMContentLoaded", function () {
-        const tabs = document.querySelectorAll(".tab-btn");
-        const sections = {
-          "collections-section": document.getElementById("collections-section"),
-          "reviews-section": document.getElementById("reviews-section"),
-          "notifications-section": document.getElementById(
-            "notifications-section",
-          ),
-          "games-section": document.getElementById("games-section"),
-        };
-
-        tabs.forEach((tab) => {
-          tab.addEventListener("click", function () {
-            const targetId = this.dataset.target;
-
-            // Убираем активный класс у всех табов
-            tabs.forEach((t) => {
-              t.classList.remove(
-                "bg-blue-600",
-                "text-white",
-                "border-blue-600",
-              );
-              t.classList.add("text-gray-600", "hover:bg-gray-100");
-            });
-
-            // Добавляем активный класс текущему табу
-            this.classList.add("bg-blue-600", "text-white", "border-blue-600");
-            this.classList.remove("text-gray-600", "hover:bg-gray-100");
-
-            // Скрываем все секции
-            Object.values(sections).forEach((section) => {
-              if (section) section.classList.add("hidden");
-            });
-
-            // Показываем нужную секцию
-            if (sections[targetId]) {
-              sections[targetId].classList.remove("hidden");
-            }
-          });
-        });
-      });
-
-        const editBtn = document.getElementById("edit-profile-btn");
-        const cancelBtn = document.getElementById("cancel-edit-btn");
-        const saveBtn = document.getElementById("save-profile-btn");
-
-        const usernameText = document.getElementById("username-text");
-        const usernameInput = document.getElementById("username-input");
-
-        const aboutText = document.getElementById("about-text");
-        const aboutInput = document.getElementById("about-input");
-
-        const avatarInput = document.getElementById("avatar-input");
-        const avatarText = document.getElementById("avatar-text");
-        const avatarImg = document.getElementById("avatar-img");
-
-        // Enable edit mode
-        editBtn.addEventListener("click", () => {
-          usernameInput.value = usernameText.textContent;
-          aboutInput.value = aboutText.textContent.replace("Обо мне: ", "");
-
-          [usernameText, aboutText].forEach(el => el.classList.add("hidden"));
-          [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
-          editBtn.classList.add("hidden");
-        });
-
-        // Cancel edit
-        cancelBtn.addEventListener("click", () => {
-          [usernameText, aboutText].forEach(el => el.classList.remove("hidden"));
-          [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.add("hidden"));
-          editBtn.classList.remove("hidden");
-
-          // reset avatar preview
-          if (avatarImg.src) avatarImg.classList.add("hidden");
-          avatarText.classList.remove("hidden");
-        });
-
-        // Save changes
-        saveBtn.addEventListener("click", () => {
-          usernameText.textContent = usernameInput.value;
-          aboutText.textContent = `Обо мне: ${aboutInput.value}`;
-
-          // Toggle visibility
-          cancelBtn.click();
-
-          // TODO: send data to server via fetch/AJAX
-          console.log({
-            username: usernameInput.value,
-            about: aboutInput.value,
-            avatar: avatarInput.files[0]
-          });
-        });
-
-        // Avatar preview
-        avatarInput.addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            avatarImg.src = reader.result;
-            avatarImg.classList.remove("hidden");
-            avatarText.classList.add("hidden");
-          };
-          reader.readAsDataURL(file);
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
-          const tabs = document.querySelectorAll('[data-target]');
-          const sections = document.querySelectorAll(".section-block");
-
-          tabs.forEach(tab => {
-            tab.addEventListener("click", () => {
-              const targetId = tab.dataset.target;
-
-              // Hide all sections
-              sections.forEach(sec => sec.classList.add("hidden"));
-
-              // Show only the clicked section
-              const targetSection = document.getElementById(targetId);
-              if (targetSection) targetSection.classList.remove("hidden");
-
-              // Optional: toggle active styling
-              tabs.forEach(t => t.classList.remove("bg-blue-600", "text-white", "border-blue-600"));
-              tab.classList.add("bg-blue-600", "text-white", "border-blue-600");
-            });
-          });
-        });
-
-    </script>
-  </body>
 </html>

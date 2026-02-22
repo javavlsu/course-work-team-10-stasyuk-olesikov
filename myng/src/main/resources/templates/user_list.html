@@ -1,64 +1,8 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Список пользователей MYNG</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome для иконок -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <!-- Google Fonts - Inter -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f9fafb;
-        min-height: 100vh;
-      }
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::section})">
 
-      /* Кастомный скроллбар для таблицы */
-      .users-table-container::-webkit-scrollbar {
-        height: 8px;
-        width: 8px;
-      }
-
-      .users-table-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-      }
-
-      .users-table-container::-webkit-scrollbar-thumb {
-        background: #cbd5e0;
-        border-radius: 4px;
-      }
-
-      .users-table-container::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-
-      /* Анимация для новых пользователей */
-      @keyframes highlight-new {
-        0% {
-          background-color: rgba(59, 130, 246, 0.1);
-        }
-        100% {
-          background-color: transparent;
-        }
-      }
-
-      .new-user {
-        animation: highlight-new 2s ease-out;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
+  <section class="bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Шапка с навигацией -->
       <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -866,6 +810,48 @@
       </div>
     </div>
 
+      <style>
+          body {
+            font-family: "Inter", sans-serif;
+            background-color: #f9fafb;
+            min-height: 100vh;
+          }
+
+          /* Кастомный скроллбар для таблицы */
+          .users-table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+          }
+
+          .users-table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          .users-table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+          }
+
+          .users-table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+          }
+
+          /* Анимация для новых пользователей */
+          @keyframes highlight-new {
+            0% {
+              background-color: rgba(59, 130, 246, 0.1);
+            }
+            100% {
+              background-color: transparent;
+            }
+          }
+
+          .new-user {
+            animation: highlight-new 2s ease-out;
+          }
+      </style>
+
     <script>
       // Функции для работы с модальными окнами
       function openModal(modalId) {
@@ -934,5 +920,5 @@
         }
       });
     </script>
-  </body>
+  </section>
 </html>

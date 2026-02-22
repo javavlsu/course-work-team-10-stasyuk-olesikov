@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class GameController {
+public class AuthController {
 
-    @GetMapping("/game")
-    public String indexPage() {
-        return "game";
+    @GetMapping("/auth")
+    public String authPage() {
+        return "auth";
     }
 }

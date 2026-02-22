@@ -1,20 +1,6 @@
 <!doctype html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Каталог игр MYNG</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Дополнительные кастомные стили при необходимости -->
-    <style>
-      /* Минимальные кастомные стили, если нужно переопределить что-то */
-      .img-placeholder {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::section})">
     <!-- Каталог игр -->
     <section
       id="catalog"
@@ -278,5 +264,4 @@
         </nav>
       </div>
     </section>
-  </body>
 </html>
