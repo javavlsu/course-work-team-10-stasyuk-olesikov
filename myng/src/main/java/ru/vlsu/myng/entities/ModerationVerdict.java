@@ -1,13 +1,18 @@
 package ru.vlsu.myng.entities;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "moderation_verdict")
-public class ModerationVerdict
-{
+public class ModerationVerdict {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +23,8 @@ public class ModerationVerdict
 
     private String reason;
 
-    // проверка того, что лишь один из внешних ключей не null нужно проверять на уровне бизнес-логики
+    // проверка того, что лишь один из внешних ключей не null нужно проверять на
+    // уровне бизнес-логики
 
     @OneToOne
     @JoinColumn(name = "fk_game_version")

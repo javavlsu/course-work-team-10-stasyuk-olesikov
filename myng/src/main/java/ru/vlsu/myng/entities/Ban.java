@@ -1,13 +1,20 @@
 package ru.vlsu.myng.entities;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.time.Instant;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "ban")
-public class Ban
-{
+public class Ban {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

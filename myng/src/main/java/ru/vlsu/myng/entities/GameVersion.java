@@ -1,14 +1,20 @@
 package ru.vlsu.myng.entities;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.time.Instant;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Entity
-@Table(name = "game_version",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"fk_game", "commit_hash"}))
-public class GameVersion
-{
+@Table(name = "game_version", uniqueConstraints = @UniqueConstraint(columnNames = { "fk_game", "commit_hash" }))
+public class GameVersion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,14 +1,21 @@
 package ru.vlsu.myng.entities;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Entity
-@Table(name = "game",
-        uniqueConstraints = @UniqueConstraint(columnNames = "repo"))
-public class Game
-{
+@Table(name = "game", uniqueConstraints = @UniqueConstraint(columnNames = "repo"))
+public class Game {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -33,18 +40,13 @@ public class Game
     private List<GameVersion> versions = new ArrayList<>();
 
     @ManyToMany
-    @JoinTable(
-            name = "game_tag",
-            joinColumns = @JoinColumn(name = "fk_game"),
-            inverseJoinColumns = @JoinColumn(name = "fk_tag")
-    )
+    @JoinTable(name = "game_tag", joinColumns = @JoinColumn(name = "fk_game"), inverseJoinColumns = @JoinColumn(name = "fk_tag"))
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToMany(mappedBy = "games")
     private Set<Collection> collections = new HashSet<>();
 
-    public enum Genre
-    {
+    public enum Genre {
         action, adventure, rpg, simulation, strategy,
         sports, puzzle, horror, platformer,
         sandbox, visual_novel, roguelike

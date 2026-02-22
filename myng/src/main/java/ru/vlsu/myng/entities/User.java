@@ -1,18 +1,25 @@
 package ru.vlsu.myng.entities;
 
 import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 @Entity
-@Table(name = "user",
-        uniqueConstraints =
-        {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "github_username")
-        })
-public class User
-{
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "username"),
+        @UniqueConstraint(columnNames = "github_username")
+})
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,8 +48,7 @@ public class User
     @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
 
-    public enum Role
-    {
+    public enum Role {
         user, dev, mod, admin
     }
 }
