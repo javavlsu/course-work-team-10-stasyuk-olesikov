@@ -91,309 +91,157 @@
 
         <!-- Таблица модерации -->
         <div class="moderation-table-container overflow-x-auto">
-          <table class="w-full min-w-[1000px]">
-            <thead>
-              <tr class="bg-gray-50 border-b border-gray-200">
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  ID
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Тип сущности
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Краткая информация
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Доп. данные
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Создано
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Действия
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <!-- Пример: версия игры со ссылкой на репозиторий -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #201
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                    >
-                      <i class="fas fa-gamepad"></i>
-                      game_version
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">Game #45 — commit:</div>
-                  <code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
-                    >a1b2c3d</code
-                  >
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm text-gray-600"
-                      >changelog: "Исправлены коллизии, улучшен рендер"</span
-                    >
-                    <a
-                      href="#"
-                      class="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 mt-1"
-                    >
-                      <i class="fas fa-external-link-alt"></i>
-                      Ссылка на репозиторий
-                    </a>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-20</div>
-                  <div class="text-xs text-gray-500">09:12</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="modal_entity_to_moderate"
-                    >
-                      <i class="fas fa-check"></i>
-                      Принять
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="decline"
-                    >
-                      <i class="fas fa-times"></i>
-                      Отклонить
-                    </button>
-                  </div>
-                </td>
-              </tr>
+            <table class="w-full min-w-[1000px]">
+                <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Тип сущности</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Краткая информация</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Доп. данные</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Создано</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Действия</th>
+                </tr>
+                </thead>
 
-              <!-- Пример: заявка на становление разработчиком со ссылкой на GitHub -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #58
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                    >
-                      <i class="fas fa-code"></i>
-                      dev_application
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">user: sergey_dev</div>
-                  <div class="flex items-center gap-1 mt-1">
-                    <i class="fab fa-github text-gray-500 text-xs"></i>
-                    <code
-                      class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
-                      >sergeydev</code
-                    >
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm text-gray-600"
-                      >"Хочу публиковать игры, есть 3 проекта на GitHub"</span
-                    >
-                    <a
-                      href="#"
-                      class="text-purple-600 hover:text-purple-800 text-xs flex items-center gap-1 mt-1"
-                    >
-                      <i class="fab fa-github"></i>
-                      Ссылка на GitHub
-                    </a>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-21</div>
-                  <div class="text-xs text-gray-500">11:03</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="modal_entity_to_moderate"
-                    >
-                      <i class="fas fa-check"></i>
-                      Принять
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="decline"
-                    >
-                      <i class="fas fa-times"></i>
-                      Отклонить
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                <tbody class="divide-y divide-gray-200">
+                <tr th:each="item : ${items}"
+                    class="hover:bg-blue-50/30 transition-colors">
 
-              <!-- Пример: отзыв с кнопкой "К игре" -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #777
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                    >
-                      <i class="fas fa-star"></i>
-                      review
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
-                    Игра #12 — рейтинг: 1/5
-                  </div>
-                  <button
-                    class="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 mt-1"
-                  >
-                    <i class="fas fa-external-link-alt"></i>
-                    К игре
-                  </button>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-600">
-                    Текст: "Плохая игра, спам"
-                  </div>
-                  <span
-                    class="inline-flex items-center gap-1 px-2 py-0.5 mt-1 bg-red-100 text-red-700 text-xs rounded-lg"
-                  >
-                    <i class="fas fa-flag"></i>
-                    report_count: 3
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-22</div>
-                  <div class="text-xs text-gray-500">17:44</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="modal_entity_to_moderate"
-                    >
-                      <i class="fas fa-check"></i>
-                      Оставить
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="decline"
-                    >
-                      <i class="fas fa-times"></i>
-                      Удалить
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                    <!-- ID -->
+                    <td class="px-6 py-4">
+            <span class="inline-flex px-2.5 py-1.5 rounded-lg bg-gray-100 font-mono text-sm"
+                  th:text="'#' + ${item.id}">
+            </span>
+                    </td>
 
-              <!-- Дополнительный пример: версия игры с другим статусом -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #203
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                    >
-                      <i class="fas fa-gamepad"></i>
-                      game_version
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">Game #23 — commit:</div>
-                  <code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
-                    >f9e8d7c</code
-                  >
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm text-gray-600"
-                      >changelog: "Новый уровень, исправлены баги"</span
-                    >
-                    <a
-                      href="#"
-                      class="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 mt-1"
-                    >
-                      <i class="fas fa-external-link-alt"></i>
-                      Ссылка на репозиторий
-                    </a>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-23</div>
-                  <div class="text-xs text-gray-500">10:30</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="modal_entity_to_moderate"
-                    >
-                      <i class="fas fa-check"></i>
-                      Принять
-                    </button>
-                      <button
-                              class="px-3 py-1.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                              data-action="open-modal"
-                              data-modal="decline"
-                      >
-                          <i class="fas fa-times"></i>
-                          Отклонить
-                      </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <!-- TYPE -->
+                    <td class="px-6 py-4">
+                        <div th:switch="${item.type}">
+
+                <span th:case="'GAME_VERSION'"
+                      class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                    <i class="fas fa-gamepad"></i> game_version
+                </span>
+
+                            <span th:case="'DEV_APPLICATION'"
+                                  class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs rounded-full">
+                    <i class="fas fa-code"></i> dev_application
+                </span>
+
+                            <span th:case="'REVIEW'"
+                                  class="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs rounded-full">
+                    <i class="fas fa-star"></i> review
+                </span>
+
+                        </div>
+                    </td>
+
+                    <!-- SHORT INFO -->
+                    <td class="px-6 py-4">
+
+                        <!-- GAME VERSION -->
+                        <div th:if="${item.type == 'GAME_VERSION'}">
+                            <div class="text-sm">
+                                Game #
+                                <span th:text="${item.gameId}"></span>
+                                — commit:
+                            </div>
+                            <code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
+                                  th:text="${item.commitHash}">
+                            </code>
+                        </div>
+
+                        <!-- DEV APPLICATION -->
+                        <div th:if="${item.type == 'DEV_APPLICATION'}">
+                            <div class="text-sm">
+                                user:
+                                <span th:text="${item.username}"></span>
+                            </div>
+                            <code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
+                                  th:text="${item.githubLogin}">
+                            </code>
+                        </div>
+
+                        <!-- REVIEW -->
+                        <div th:if="${item.type == 'REVIEW'}">
+                            <div class="text-sm">
+                                Игра #
+                                <span th:text="${item.gameId}"></span>
+                                — рейтинг:
+                                <span th:text="${item.rating}"></span>/5
+                            </div>
+                            <a th:href="@{/game/{id}(id=${item.gameId})}"
+                               class="text-blue-600 text-xs">
+                                К игре
+                            </a>
+                        </div>
+
+                    </td>
+
+                    <!-- EXTRA -->
+                    <td class="px-6 py-4">
+
+                        <div th:if="${item.type == 'GAME_VERSION'}">
+                            <span th:text="${item.changelog}"></span>
+                            <a th:href="${item.repoUrl}"
+                               target="_blank"
+                               class="text-blue-600 text-xs">
+                                Ссылка на репозиторий
+                            </a>
+                        </div>
+
+                        <div th:if="${item.type == 'DEV_APPLICATION'}">
+                            <span th:text="${item.description}"></span>
+                            <a th:href="${item.githubUrl}"
+                               target="_blank"
+                               class="text-purple-600 text-xs">
+                                GitHub
+                            </a>
+                        </div>
+
+                        <div th:if="${item.type == 'REVIEW'}">
+                            <span th:text="${item.reviewText}"></span>
+                            <span class="text-red-600 text-xs"
+                                  th:text="'report_count: ' + ${item.reportCount}">
+                </span>
+                        </div>
+
+                    </td>
+
+                    <!-- CREATED -->
+                    <td class="px-6 py-4">
+                        <div th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd')}"></div>
+                        <div class="text-xs text-gray-500"
+                             th:text="${#temporals.format(item.createdAt, 'HH:mm')}">
+                        </div>
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+
+                            <form th:action="@{/moderation/approve/{id}(id=${item.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg">
+                                    Принять
+                                </button>
+                            </form>
+
+                            <form th:action="@{/moderation/reject/{id}(id=${item.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs rounded-lg">
+                                    Отклонить
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Пагинация и итоги -->

@@ -18,7 +18,7 @@ public class ModerationVerdict {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean approved;
 
     private String reason;

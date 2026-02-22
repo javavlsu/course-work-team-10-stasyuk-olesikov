@@ -1,0 +1,33 @@
+package ru.vlsu.myng.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
+
+@Getter
+@Setter
+public class ModerationItem {
+
+    private Long id;             // ID сущности
+    private String type;         // Тип: GAME_VERSION, DEV_APPLICATION, REVIEW
+    private Long gameId;         // Для GameVersion и Review
+
+    // --- Для DEV_APPLICATION ---
+    private String username;
+    private String githubLogin;
+    private String description;
+    private String githubUrl;
+
+    // --- Для GAME_VERSION ---
+    private String commitHash;
+    private String changelog;
+    private String repoUrl;
+
+    // --- Для REVIEW ---
+    private Integer rating;
+    private String reviewText;
+    private Integer reportCount;
+
+    private Instant createdAt;   // Время создания
+}

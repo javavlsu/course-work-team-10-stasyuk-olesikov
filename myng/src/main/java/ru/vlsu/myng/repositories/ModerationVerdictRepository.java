@@ -19,6 +19,7 @@ import java.util.Optional;
  *  - модератор выносит решение по версиям игр;<br>
  *  - модератор выносит решение по жалобам на отзывы;<br>
  *  - получение списка решений модерации по трем типам сущностей для аналитики или отображения в UI.<br>
+ *  - получение списков трёх видов сущностей, не прошедших модерацию
  * <br>
  * Наследует стандартные CRUD-операции из JpaRepository.
  */
@@ -76,4 +77,34 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     Optional<ModerationVerdict> findByDevApplication(DevApplication application);
+
+    /**
+     * Возвращает список всех версий игр, по которым ещё не вынесено решение модерации.
+     *
+     * @return список решений модерации по версиям игр с флагом approved = false.
+     *         Никогда не возвращает null, может быть пустым, если таких версий нет.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
+    List<ModerationVerdict> findByGameVersionIsNotNullAndApprovedIsNull();
+
+    /**
+     * Возвращает список всех отзывов, по которым ещё не вынесено решение модерации.
+     *
+     * @return список решений модерации по отзывам с флагом approved = false.
+     *         Никогда не возвращает null, может быть пустым, если таких отзывов нет.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
+    List<ModerationVerdict> findByReviewIsNotNullAndApprovedIsNull();
+
+    /**
+     * Возвращает список всех заявок разработчиков, по которым ещё не вынесено решение модерации.
+     *
+     * @return список решений модерации по заявкам разработчиков с флагом approved = false.
+     *         Никогда не возвращает null, может быть пустым, если таких заявок нет.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
+    List<ModerationVerdict> findByDevApplicationIsNotNullAndApprovedIsNull();
 }
