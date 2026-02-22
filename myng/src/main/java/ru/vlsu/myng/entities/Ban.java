@@ -23,10 +23,10 @@ public class Ban {
     @Column(nullable = false)
     private String reason;
 
-    @Column(nullable = false)
+    @Column(name = "start_time", nullable = false)
     private Instant startTime;
 
-    @Column(nullable = false)
+    @Column(name = "end_time", nullable = false)
     private Instant endTime;
 
     @ManyToOne(optional = false)

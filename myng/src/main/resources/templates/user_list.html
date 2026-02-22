@@ -1,7 +1,8 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout(~{::section})">
-
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
   <section class="bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Шапка с навигацией -->
@@ -134,318 +135,114 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              <!-- Иван (активный пользователь) -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
+              <tr
+                th:each="user : ${users}"
+                class="hover:bg-blue-50/30 transition-colors"
+              >
+                <!-- Пользователь -->
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div
                       class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
-                    >
-                      ИВ
-                    </div>
+                      th:text="${#strings.substring(user.username,0,1).toUpperCase()}"
+                    ></div>
                     <div>
-                      <div class="font-medium text-gray-900">@ivan_b</div>
-                      <div class="text-xs text-gray-400">ivan@example.com</div>
+                      <div
+                        class="font-medium text-gray-900"
+                        th:text="'@' + ${user.username}"
+                      ></div>
+                      <div
+                        class="text-xs text-gray-400"
+                        th:text="${user.githubUsername != null ? user.githubUsername : '—'}"
+                      ></div>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                  >
-                    <i class="fas fa-user"></i>
-                    user
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-circle text-xs"></i>
-                    Активен
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">12.01.2025</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="change_role"
-                    >
-                      <i class="fas fa-user-edit"></i>
-                      Роль
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="warn"
-                    >
-                      <i class="fas fa-exclamation-triangle"></i>
-                      Предупр.
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="block"
-                    >
-                      <i class="fas fa-ban"></i>
-                      Блок
-                    </button>
-                  </div>
-                </td>
-              </tr>
 
-              <!-- Маша (разработчик активный) -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold"
-                    >
-                      МС
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">@masha_dev</div>
-                      <div class="text-xs text-gray-400">masha@example.com</div>
-                    </div>
-                  </div>
-                </td>
+                <!-- Роль -->
                 <td class="px-6 py-4">
                   <span
-                    class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
+                    th:switch="${user.role}"
+                    class="px-3 py-1.5 text-xs font-medium rounded-full inline-flex items-center gap-1"
                   >
-                    <i class="fas fa-code"></i>
-                    dev
+                    <span th:case="'user'" class="bg-blue-50 text-blue-700">
+                      <i class="fas fa-user"></i> Пользователь
+                    </span>
+                    <span th:case="'dev'" class="bg-purple-50 text-purple-700">
+                      <i class="fas fa-code"></i> Разработчик
+                    </span>
+                    <span th:case="'mod'" class="bg-teal-50 text-teal-700">
+                      <i class="fas fa-shield-alt"></i> Модератор
+                    </span>
+                    <span th:case="'admin'" class="bg-red-50 text-red-700">
+                      <i class="fas fa-crown"></i> Администратор
+                    </span>
+                    <span
+                      th:case="*"
+                      th:text="${user.role}"
+                      class="bg-gray-50 text-gray-700"
+                    >
+                      Неизвестно
+                    </span>
                   </span>
                 </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-circle text-xs"></i>
-                    Активен
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">05.02.2025</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="change_role"
-                    >
-                      <i class="fas fa-user-edit"></i>
-                      Роль
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="warn"
-                    >
-                      <i class="fas fa-exclamation-triangle"></i>
-                      Предупр.
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="block"
-                    >
-                      <i class="fas fa-ban"></i>
-                      Блок
-                    </button>
-                  </div>
-                </td>
-              </tr>
 
-              <!-- Сергей (модератор активный) -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white font-bold"
-                    >
-                      СМ
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">@sergey_mod</div>
-                      <div class="text-xs text-gray-400">
-                        sergey@example.com
-                      </div>
-                    </div>
-                  </div>
-                </td>
+                <!-- Статус -->
                 <td class="px-6 py-4">
                   <span
-                    class="px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                  >
-                    <i class="fas fa-shield-alt"></i>
-                    moderator
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-circle text-xs"></i>
-                    Активен
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">10.02.2025</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="change_role"
-                    >
-                      <i class="fas fa-user-edit"></i>
-                      Роль
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="warn"
-                    >
-                      <i class="fas fa-exclamation-triangle"></i>
-                      Предупр.
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="block"
-                    >
-                      <i class="fas fa-ban"></i>
-                      Блок
-                    </button>
-                  </div>
-                </td>
-              </tr>
-
-              <!-- Петр (заблокированный пользователь) -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-bold"
-                    >
-                      ПС
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">@petr_s</div>
-                      <div class="text-xs text-gray-400">petr@example.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                  >
-                    <i class="fas fa-user"></i>
-                    user
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span
+                    th:if="${bannedMap[user.id]}"
                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg"
                   >
                     <i class="fas fa-ban"></i>
                     Заблокирован
                   </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">20.01.2025</div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="change_role"
-                    >
-                      <i class="fas fa-user-edit"></i>
-                      Роль
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="warn"
-                    >
-                      <i class="fas fa-exclamation-triangle"></i>
-                      Предупр.
-                    </button>
-                    <button
-                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-                      data-action="open-modal"
-                      data-modal="unblock"
-                    >
-                      <i class="fas fa-lock-open"></i>
-                      Разблок.
-                    </button>
-                  </div>
-                </td>
-              </tr>
 
-              <!-- Алексей (админ активный) -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center text-white font-bold"
-                    >
-                      АМ
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">@alex_admin</div>
-                      <div class="text-xs text-gray-400">alex@example.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
                   <span
-                    class="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full flex items-center gap-1 w-fit"
-                  >
-                    <i class="fas fa-crown"></i>
-                    admin
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span
+                    th:if="${!bannedMap[user.id]}"
                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
                   >
                     <i class="fas fa-circle text-xs"></i>
                     Активен
                   </span>
                 </td>
+
+                <!-- Дата регистрации -->
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">01.12.2024</div>
+                  <div
+                    class="text-sm text-gray-900"
+                    th:text="${#temporals.format(user.registeredAt, 'dd.MM.yyyy')}"
+                  ></div>
                 </td>
+
+                <!-- Действия -->
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-2">
+                    <!-- Изменить роль -->
                     <button
                       class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
                       data-action="open-modal"
                       data-modal="change_role"
                     >
                       <i class="fas fa-user-edit"></i>
                       Роль
                     </button>
+
+                    <!-- Предупреждение -->
                     <button
                       class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
                       data-action="open-modal"
                       data-modal="warn"
                     >
                       <i class="fas fa-exclamation-triangle"></i>
                       Предупр.
                     </button>
+
+                    <!-- Блокировка -->
                     <button
                       class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
                       data-action="open-modal"
                       data-modal="block"
                     >
@@ -810,47 +607,47 @@
       </div>
     </div>
 
-      <style>
-          body {
-            font-family: "Inter", sans-serif;
-            background-color: #f9fafb;
-            min-height: 100vh;
-          }
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+        min-height: 100vh;
+      }
 
-          /* Кастомный скроллбар для таблицы */
-          .users-table-container::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
-          }
+      /* Кастомный скроллбар для таблицы */
+      .users-table-container::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
 
-          .users-table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-          }
+      .users-table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
 
-          .users-table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 4px;
-          }
+      .users-table-container::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+      }
 
-          .users-table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-          }
+      .users-table-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
 
-          /* Анимация для новых пользователей */
-          @keyframes highlight-new {
-            0% {
-              background-color: rgba(59, 130, 246, 0.1);
-            }
-            100% {
-              background-color: transparent;
-            }
-          }
+      /* Анимация для новых пользователей */
+      @keyframes highlight-new {
+        0% {
+          background-color: rgba(59, 130, 246, 0.1);
+        }
+        100% {
+          background-color: transparent;
+        }
+      }
 
-          .new-user {
-            animation: highlight-new 2s ease-out;
-          }
-      </style>
+      .new-user {
+        animation: highlight-new 2s ease-out;
+      }
+    </style>
 
     <script>
       // Функции для работы с модальными окнами

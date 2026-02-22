@@ -28,18 +28,23 @@ public class User {
     @Column(nullable = false, length = 20)
     private String username;
 
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
     @Column(length = 255)
     private String bio;
 
     @Column(nullable = false, columnDefinition = "LONGBLOB")
     private byte[] profilePic;
 
+    @Column(name = "registered_at")
     private Instant registeredAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.user;
 
+    @Column(name = "github_username")
     private String githubUsername;
 
     @OneToMany(mappedBy = "developer")

@@ -1,858 +1,851 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout(~{::section})">
-
-<section
-        id="game"
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
-        role="region"
-        aria-labelledby="game-title"
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
 >
+  <section
+    id="game"
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+    role="region"
+    aria-labelledby="game-title"
+  >
     <!-- Шапка с навигацией -->
     <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-4"
-        >
-            <div>
-                <h1
-                        id="game-title"
-                        class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
-                >
-                    <i class="fas fa-gamepad text-blue-500"></i>
-                    <span id="game-name">Cyber Knight</span>
-                </h1>
-                <p class="text-gray-600 flex items-center gap-2">
-                    <i class="fas fa-user-circle text-blue-500"></i>
-                    Автор: @dev_studio • Платформер, RPG
-                </p>
-            </div>
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+      >
+        <div>
+          <h1
+            id="game-title"
+            class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
+          >
+            <i class="fas fa-gamepad text-blue-500"></i>
+            <span id="game-name">Cyber Knight</span>
+          </h1>
+          <p class="text-gray-600 flex items-center gap-2">
+            <i class="fas fa-user-circle text-blue-500"></i>
+            Автор: @dev_studio • Платформер, RPG
+          </p>
         </div>
+      </div>
     </div>
 
     <!-- Main Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-        <!-- ===== LEFT COLUMN ===== -->
-        <div class="flex flex-col gap-6">
-            <!-- Big Cover -->
-            <div class="relative bg-white rounded-xl shadow-lg overflow-hidden">
-                <div
-                        id="game-avatar"
-                        class="w-full h-[400px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white cursor-pointer"
-                >
-                    <i class="fas fa-play text-6xl opacity-50"></i>
-                </div>
+      <!-- ===== LEFT COLUMN ===== -->
+      <div class="flex flex-col gap-6">
+        <!-- Big Cover -->
+        <div class="relative bg-white rounded-xl shadow-lg overflow-hidden">
+          <div
+            id="game-avatar"
+            class="w-full h-[400px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white cursor-pointer"
+          >
+            <i class="fas fa-play text-6xl opacity-50"></i>
+          </div>
 
-                <!-- Edit overlay -->
-                <div
-                        id="avatarOverlay"
-                        class="absolute inset-0 bg-black/60 hidden items-center justify-center cursor-pointer"
-                >
-                    <div class="text-white text-center">
-                        <i class="fas fa-plus text-6xl mb-2"></i>
-                        <div class="text-sm font-medium">Загрузить изображение</div>
-                    </div>
-                </div>
-
-                <input
-                        type="file"
-                        id="avatarInput"
-                        accept="image/*"
-                        class="hidden"
-                />
+          <!-- Edit overlay -->
+          <div
+            id="avatarOverlay"
+            class="absolute inset-0 bg-black/60 hidden items-center justify-center cursor-pointer"
+          >
+            <div class="text-white text-center">
+              <i class="fas fa-plus text-6xl mb-2"></i>
+              <div class="text-sm font-medium">Загрузить изображение</div>
             </div>
+          </div>
 
-            <!-- Meta Block -->
-            <div class="bg-white rounded-xl shadow-lg p-5 text-sm text-gray-700">
-                <div class="space-y-3">
-                    <div class="flex justify-between pb-2 border-b border-gray-100">
-                        <span class="text-gray-500">Дата публикации</span>
-                        <span class="font-medium">12 января 2025</span>
-                    </div>
-                    <div class="flex justify-between pb-2 border-b border-gray-100">
-                        <span class="text-gray-500">Теги</span>
-                        <span class="font-medium">Приключения, RPG, Онлайн</span>
-                    </div>
-                    <div class="flex justify-between pb-2 border-b border-gray-100">
-                        <span class="text-gray-500">Последняя версия</span>
-                        <span class="font-medium">1.3</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Всего версий</span>
-                        <span class="font-medium">4</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Thumbnails -->
-            <div class="bg-white rounded-xl shadow-lg p-5">
-                <h4
-                        class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
-                >
-                    <i class="fas fa-images text-blue-500"></i>
-                    Скриншоты
-                </h4>
-                <div class="grid grid-cols-5 gap-2">
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                    <div
-                            class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-                    ></div>
-                </div>
-            </div>
+          <input type="file" id="avatarInput" accept="image/*" class="hidden" />
         </div>
 
-        <!-- ===== RIGHT COLUMN ===== -->
-        <div class="flex flex-col gap-6">
-            <!-- Description Block -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Описание</h3>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex flex-wrap gap-3 mb-6">
-                    <button
-                            onclick="window.location.href = 'running_game.html'"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
-                    >
-                        <i class="fas fa-play"></i> Играть
-                    </button>
-
-                    <button
-                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
-                    >
-                        <i class="fas fa-plus-circle"></i> В коллекцию
-                    </button>
-
-                    <button
-                            id="editBtn"
-                            class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
-                    >
-                        <i class="fas fa-edit"></i>
-                        <span id="editBtnText">Редактировать</span>
-                    </button>
-                </div>
-
-                <p id="game-description" class="text-gray-700 leading-relaxed">
-                    Cyber Knight — это киберпанк-платформер с элементами RPG. Игроку
-                    предстоит исследовать мрачный мир будущего, взламывать системы и
-                    сражаться с корпорациями. Уникальная механика взлома в реальном
-                    времени, более 20 уровней, множество улучшений и несколько
-                    концовок.
-                </p>
-
-                <div class="mt-4 flex items-center gap-4 text-sm">
-              <span class="flex items-center gap-1 text-gray-600">
-                <i class="fas fa-star text-yellow-500"></i> 4.5 (128 отзывов)
-              </span>
-                </div>
+        <!-- Meta Block -->
+        <div class="bg-white rounded-xl shadow-lg p-5 text-sm text-gray-700">
+          <div class="space-y-3">
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Дата публикации</span>
+              <span class="font-medium">12 января 2025</span>
             </div>
-
-            <!-- Versions Block -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h4
-                        class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
-                >
-                    <i class="fas fa-code-branch text-blue-500"></i>
-                    Версии игры
-                </h4>
-
-                <div
-                        class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4"
-                >
-                    <select
-                            class="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white text-sm"
-                    >
-                        <option>Версия 1.3 (текущая)</option>
-                        <option>Версия 1.2</option>
-                        <option>Версия 1.1</option>
-                        <option>Версия 1.0</option>
-                    </select>
-
-                    <div class="flex gap-2">
-                        <button
-                                data-action="open-modal"
-                                data-modal="add_game_ver"
-                                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
-                        >
-                            <i class="fas fa-plus"></i> Добавить
-                        </button>
-                        <button
-                                data-action="open-modal"
-                                data-modal="delete_game_ver"
-                                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
-                        >
-                            <i class="fas fa-trash-alt"></i> Удалить
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Changelog preview -->
-                <div class="bg-gray-50 rounded-lg p-3 text-sm">
-                    <span class="font-medium text-gray-700">v1.3 — 10 фев 2025</span>
-                    <p class="text-gray-600 text-xs mt-1">
-                        • Добавлен новый уровень<br />• Исправлены баги физики<br />•
-                        Улучшена производительность
-                    </p>
-                </div>
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Теги</span>
+              <span class="font-medium">Приключения, RPG, Онлайн</span>
             </div>
-
-            <!-- Reviews -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3
-                            class="text-xl font-bold text-gray-900 flex items-center gap-2"
-                    >
-                        <i class="fas fa-star text-yellow-500"></i>
-                        Отзывы
-                        <span class="text-sm font-normal text-gray-500 ml-2"
-                        >128 отзывов</span
-                        >
-                    </h3>
-
-                    <button
-                            data-action="open-modal"
-                            data-modal="review"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-                    >
-                        <i class="fas fa-pen"></i> Написать
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    <!-- Review Card 1 -->
-                    <article
-                            class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
-                                >
-                                    АБ
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Александр</div>
-                                    <div class="text-xs text-gray-500">12 января 2025</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 text-sm leading-relaxed">
-                            Отличная игра! Механики интересные, графика на высоте.
-                            Особенно понравилась боевая система и сюжетные повороты. Жду
-                            новых обновлений!
-                        </p>
-                        <div class="flex items-center gap-3 mt-3 text-xs">
-                            <button class="text-gray-500 hover:text-blue-600">
-                                <i class="far fa-flag mr-1"></i> Пожаловаться
-                            </button>
-                        </div>
-                    </article>
-
-                    <!-- Review Card 2 -->
-                    <article
-                            class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm"
-                                >
-                                    ЕК
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Екатерина</div>
-                                    <div class="text-xs text-gray-500">10 февраля 2025</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 text-sm leading-relaxed">
-                            Шедевр! Прошел за выходные, очень увлекательно. Музыка
-                            отдельный восторг, советую всем любителям киберпанка.
-                        </p>
-                        <div class="flex items-center gap-3 mt-3 text-xs">
-                            <button class="text-gray-500 hover:text-blue-600">
-                                <i class="far fa-flag mr-1"></i> Пожаловаться
-                            </button>
-                        </div>
-                    </article>
-
-                    <!-- Review Card 3 -->
-                    <article
-                            class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm"
-                                >
-                                    ДМ
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Дмитрий</div>
-                                    <div class="text-xs text-gray-500">5 февраля 2025</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 text-sm leading-relaxed">
-                            Хорошая игра, но есть баги с управлением. Надеюсь,
-                            разработчики исправят в следующих версиях.
-                        </p>
-                        <div class="flex items-center gap-3 mt-3 text-xs">
-                            <button class="text-gray-500 hover:text-blue-600">
-                                <i class="far fa-flag mr-1"></i> Пожаловаться
-                            </button>
-                        </div>
-                    </article>
-
-                    <!-- Review Card 4 -->
-                    <article
-                            class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm"
-                                >
-                                    СК
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900">Сергей</div>
-                                    <div class="text-xs text-gray-500">28 января 2025</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 text-sm leading-relaxed">
-                            Отличный киберпанк, атмосфера бесподобная. Немного не хватает
-                            мультиплеера, но в целом очень достойно.
-                        </p>
-                        <div class="flex items-center gap-3 mt-3 text-xs">
-                            <button class="text-gray-500 hover:text-blue-600">
-                                <i class="far fa-flag mr-1"></i> Пожаловаться
-                            </button>
-                        </div>
-                    </article>
-                </div>
-
-                <!-- Кнопка "Показать еще" -->
-                <div class="mt-4 text-center">
-                    <button
-                            class="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                        Показать еще отзывы <i class="fas fa-chevron-down ml-1"></i>
-                    </button>
-                </div>
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Последняя версия</span>
+              <span class="font-medium">1.3</span>
             </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Всего версий</span>
+              <span class="font-medium">4</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Thumbnails -->
+        <div class="bg-white rounded-xl shadow-lg p-5">
+          <h4
+            class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
+          >
+            <i class="fas fa-images text-blue-500"></i>
+            Скриншоты
+          </h4>
+          <div class="grid grid-cols-5 gap-2">
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+            <div
+              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RIGHT COLUMN ===== -->
+      <div class="flex flex-col gap-6">
+        <!-- Description Block -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Описание</h3>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex flex-wrap gap-3 mb-6">
+            <button
+              onclick="window.location.href = 'running_game.html'"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-play"></i> Играть
+            </button>
+
+            <button
+              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-plus-circle"></i> В коллекцию
+            </button>
+
+            <button
+              id="editBtn"
+              class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-edit"></i>
+              <span id="editBtnText">Редактировать</span>
+            </button>
+          </div>
+
+          <p id="game-description" class="text-gray-700 leading-relaxed">
+            Cyber Knight — это киберпанк-платформер с элементами RPG. Игроку
+            предстоит исследовать мрачный мир будущего, взламывать системы и
+            сражаться с корпорациями. Уникальная механика взлома в реальном
+            времени, более 20 уровней, множество улучшений и несколько концовок.
+          </p>
+
+          <div class="mt-4 flex items-center gap-4 text-sm">
+            <span class="flex items-center gap-1 text-gray-600">
+              <i class="fas fa-star text-yellow-500"></i> 4.5 (128 отзывов)
+            </span>
+          </div>
+        </div>
+
+        <!-- Versions Block -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h4
+            class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-code-branch text-blue-500"></i>
+            Версии игры
+          </h4>
+
+          <div
+            class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4"
+          >
+            <select
+              class="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white text-sm"
+            >
+              <option>Версия 1.3 (текущая)</option>
+              <option>Версия 1.2</option>
+              <option>Версия 1.1</option>
+              <option>Версия 1.0</option>
+            </select>
+
+            <div class="flex gap-2">
+              <button
+                data-action="open-modal"
+                data-modal="add_game_ver"
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
+              >
+                <i class="fas fa-plus"></i> Добавить
+              </button>
+              <button
+                data-action="open-modal"
+                data-modal="delete_game_ver"
+                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
+              >
+                <i class="fas fa-trash-alt"></i> Удалить
+              </button>
+            </div>
+          </div>
+
+          <!-- Changelog preview -->
+          <div class="bg-gray-50 rounded-lg p-3 text-sm">
+            <span class="font-medium text-gray-700">v1.3 — 10 фев 2025</span>
+            <p class="text-gray-600 text-xs mt-1">
+              • Добавлен новый уровень<br />• Исправлены баги физики<br />•
+              Улучшена производительность
+            </p>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-star text-yellow-500"></i>
+              Отзывы
+              <span class="text-sm font-normal text-gray-500 ml-2"
+                >128 отзывов</span
+              >
+            </h3>
+
+            <button
+              data-action="open-modal"
+              data-modal="review"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+            >
+              <i class="fas fa-pen"></i> Написать
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Review Card 1 -->
+            <article
+              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
+                  >
+                    АБ
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Александр</div>
+                    <div class="text-xs text-gray-500">12 января 2025</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="far fa-star"></i>
+                </div>
+              </div>
+              <p class="text-gray-700 text-sm leading-relaxed">
+                Отличная игра! Механики интересные, графика на высоте. Особенно
+                понравилась боевая система и сюжетные повороты. Жду новых
+                обновлений!
+              </p>
+              <div class="flex items-center gap-3 mt-3 text-xs">
+                <button class="text-gray-500 hover:text-blue-600">
+                  <i class="far fa-flag mr-1"></i> Пожаловаться
+                </button>
+              </div>
+            </article>
+
+            <!-- Review Card 2 -->
+            <article
+              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm"
+                  >
+                    ЕК
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Екатерина</div>
+                    <div class="text-xs text-gray-500">10 февраля 2025</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                </div>
+              </div>
+              <p class="text-gray-700 text-sm leading-relaxed">
+                Шедевр! Прошел за выходные, очень увлекательно. Музыка отдельный
+                восторг, советую всем любителям киберпанка.
+              </p>
+              <div class="flex items-center gap-3 mt-3 text-xs">
+                <button class="text-gray-500 hover:text-blue-600">
+                  <i class="far fa-flag mr-1"></i> Пожаловаться
+                </button>
+              </div>
+            </article>
+
+            <!-- Review Card 3 -->
+            <article
+              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm"
+                  >
+                    ДМ
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Дмитрий</div>
+                    <div class="text-xs text-gray-500">5 февраля 2025</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="far fa-star"></i>
+                  <i class="far fa-star"></i>
+                </div>
+              </div>
+              <p class="text-gray-700 text-sm leading-relaxed">
+                Хорошая игра, но есть баги с управлением. Надеюсь, разработчики
+                исправят в следующих версиях.
+              </p>
+              <div class="flex items-center gap-3 mt-3 text-xs">
+                <button class="text-gray-500 hover:text-blue-600">
+                  <i class="far fa-flag mr-1"></i> Пожаловаться
+                </button>
+              </div>
+            </article>
+
+            <!-- Review Card 4 -->
+            <article
+              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm"
+                  >
+                    СК
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Сергей</div>
+                    <div class="text-xs text-gray-500">28 января 2025</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-yellow-500 text-sm">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                </div>
+              </div>
+              <p class="text-gray-700 text-sm leading-relaxed">
+                Отличный киберпанк, атмосфера бесподобная. Немного не хватает
+                мультиплеера, но в целом очень достойно.
+              </p>
+              <div class="flex items-center gap-3 mt-3 text-xs">
+                <button class="text-gray-500 hover:text-blue-600">
+                  <i class="far fa-flag mr-1"></i> Пожаловаться
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <!-- Кнопка "Показать еще" -->
+          <div class="mt-4 text-center">
+            <button
+              class="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              Показать еще отзывы <i class="fas fa-chevron-down ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-
 
     <!-- Модальное окно для отзыва -->
     <div
-            id="reviewModal"
-            class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
-            style="display: none"
+      id="reviewModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
     >
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-pen text-blue-500"></i>
-                    Написать отзыв
-                </h3>
-                <button
-                        class="text-gray-400 hover:text-gray-600"
-                        onclick="closeModal('reviewModal')"
-                >
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <!-- Рейтинг звездами -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Ваша оценка</label
-                    >
-                    <div class="flex gap-2 text-2xl" id="starRating">
-                        <i
-                                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
-                                data-rating="1"
-                        ></i>
-                        <i
-                                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
-                                data-rating="2"
-                        ></i>
-                        <i
-                                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
-                                data-rating="3"
-                        ></i>
-                        <i
-                                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
-                                data-rating="4"
-                        ></i>
-                        <i
-                                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
-                                data-rating="5"
-                        ></i>
-                    </div>
-                </div>
-
-                <!-- Текст отзыва -->
-                <div>
-                    <label
-                            for="reviewText"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                    >Текст отзыва</label
-                    >
-                    <textarea
-                            id="reviewText"
-                            rows="4"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Поделитесь впечатлениями об игре..."
-                    ></textarea>
-                </div>
-
-                <!-- Кнопки -->
-                <div class="flex justify-end gap-3 pt-4">
-                    <button
-                            class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
-                            onclick="closeModal('reviewModal')"
-                    >
-                        Отмена
-                    </button>
-                    <button
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                            onclick="submitReview()"
-                    >
-                        <i class="fas fa-paper-plane"></i>
-                        Опубликовать
-                    </button>
-                </div>
-            </div>
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-pen text-blue-500"></i>
+            Написать отзыв
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('reviewModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
         </div>
+
+        <div class="space-y-4">
+          <!-- Рейтинг звездами -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Ваша оценка</label
+            >
+            <div class="flex gap-2 text-2xl" id="starRating">
+              <i
+                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                data-rating="1"
+              ></i>
+              <i
+                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                data-rating="2"
+              ></i>
+              <i
+                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                data-rating="3"
+              ></i>
+              <i
+                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                data-rating="4"
+              ></i>
+              <i
+                class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                data-rating="5"
+              ></i>
+            </div>
+          </div>
+
+          <!-- Текст отзыва -->
+          <div>
+            <label
+              for="reviewText"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >Текст отзыва</label
+            >
+            <textarea
+              id="reviewText"
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+              placeholder="Поделитесь впечатлениями об игре..."
+            ></textarea>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('reviewModal')"
+            >
+              Отмена
+            </button>
+            <button
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              onclick="submitReview()"
+            >
+              <i class="fas fa-paper-plane"></i>
+              Опубликовать
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Модальное окно добавления версии -->
     <div
-            id="addVersionModal"
-            class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
-            style="display: none"
+      id="addVersionModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
     >
-        <div
-                class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
-        >
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-plus-circle text-blue-500"></i>
-                    Добавить версию игры
-                </h3>
-                <button
-                        class="text-gray-400 hover:text-gray-600"
-                        onclick="closeModal('addVersionModal')"
-                >
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <!-- Версия игры -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Версия игры *</label
-                    >
-                    <input
-                            type="text"
-                            placeholder="Например: 1.4.0"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                    />
-                </div>
-
-                <!-- Ссылка на репозиторий -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Ссылка на репозиторий</label
-                    >
-                    <input
-                            type="url"
-                            placeholder="https://github.com/..."
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                    />
-                </div>
-
-                <!-- Хеш коммита -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Хеш коммита</label
-                    >
-                    <input
-                            type="text"
-                            placeholder="a1b2c3d..."
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono"
-                    />
-                </div>
-
-                <!-- Список изменений -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Список изменений</label
-                    >
-                    <textarea
-                            rows="4"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                            placeholder="• Добавлено...&#10;• Исправлено...&#10;• Улучшено..."
-                    ></textarea>
-                </div>
-
-                <!-- Загрузка файлов -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Файлы версии</label
-                    >
-                    <div
-                            class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
-                            onclick="document.getElementById('fileInput').click()"
-                    >
-                        <input type="file" id="fileInput" class="hidden" multiple />
-                        <i
-                                class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"
-                        ></i>
-                        <p class="text-sm text-gray-600">
-                            Перетащите файлы или нажмите для выбора
-                        </p>
-                        <p class="text-xs text-gray-500 mt-1">ZIP, RAR, 7z до 500MB</p>
-                    </div>
-
-                    <!-- Список загруженных файлов -->
-                    <div class="mt-2 space-y-2">
-                        <div
-                                class="flex items-center justify-between bg-gray-50 p-2 rounded-lg"
-                        >
-                            <div class="flex items-center gap-2 text-sm">
-                                <i class="fas fa-file-archive text-orange-500"></i>
-                                <span class="text-gray-700">game-build-1.4.0.zip</span>
-                                <span class="text-xs text-gray-500">245 MB</span>
-                            </div>
-                            <button class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Кнопки -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button
-                            class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
-                            onclick="closeModal('addVersionModal')"
-                    >
-                        Отмена
-                    </button>
-                    <button
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                            onclick="addVersion()"
-                    >
-                        <i class="fas fa-plus"></i>
-                        Добавить версию
-                    </button>
-                </div>
-            </div>
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-plus-circle text-blue-500"></i>
+            Добавить версию игры
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('addVersionModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
         </div>
+
+        <div class="space-y-4">
+          <!-- Версия игры -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Версия игры *</label
+            >
+            <input
+              type="text"
+              placeholder="Например: 1.4.0"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+            />
+          </div>
+
+          <!-- Ссылка на репозиторий -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Ссылка на репозиторий</label
+            >
+            <input
+              type="url"
+              placeholder="https://github.com/..."
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+            />
+          </div>
+
+          <!-- Хеш коммита -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Хеш коммита</label
+            >
+            <input
+              type="text"
+              placeholder="a1b2c3d..."
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono"
+            />
+          </div>
+
+          <!-- Список изменений -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Список изменений</label
+            >
+            <textarea
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+              placeholder="• Добавлено...&#10;• Исправлено...&#10;• Улучшено..."
+            ></textarea>
+          </div>
+
+          <!-- Загрузка файлов -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Файлы версии</label
+            >
+            <div
+              class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              <input type="file" id="fileInput" class="hidden" multiple />
+              <i
+                class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"
+              ></i>
+              <p class="text-sm text-gray-600">
+                Перетащите файлы или нажмите для выбора
+              </p>
+              <p class="text-xs text-gray-500 mt-1">ZIP, RAR, 7z до 500MB</p>
+            </div>
+
+            <!-- Список загруженных файлов -->
+            <div class="mt-2 space-y-2">
+              <div
+                class="flex items-center justify-between bg-gray-50 p-2 rounded-lg"
+              >
+                <div class="flex items-center gap-2 text-sm">
+                  <i class="fas fa-file-archive text-orange-500"></i>
+                  <span class="text-gray-700">game-build-1.4.0.zip</span>
+                  <span class="text-xs text-gray-500">245 MB</span>
+                </div>
+                <button class="text-red-500 hover:text-red-700">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('addVersionModal')"
+            >
+              Отмена
+            </button>
+            <button
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              onclick="addVersion()"
+            >
+              <i class="fas fa-plus"></i>
+              Добавить версию
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Модальное окно удаления версии -->
     <div
-            id="deleteVersionModal"
-            class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
-            style="display: none"
+      id="deleteVersionModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
     >
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle text-red-500"></i>
-                    Удаление версии
-                </h3>
-                <button
-                        class="text-gray-400 hover:text-gray-600"
-                        onclick="closeModal('deleteVersionModal')"
-                >
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div class="flex items-center gap-3 text-red-800 mb-2">
-                        <i class="fas fa-info-circle"></i>
-                        <span class="text-sm font-medium"
-                        >Вы уверены, что хотите удалить версию "1.3"?</span
-                        >
-                    </div>
-                    <p class="text-xs text-red-600 ml-7">
-                        Это действие нельзя отменить. Все файлы версии будут удалены.
-                    </p>
-                </div>
-
-                <!-- Кнопки -->
-                <div class="flex justify-end gap-3 pt-2">
-                    <button
-                            class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
-                            onclick="closeModal('deleteVersionModal')"
-                    >
-                        Отмена
-                    </button>
-                    <button
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                            onclick="deleteVersion()"
-                    >
-                        <i class="fas fa-trash-alt"></i>
-                        Удалить
-                    </button>
-                </div>
-            </div>
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle text-red-500"></i>
+            Удаление версии
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('deleteVersionModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
         </div>
+
+        <div class="space-y-4">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center gap-3 text-red-800 mb-2">
+              <i class="fas fa-info-circle"></i>
+              <span class="text-sm font-medium"
+                >Вы уверены, что хотите удалить версию "1.3"?</span
+              >
+            </div>
+            <p class="text-xs text-red-600 ml-7">
+              Это действие нельзя отменить. Все файлы версии будут удалены.
+            </p>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('deleteVersionModal')"
+            >
+              Отмена
+            </button>
+            <button
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              onclick="deleteVersion()"
+            >
+              <i class="fas fa-trash-alt"></i>
+              Удалить
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const editBtn = document.getElementById("editBtn");
-        const editBtnText = document.getElementById("editBtnText");
+      const editBtn = document.getElementById("editBtn");
+      const editBtnText = document.getElementById("editBtnText");
 
-        const nameEl = document.getElementById("game-name");
-        const descEl = document.getElementById("game-description");
-        const avatarEl = document.getElementById("game-avatar");
+      const nameEl = document.getElementById("game-name");
+      const descEl = document.getElementById("game-description");
+      const avatarEl = document.getElementById("game-avatar");
 
-        const avatarOverlay = document.getElementById("avatarOverlay");
-        const avatarInput = document.getElementById("avatarInput");
+      const avatarOverlay = document.getElementById("avatarOverlay");
+      const avatarInput = document.getElementById("avatarInput");
 
-        let isEditing = false;
+      let isEditing = false;
 
-        editBtn.addEventListener("click", () => {
-          isEditing = !isEditing;
+      editBtn.addEventListener("click", () => {
+        isEditing = !isEditing;
 
-          if (isEditing) {
-            enableEditing();
-          } else {
-            disableEditing();
-          }
-        });
-
-        function enableEditing() {
-          editBtnText.textContent = "Сохранить";
-          editBtn.classList.remove("bg-purple-600");
-          editBtn.classList.add("bg-green-600");
-
-          nameEl.contentEditable = true;
-          descEl.contentEditable = true;
-
-          nameEl.classList.add("editable-active");
-          descEl.classList.add("editable-active");
-
-          avatarOverlay.classList.remove("hidden");
-          avatarOverlay.classList.add("flex");
+        if (isEditing) {
+          enableEditing();
+        } else {
+          disableEditing();
         }
+      });
 
-        function disableEditing() {
-          editBtnText.textContent = "Редактировать";
-          editBtn.classList.remove("bg-green-600");
-          editBtn.classList.add("bg-purple-600");
+      function enableEditing() {
+        editBtnText.textContent = "Сохранить";
+        editBtn.classList.remove("bg-purple-600");
+        editBtn.classList.add("bg-green-600");
 
-          nameEl.contentEditable = false;
-          descEl.contentEditable = false;
+        nameEl.contentEditable = true;
+        descEl.contentEditable = true;
 
-          nameEl.classList.remove("editable-active");
-          descEl.classList.remove("editable-active");
+        nameEl.classList.add("editable-active");
+        descEl.classList.add("editable-active");
 
-          avatarOverlay.classList.add("hidden");
-          avatarOverlay.classList.remove("flex");
+        avatarOverlay.classList.remove("hidden");
+        avatarOverlay.classList.add("flex");
+      }
 
-          console.log("Saved:", {
-            name: nameEl.textContent.trim(),
-            description: descEl.textContent.trim(),
-          });
-        }
+      function disableEditing() {
+        editBtnText.textContent = "Редактировать";
+        editBtn.classList.remove("bg-green-600");
+        editBtn.classList.add("bg-purple-600");
 
-        avatarOverlay.addEventListener("click", () => {
-          if (!isEditing) return;
-          avatarInput.click();
+        nameEl.contentEditable = false;
+        descEl.contentEditable = false;
+
+        nameEl.classList.remove("editable-active");
+        descEl.classList.remove("editable-active");
+
+        avatarOverlay.classList.add("hidden");
+        avatarOverlay.classList.remove("flex");
+
+        console.log("Saved:", {
+          name: nameEl.textContent.trim(),
+          description: descEl.textContent.trim(),
         });
+      }
 
-        avatarInput.addEventListener("change", () => {
-          const file = avatarInput.files[0];
-          if (!file) return;
+      avatarOverlay.addEventListener("click", () => {
+        if (!isEditing) return;
+        avatarInput.click();
+      });
 
-          const reader = new FileReader();
+      avatarInput.addEventListener("change", () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
 
-          reader.onload = function (e) {
-            avatarEl.style.backgroundImage = `url(${e.target.result})`;
-            avatarEl.style.backgroundSize = "cover";
-            avatarEl.style.backgroundPosition = "center";
-            document.getElementById("avatarContent").innerHTML = "";
-          };
+        const reader = new FileReader();
 
-          reader.readAsDataURL(file);
-        });
+        reader.onload = function (e) {
+          avatarEl.style.backgroundImage = `url(${e.target.result})`;
+          avatarEl.style.backgroundSize = "cover";
+          avatarEl.style.backgroundPosition = "center";
+          document.getElementById("avatarContent").innerHTML = "";
+        };
+
+        reader.readAsDataURL(file);
+      });
     </script>
 
     <script>
-        // Функции для работы с модальными окнами
-        function openModal(modalId) {
-          document.getElementById(modalId).style.display = "flex";
-        }
+      // Функции для работы с модальными окнами
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
+      }
 
-        function closeModal(modalId) {
-          document.getElementById(modalId).style.display = "none";
-        }
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
 
-        // Привязка кнопок к модальным окнам
-        document.querySelectorAll("[data-modal]").forEach((button) => {
-          button.addEventListener("click", () => {
-            const modalId = button.getAttribute("data-modal");
-            const modalMap = {
-              review: "reviewModal",
-              add_game_ver: "addVersionModal",
-              delete_game_ver: "deleteVersionModal",
-            };
-            if (modalMap[modalId]) {
-              openModal(modalMap[modalId]);
-            }
-          });
-        });
-
-        // Логика звездного рейтинга
-        const stars = document.querySelectorAll("#starRating .star");
-        let currentRating = 0;
-
-        stars.forEach((star) => {
-          star.addEventListener("mouseover", function () {
-            const rating = parseInt(this.dataset.rating);
-            highlightStars(rating);
-          });
-
-          star.addEventListener("mouseout", function () {
-            highlightStars(currentRating);
-          });
-
-          star.addEventListener("click", function () {
-            currentRating = parseInt(this.dataset.rating);
-            highlightStars(currentRating);
-          });
-        });
-
-        function highlightStars(rating) {
-          stars.forEach((star, index) => {
-            if (index < rating) {
-              star.className =
-                "fas fa-star text-yellow-400 cursor-pointer transition star";
-            } else {
-              star.className =
-                "far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star";
-            }
-          });
-        }
-
-        // Функции отправки форм
-        function submitReview() {
-          const rating = currentRating;
-          const text = document.getElementById("reviewText").value;
-
-          if (rating === 0) {
-            alert("Пожалуйста, поставьте оценку");
-            return;
-          }
-          if (!text.trim()) {
-            alert("Пожалуйста, напишите отзыв");
-            return;
-          }
-
-          console.log("Отзыв отправлен:", { rating, text });
-          closeModal("reviewModal");
-          // Сброс формы
-          currentRating = 0;
-          highlightStars(0);
-          document.getElementById("reviewText").value = "";
-        }
-
-        function addVersion() {
-          console.log("Добавление версии");
-          closeModal("addVersionModal");
-          // Здесь можно добавить сброс формы
-        }
-
-        function deleteVersion() {
-          console.log("Удаление версии");
-          closeModal("deleteVersionModal");
-        }
-
-        // Закрытие по клику на фон
-        document.querySelectorAll(".fixed.inset-0").forEach((modal) => {
-          modal.addEventListener("click", function (e) {
-            if (e.target === this) {
-              this.style.display = "none";
-            }
-          });
-        });
-
-        // Закрытие по Escape
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") {
-            document
-              .querySelectorAll('.fixed.inset-0[style*="flex"]')
-              .forEach((modal) => {
-                modal.style.display = "none";
-              });
+      // Привязка кнопок к модальным окнам
+      document.querySelectorAll("[data-modal]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const modalId = button.getAttribute("data-modal");
+          const modalMap = {
+            review: "reviewModal",
+            add_game_ver: "addVersionModal",
+            delete_game_ver: "deleteVersionModal",
+          };
+          if (modalMap[modalId]) {
+            openModal(modalMap[modalId]);
           }
         });
+      });
+
+      // Логика звездного рейтинга
+      const stars = document.querySelectorAll("#starRating .star");
+      let currentRating = 0;
+
+      stars.forEach((star) => {
+        star.addEventListener("mouseover", function () {
+          const rating = parseInt(this.dataset.rating);
+          highlightStars(rating);
+        });
+
+        star.addEventListener("mouseout", function () {
+          highlightStars(currentRating);
+        });
+
+        star.addEventListener("click", function () {
+          currentRating = parseInt(this.dataset.rating);
+          highlightStars(currentRating);
+        });
+      });
+
+      function highlightStars(rating) {
+        stars.forEach((star, index) => {
+          if (index < rating) {
+            star.className =
+              "fas fa-star text-yellow-400 cursor-pointer transition star";
+          } else {
+            star.className =
+              "far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star";
+          }
+        });
+      }
+
+      // Функции отправки форм
+      function submitReview() {
+        const rating = currentRating;
+        const text = document.getElementById("reviewText").value;
+
+        if (rating === 0) {
+          alert("Пожалуйста, поставьте оценку");
+          return;
+        }
+        if (!text.trim()) {
+          alert("Пожалуйста, напишите отзыв");
+          return;
+        }
+
+        console.log("Отзыв отправлен:", { rating, text });
+        closeModal("reviewModal");
+        // Сброс формы
+        currentRating = 0;
+        highlightStars(0);
+        document.getElementById("reviewText").value = "";
+      }
+
+      function addVersion() {
+        console.log("Добавление версии");
+        closeModal("addVersionModal");
+        // Здесь можно добавить сброс формы
+      }
+
+      function deleteVersion() {
+        console.log("Удаление версии");
+        closeModal("deleteVersionModal");
+      }
+
+      // Закрытие по клику на фон
+      document.querySelectorAll(".fixed.inset-0").forEach((modal) => {
+        modal.addEventListener("click", function (e) {
+          if (e.target === this) {
+            this.style.display = "none";
+          }
+        });
+      });
+
+      // Закрытие по Escape
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          document
+            .querySelectorAll('.fixed.inset-0[style*="flex"]')
+            .forEach((modal) => {
+              modal.style.display = "none";
+            });
+        }
+      });
     </script>
-</section>
+  </section>
+</html>
