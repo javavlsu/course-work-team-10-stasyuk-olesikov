@@ -7,13 +7,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.entities.User;
+import ru.vlsu.myng.entities.Collection;
 import ru.vlsu.myng.repositories.UserRepository;
+import ru.vlsu.myng.repositories.CollectionRepository;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ProfileController {
 
     private final UserRepository userRepository;
+    private final CollectionRepository collectionRepository;
 
     @GetMapping("/profile/{id}")
     public String profilePage(@PathVariable("id") Integer id, Model model) {
@@ -22,7 +27,7 @@ public class ProfileController {
 
         model.addAttribute("user", user);
 
-        return "profile"; // Thymeleaf template profile.html in templates folder
+        return "profile";
     }
 
     @GetMapping("/profile/{id}/avatar")

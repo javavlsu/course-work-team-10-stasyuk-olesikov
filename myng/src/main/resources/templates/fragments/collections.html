@@ -1,0 +1,69 @@
+<!-- templates/fragments/collections.html -->
+<div th:fragment="collectionsFragment"
+     id="collections-section"
+     class="section-block">
+
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-layer-group text-blue-600"></i>
+            Мои коллекции
+        </h3>
+
+        <button
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
+                data-action="open-modal"
+                data-modal="create_collection">
+            <i class="fas fa-plus-circle"></i>
+            Создать коллекцию
+        </button>
+    </div>
+
+    <div id="collections-container"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <article th:each="collection : ${collections}"
+                 class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+
+            <div class="collection-card cursor-pointer h-32"
+                 th:data-collection-id="${collection.id}"
+                 th:classappend="${collection.id == 1} ?
+                 ' bg-gradient-to-r from-blue-500 to-indigo-600' :
+                 ' bg-gradient-to-r from-purple-500 to-pink-600'">
+            </div>
+
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-bold text-gray-900"
+                        th:text="${collection.name}">
+                        Collection Name
+                    </h4>
+                </div>
+
+                <p class="text-gray-600 text-sm mb-4"
+                   th:text="${#lists.size(collection.games)} + ' игр · Обновлено сегодня'">
+                </p>
+
+                <div class="flex gap-2">
+                    <button
+                            class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center gap-2 justify-center transition-colors duration-200">
+                        <i class="fas fa-plus"></i>
+                        Добавить игру
+                    </button>
+
+                    <button
+                            class="px-3 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-sm font-medium rounded-lg transition-colors duration-200">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+        </article>
+
+        <!-- Optional: empty state -->
+        <div th:if="${#lists.isEmpty(collections)}"
+             class="text-gray-500">
+            У вас пока нет коллекций.
+        </div>
+
+    </div>
+</div>

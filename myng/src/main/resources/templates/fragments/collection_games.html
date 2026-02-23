@@ -1,0 +1,59 @@
+<!-- templates/fragments/games.html -->
+<div th:fragment="gamesFragment(collection, games)"
+     id="games-container"
+     class="section-block"
+     th:classappend="${#lists.isEmpty(games)} ? ' hidden'">
+
+    <button id="back-to-collections"
+            class="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+        ← Go back
+    </button>
+
+    <h3 id="games-title"
+        class="text-xl font-bold mb-4"
+        th:text="${collection.name} + ' Games'">
+        Collection Games
+    </h3>
+
+    <ul id="games-list" class="space-y-2">
+
+        <li th:each="game : ${games}"
+            class="p-4 bg-white shadow rounded">
+
+            <h4 class="text-lg font-semibold"
+                th:text="${game.name}">
+                Game Name
+            </h4>
+
+            <p class="text-gray-600"
+               th:text="${game.descr}">
+                Game description
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Genre:
+                <span th:text="${game.genre}">genre</span>
+            </p>
+
+            <p class="text-sm text-gray-500">
+                Developer:
+                <span th:text="${game.developer != null ? game.developer.username : 'Unknown'}">
+                    developer
+                </span>
+            </p>
+
+            <a th:href="@{${game.repo}}"
+               class="text-blue-500 hover:underline"
+               target="_blank">
+                Repository
+            </a>
+
+        </li>
+
+        <li th:if="${#lists.isEmpty(games)}"
+            class="text-gray-500">
+            No games found in this collection.
+        </li>
+
+    </ul>
+</div>
