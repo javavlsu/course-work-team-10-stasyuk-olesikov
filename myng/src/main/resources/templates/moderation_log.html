@@ -125,7 +125,7 @@
                 <th
                   class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Результат
+                  Статус
                 </th>
                 <th
                   class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -226,36 +226,45 @@
                     </span>
                   </td>
 
-                  <!-- MODERATOR (пока заглушка если нет в DTO) -->
                   <td class="px-6 py-4">
-                      <span class="text-gray-500 text-sm">—</span>
+                    <span class="font-medium text-gray-900"
+                          th:text="${item.moderatorUsername != null} ? '@' + ${item.moderatorUsername} : '—'">
+                        —
+                    </span>
                   </td>
 
                   <!-- RESULT (пример логики) -->
                   <td class="px-6 py-4">
-                    <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700">
-                        На модерации
-                    </span>
+                      <!-- На модерации -->
+                      <span th:if="${item.approved == null}"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700">
+                            На модерации
+                        </span>
+
+                      <!-- Одобрено -->
+                      <span th:if="${item.approved == true}"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-green-100 text-green-700">
+                            Одобрено
+                        </span>
+
+                      <!-- REVIEW и удалено -->
+                      <span th:if="${item.approved == false and item.type == 'REVIEW'}"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-red-100 text-red-700">
+                            Удалено
+                        </span>
+
+                      <!-- Остальные отклонения -->
+                      <span th:if="${item.approved == false and item.type != 'REVIEW'}"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-red-100 text-red-700">
+                            Отклонено
+                        </span>
                   </td>
 
                   <!-- REASON / CONTENT -->
                   <td class="px-6 py-4 max-w-xs">
-
                       <p class="text-sm text-gray-600"
-                         th:if="${item.type == 'GAME_VERSION'}"
-                         th:text="${item.changelog}">
+                         th:text="${item.reason == null} ? '—' : ${item.reason}">
                       </p>
-
-                      <p class="text-sm text-gray-600"
-                         th:if="${item.type == 'DEV_APPLICATION'}"
-                         th:text="${item.description}">
-                      </p>
-
-                      <p class="text-sm text-gray-600"
-                         th:if="${item.type == 'REVIEW'}"
-                         th:text="${item.reviewText}">
-                      </p>
-
                   </td>
 
                   <!-- DATE -->

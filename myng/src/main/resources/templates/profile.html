@@ -25,11 +25,12 @@
                 <div class="w-24 h-24 relative rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden cursor-pointer">
                     <img
                             id="avatar-img"
-                            src=""
+                            th:if="${user.profilePic != null}"
+                            th:src="@{'/profile/' + ${user.id} + '/avatar'}"
                             alt="Avatar"
-                            class="w-full h-full object-cover rounded-full hidden"
+                            class="w-full h-full object-cover rounded-full"
                     />
-                    <span id="avatar-text">AB</span>
+                    <span id="avatar-text" th:if="${user.profilePic == null}">AB</span>
                     <input type="file" id="avatar-input" class="absolute inset-0 opacity-0 cursor-pointer" />
                 </div>
 
@@ -39,27 +40,20 @@
                         <div>
                             <!-- Username -->
                             <h3 class="text-2xl font-bold text-gray-900 mb-1">
-                                <span id="username-text">Александр Б.</span>
+                                <span id="username-text" th:text="${user.username}">Александр Б.</span>
                                 <input
                                         type="text"
                                         id="username-input"
                                         class="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
+                                        th:value="${user.username}"
                                 />
                             </h3>
 
                             <!-- Role (read-only) -->
                             <p class="text-gray-500 flex items-center gap-2">
                                 <i class="fas fa-user-circle text-sm"></i>
-                                <span id="role-text">пользователь</span>
+                                <span id="role-text" th:text="${user.role}">пользователь</span>
                             </p>
-                        </div>
-
-                        <!-- Бейджи -->
-                        <div class="flex flex-wrap gap-2">
-          <span class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium flex items-center gap-1">
-            <i class="fas fa-pen-fancy text-xs"></i>
-            Автор
-          </span>
                         </div>
                     </div>
 
@@ -102,7 +96,7 @@
 
             <!-- About Me -->
             <div class="mt-6">
-                <p id="about-text" class="text-gray-700">Обо мне: Люблю инди-игры.</p>
+                <p id="about-text" class="text-gray-700" th:text="${user.bio}"></p>
                 <textarea
                         id="about-input"
                         class="mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
@@ -110,7 +104,7 @@
             </div>
         </div>
 
-        <!-- Вкладки профиля -->
+        <!-- Вкладки профиля -->`
       <div class="mb-6">
         <!-- Основные вкладки -->
         <div class="flex flex-wrap gap-2 border-b border-gray-200 pb-2">

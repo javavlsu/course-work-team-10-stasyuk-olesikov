@@ -30,4 +30,7 @@ public class ModerationItem {
     private Integer reportCount;
 
     private Instant createdAt;   // Время создания
+    private String moderatorUsername;
+    private Boolean approved;
+    private String reason;
 }
