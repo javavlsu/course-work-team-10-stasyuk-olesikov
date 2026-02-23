@@ -231,6 +231,7 @@
                             <form th:action="@{/moderation/reject/{id}(id=${item.id})}"
                                   method="post">
                                 <button type="submit"
+                                        th:text="${item.type == 'REVIEW'} ? 'Удалить' : 'Отклонить'"
                                         class="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs rounded-lg">
                                     Отклонить
                                 </button>
