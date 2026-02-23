@@ -139,251 +139,137 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <!-- Пример 1: Одобренная версия игры -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #101
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-gamepad text-blue-600 text-sm"></i>
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">
-                        #58 (Версия игры)
-                      </div>
-                      <div class="text-xs text-gray-500">
-                        Cyber Knight v1.2.0
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
-                  >
-                    game_version
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600"
-                    ></div>
-                    <span class="font-medium text-gray-900">@petr_s</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-check-circle"></i>
-                    Одобрено
-                  </span>
-                </td>
-                <td class="px-6 py-4 max-w-xs">
-                  <p class="text-sm text-gray-600">
-                    Соответствует правилам, багов не выявлено, все тесты
-                    пройдены успешно
-                  </p>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-12</div>
-                  <div class="text-xs text-gray-500">14:35</div>
-                </td>
-              </tr>
+              <tbody class="divide-y divide-gray-200">
+              <tr th:each="item : ${moderationItems}"
+                  class="hover:bg-blue-50/30 transition-colors">
 
-              <!-- Пример 2: Отклонена заявка разработчика -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #102
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-user-plus text-purple-600 text-sm"></i>
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">
-                        #12 (Заявка разработчика)
-                      </div>
-                      <div class="text-xs text-gray-500">
-                        Пользователь: sergey_dev
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full"
-                  >
-                    dev_application
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-600"
-                    ></div>
-                    <span class="font-medium text-gray-900">@sergey_mod</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-times-circle"></i>
-                    Отклонено
-                  </span>
-                </td>
-                <td class="px-6 py-4 max-w-xs">
-                  <p class="text-sm text-gray-600">
-                    Недостаточно проектов в GitHub. Требуется минимум 3
-                    публичных репозитория с инди-играми
-                  </p>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-12</div>
-                  <div class="text-xs text-gray-500">15:10</div>
-                </td>
-              </tr>
+                  <!-- ID -->
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
+                          th:text="'#' + ${item.id}">
+                        #101
+                    </span>
+                  </td>
 
-              <!-- Пример 3: Удалённый отзыв -->
-              <tr class="hover:bg-blue-50/30 transition-colors new-log-entry">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #103
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-star text-yellow-600 text-sm"></i>
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">#344 (Отзыв)</div>
-                      <div class="text-xs text-gray-500">
-                        Игра: Pixel Dungeon
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full"
-                  >
-                    review
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-pink-600"
-                    ></div>
-                    <span class="font-medium text-gray-900"
-                      >@ekaterina_mod</span
-                    >
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                    Удалено
-                  </span>
-                </td>
-                <td class="px-6 py-4 max-w-xs">
-                  <p class="text-sm text-gray-600">
-                    Оскорбительное содержание, нарушение правил сообщества.
-                    Получено 3 жалобы от пользователей
-                  </p>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-12</div>
-                  <div class="text-xs text-gray-500">16:22</div>
-                </td>
-              </tr>
+                  <!-- ENTITY -->
+                  <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
 
-              <!-- Пример 4: Еще одна одобренная заявка -->
-              <tr class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-800 font-mono text-sm"
-                  >
-                    #104
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center"
-                    >
-                      <i class="fas fa-user-plus text-purple-600 text-sm"></i>
-                    </div>
-                    <div>
-                      <div class="font-medium text-gray-900">
-                        #15 (Заявка разработчика)
+                          <!-- Иконка по типу -->
+                          <div th:switch="${item.type}"
+                               class="w-8 h-8 rounded-full flex items-center justify-center"
+                               th:classappend="
+                                    ${item.type == 'GAME_VERSION'} ? 'bg-blue-100' :
+                                    (${item.type == 'DEV_APPLICATION'} ? 'bg-purple-100' :
+                                    'bg-yellow-100')">
+
+                              <i th:case="'GAME_VERSION'"
+                                 class="fas fa-gamepad text-blue-600 text-sm"></i>
+
+                              <i th:case="'DEV_APPLICATION'"
+                                 class="fas fa-user-plus text-purple-600 text-sm"></i>
+
+                              <i th:case="'REVIEW'"
+                                 class="fas fa-star text-yellow-600 text-sm"></i>
+
+                          </div>
+
+                          <!-- Текст сущности -->
+                          <div>
+                              <div class="font-medium text-gray-900">
+
+                                  <!-- GAME_VERSION -->
+                                    <span th:if="${item.type == 'GAME_VERSION'}"
+                                        th:text="'#' + ${item.id} + ' (Версия игры)'">
+                                    </span>
+
+                                  <!-- DEV_APPLICATION -->
+                                    <span th:if="${item.type == 'DEV_APPLICATION'}"
+                                        th:text="'#' + ${item.id} + ' (Заявка разработчика)'">
+                                    </span>
+
+                                  <!-- REVIEW -->
+                                  <span th:if="${item.type == 'REVIEW'}"
+                                        th:text="'#' + ${item.id} + ' (Отзыв)'">
+                                    </span>
+
+                              </div>
+
+                              <!-- Доп. информация -->
+                              <div class="text-xs text-gray-500">
+
+                                <span th:if="${item.type == 'GAME_VERSION'}"
+                                      th:text="${item.commitHash}">
+                                </span>
+
+                              <span th:if="${item.type == 'DEV_APPLICATION'}"
+                                    th:text="'Пользователь: ' + ${item.username}">
+                              </span>
+
+                                <span th:if="${item.type == 'REVIEW'}"
+                                                    th:text="'Игра ID: ' + ${item.gameId}">
+                                </span>
+
+                              </div>
+                          </div>
                       </div>
-                      <div class="text-xs text-gray-500">
-                        Пользователь: indie_dev_anna
+                  </td>
+
+                  <!-- TYPE -->
+                  <td class="px-6 py-4">
+                    <span class="px-3 py-1.5 text-xs font-medium rounded-full"
+                          th:classappend="
+                            ${item.type == 'GAME_VERSION'} ? 'bg-blue-50 text-blue-700' :
+                            (${item.type == 'DEV_APPLICATION'} ? 'bg-purple-50 text-purple-700' :
+                            'bg-yellow-50 text-yellow-700')"
+                          th:text="${item.type.toLowerCase()}">
+                    </span>
+                  </td>
+
+                  <!-- MODERATOR (пока заглушка если нет в DTO) -->
+                  <td class="px-6 py-4">
+                      <span class="text-gray-500 text-sm">—</span>
+                  </td>
+
+                  <!-- RESULT (пример логики) -->
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700">
+                        На модерации
+                    </span>
+                  </td>
+
+                  <!-- REASON / CONTENT -->
+                  <td class="px-6 py-4 max-w-xs">
+
+                      <p class="text-sm text-gray-600"
+                         th:if="${item.type == 'GAME_VERSION'}"
+                         th:text="${item.changelog}">
+                      </p>
+
+                      <p class="text-sm text-gray-600"
+                         th:if="${item.type == 'DEV_APPLICATION'}"
+                         th:text="${item.description}">
+                      </p>
+
+                      <p class="text-sm text-gray-600"
+                         th:if="${item.type == 'REVIEW'}"
+                         th:text="${item.reviewText}">
+                      </p>
+
+                  </td>
+
+                  <!-- DATE -->
+                  <td class="px-6 py-4">
+                      <div class="text-sm text-gray-900"
+                           th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd')}">
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-full"
-                  >
-                    dev_application
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
-                    <div
-                      class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-red-600"
-                    ></div>
-                    <span class="font-medium text-gray-900">@aleksei_mod</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
-                  >
-                    <i class="fas fa-check-circle"></i>
-                    Одобрено
-                  </span>
-                </td>
-                <td class="px-6 py-4 max-w-xs">
-                  <p class="text-sm text-gray-600">
-                    5 успешных проектов на GitHub, активное сообщество,
-                    портфолио соответствует требованиям
-                  </p>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">2025-02-13</div>
-                  <div class="text-xs text-gray-500">09:45</div>
-                </td>
+                      <div class="text-xs text-gray-500"
+                           th:text="${#temporals.format(item.createdAt, 'HH:mm')}">
+                      </div>
+                  </td>
+
               </tr>
-            </tbody>
+              </tbody>
           </table>
         </div>
 
