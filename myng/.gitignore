@@ -30,10 +30,12 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+.vscode
 
-#Node_mod
-/myng/src/main/frontend/node_modules/
+# Node modules
+node_modules/
+myng/src/main/frontend/node_modules/
+**/node_modules/
 
 # Credentials
 credentials.properties
