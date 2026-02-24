@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 "/auth/**", // вход/регистрация
                                 "/game/**", // просмотр игр
                                 "/catalog", // список игр
-                                "/running_game", // игра
+                                "/running-game", // игра
                                 "/css/**", // стили
                                 "/js/**", // скрипты
                                 "/images/**" // картинки
@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/auth/login") // куда отправлять форму
                         .defaultSuccessUrl("/") // куда после успеха
                         .failureUrl("/auth?error=true") // куда при ошибке
-                        .usernameParameter("username") // поле для username
+                        .usernameParameter("username") // поле для username или почты
                         .passwordParameter("password") // поле для пароля
                         .permitAll())
 

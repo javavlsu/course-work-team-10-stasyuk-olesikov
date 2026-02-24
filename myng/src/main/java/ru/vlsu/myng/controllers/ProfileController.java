@@ -8,39 +8,36 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.entities.Collection;
-import ru.vlsu.myng.repositories.UserRepository;
+import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.repositories.CollectionRepository;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ProfileController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final CollectionRepository collectionRepository;
 
-    @GetMapping("/profile/{id}")
-    public String profilePage(@PathVariable("id") Integer id, Model model) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
-
+    @GetMapping("/profile")
+    public String myProfilePage(Principal principal, Model model) {
+        String email = principal.getName();
+        User user = userService.findByEmail(email);
         model.addAttribute("user", user);
-
         return "profile";
     }
 
     @GetMapping("/profile/{id}/avatar")
     @ResponseBody
     public byte[] getAvatar(@PathVariable("id") Integer id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userService.findById(id);
 
-        if (user.getProfilePic() != null) {
+        if (user.getProfilePic() != null && user.getProfilePic().length > 0) {
             return user.getProfilePic();
         }
 
-        // Optionally, return a default avatar as byte[]
         return new byte[0];
     }
 }

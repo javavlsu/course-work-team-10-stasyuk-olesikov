@@ -9,7 +9,7 @@ import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.repositories.UserRepository;
 
 import java.time.Instant;
-    
+
 /**
  * Сервис для работы с пользователями.
  * Содержит бизнес-логику регистрации, поиска и управления пользователями.
@@ -27,10 +27,10 @@ public class UserService {
      * @param registrationDto данные из формы регистрации
      * @return зарегистрированный пользователь
      * @throws RuntimeException если:
-     *                         - пароли не совпадают
-     *                         - username уже занят
-     *                         - email уже используется
-     *                         - пароль слишком короткий
+     *                          - пароли не совпадают
+     *                          - username уже занят
+     *                          - email уже используется
+     *                          - пароль слишком короткий
      */
     @Transactional
     public User registerNewUser(UserRegistrationDto registrationDto) {
@@ -58,21 +58,29 @@ public class UserService {
         User user = new User();
         user.setUsername(registrationDto.getUsername());
         user.setEmail(registrationDto.getEmail());
-        
+
         // Хешируем пароль перед сохранением
         user.setPasswordHash(passwordEncoder.encode(registrationDto.getPassword()));
-        
+
         // Устанавливаем дату регистрации
         user.setRegisteredAt(Instant.now());
-        
+
         // Роль по умолчанию - обычный пользователь
         user.setRole(User.Role.user);
-        
+
         // profilePic пока пустой (можно установить картинку по умолчанию позже)
         user.setProfilePic(new byte[0]);
 
         // 6. Сохраняем пользователя
         return userRepository.save(user);
+    }
+
+    /**
+     * Поиск пользователя по id.
+     */
+    public User findById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + id));
     }
 
     /**
