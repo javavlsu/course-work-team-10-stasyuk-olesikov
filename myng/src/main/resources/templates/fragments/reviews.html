@@ -1,0 +1,100 @@
+<div th:fragment="reviewsFragment"
+     id="reviews-section"
+     class="section-block hidden">
+    <h3
+            class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
+    >
+        <i class="fas fa-star text-yellow-500"></i>
+        Мои отзывы
+    </h3>
+
+    <div class="space-y-4">
+        <!-- Отзыв 1 -->
+        <article
+                class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+        >
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+                    >
+                        AB
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Александр</div>
+                        <div class="text-sm text-gray-500">12 янв 2025</div>
+                    </div>
+                </div>
+                <div class="review-rating text-xl">★★★★☆</div>
+            </div>
+            <p class="text-gray-700">
+                Отличная игра! Механики интересные, играл с удовольствием.
+                Особенно понравилась боевая система и арт-дизайн.
+            </p>
+            <div
+                    class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100"
+            >
+              <span class="text-sm text-gray-500">
+                <i class="fas fa-gamepad mr-1"></i>
+                Cyber Knight
+              </span>
+                <button
+                        class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                    <i class="fas fa-pencil-alt mr-1"></i>
+                    Редактировать
+                </button>
+                <button
+                        class="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                    <i class="fas fa-trash-alt mrgit-1"></i>
+                    Удалить
+                </button>
+            </div>
+        </article>
+
+        <!-- Отзыв 2 -->
+        <article
+                class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+        >
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+                    >
+                        AB
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900">Александр</div>
+                        <div class="text-sm text-gray-500">10 янв 2025</div>
+                    </div>
+                </div>
+                <div class="review-rating text-xl">★★★☆☆</div>
+            </div>
+            <p class="text-gray-700">
+                Хорошая идея, но нужно доработать UX. Управление не всегда
+                отзывчивое, баги в диалогах. Жду обновлений!
+            </p>
+            <div
+                    class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100"
+            >
+              <span class="text-sm text-gray-500">
+                <i class="fas fa-gamepad mr-1"></i>
+                Lost in Space
+              </span>
+                <button
+                        class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                    <i class="fas fa-pencil-alt mr-1"></i>
+                    Редактировать
+                </button>
+                <button
+                        class="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                    <i class="fas fa-trash-alt mr-1"></i>
+                    Удалить
+                </button>
+            </div>
+        </article>
+    </div>
+</div>

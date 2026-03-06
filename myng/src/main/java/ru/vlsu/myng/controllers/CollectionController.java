@@ -5,9 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.vlsu.myng.entities.Collection;
-import ru.vlsu.myng.entities.User;
-import ru.vlsu.myng.repositories.CollectionRepository;
-import ru.vlsu.myng.repositories.UserRepository;
+import ru.vlsu.myng.services.CollectionService;
 
 import java.util.List;
 
@@ -16,41 +14,24 @@ import java.util.List;
 @RequestMapping("/collections")
 public class CollectionController {
 
-    private final CollectionRepository collectionRepository;
-    private final UserRepository userRepository;
+    private final CollectionService collectionService;
 
-    /**
-     * Show all collections for a specific user
-     */
     @GetMapping("/user/{userId}")
     public String userCollections(@PathVariable Integer userId, Model model) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User not found"));
-
-        List<Collection> collections =
-                collectionRepository.findByUser(user);
-
-        model.addAttribute("user", user);
-        model.addAttribute("collections", collections);
+        model.addAttribute("user", collectionService.getUser(userId));
+        model.addAttribute("collections", collectionService.getUserCollections(userId));
 
         return "fragments/collections :: collectionsFragment";
     }
 
-    /**
-     * Show games inside a collection
-     */
     @GetMapping("/{collectionId}")
-    public String collectionDetails(@PathVariable Integer collectionId,
-                                    Model model) {
+    public String collectionDetails(@PathVariable Integer collectionId, Model model) {
 
-        Collection collection = collectionRepository.findById(collectionId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Collection not found"));
+        Collection collection = collectionService.getCollection(collectionId);
 
         model.addAttribute("collection", collection);
-        model.addAttribute("games", collection.getGames());
+        model.addAttribute("games", collectionService.getCollectionGames(collectionId));
 
         return "fragments/collection_games :: gamesFragment";
     }

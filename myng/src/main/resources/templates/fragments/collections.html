@@ -66,4 +66,214 @@
         </div>
 
     </div>
+
+    <template id="tpl-create-collection">
+        <form data-form="create_collection" class="space-y-4">
+            <!-- Header -->
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-1 flex items-center justify-center gap-2">
+                    <i class="fas fa-plus-circle text-blue-500"></i>
+                    Создать коллекцию
+                </h3>
+                <p class="text-gray-500 text-sm">Введите название новой коллекции</p>
+            </div>
+
+            <!-- Input field -->
+            <div>
+                <input
+                        name="collection_name"
+                        placeholder="Название коллекции"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                />
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end gap-3 mt-2">
+                <button
+                        type="button"
+                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+                        data-action="cancel"
+                >
+                    Отмена
+                </button>
+                <button
+                        type="submit"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                >
+                    <i class="fas fa-check"></i> OK
+                </button>
+            </div>
+        </form>
+    </template>
+
+    <script>
+        const collectionsContainer = document.getElementById('collections-container');
+        const gamesContainer = document.getElementById('games-container');
+        const gamesTitle = document.getElementById('games-title');
+        const gamesList = document.getElementById('games-list');
+        const backButton = document.getElementById('back-to-collections');
+
+        document.querySelectorAll('.collection-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const collectionId = card.dataset.collectionId;
+
+                // Find the collection in the DOM
+                const article = card.closest('article');
+                const title = article.querySelector('h4').textContent;
+
+                // Collect games from Thymeleaf-rendered data
+                // We can store games in a hidden <script> tag or data attribute
+                const gamesData = JSON.parse(article.dataset.games || '[]');
+
+                showGames(title, gamesData);
+            });
+        });
+
+        // Back button
+        backButton.addEventListener('click', () => {
+            gamesContainer.classList.add('hidden');
+            collectionsContainer.classList.remove('hidden');
+        });
+
+        // Show games function
+        function showGames(title, games) {
+            gamesTitle.textContent = title;
+            gamesList.innerHTML = '';
+
+            games.forEach(game => {
+                const li = document.createElement('li');
+                li.className = "p-2 border rounded bg-white shadow-sm";
+                li.textContent = game.name; // assuming game has a 'name' property
+                gamesList.appendChild(li);
+            });
+
+            collectionsContainer.classList.add('hidden');
+            gamesContainer.classList.remove('hidden');
+        }
+    </script>
+
+    <script>
+        document.querySelectorAll('[data-action="edit-collection"]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const textEl = document.getElementById(`${targetId}-title-text`);
+            const inputEl = document.getElementById(`${targetId}-title-input`);
+
+            // Toggle editable state
+            textEl.classList.toggle('hidden');
+            inputEl.classList.toggle('hidden');
+
+            if (!inputEl.classList.contains('hidden')) {
+              inputEl.value = textEl.textContent;
+              inputEl.focus();
+
+              inputEl.addEventListener('blur', () => {
+                textEl.textContent = inputEl.value || textEl.textContent;
+                textEl.classList.remove('hidden');
+                inputEl.classList.add('hidden');
+              }, { once: true });
+            }
+          });
+        });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+          const modalOverlay = document.getElementById("modal-overlay");
+          const modalContent = document.getElementById("modal-content");
+
+          function openModal(templateId, onConfirm) {
+            // Clear any previous content
+            modalContent.innerHTML = "";
+
+            // Clone template content
+            const template = document.getElementById(templateId);
+            const clone = template.content.cloneNode(true);
+            modalContent.appendChild(clone);
+
+            // Show modal
+            modalOverlay.classList.remove("hidden");
+            modalOverlay.classList.add("flex");
+
+            // Attach cancel listener
+            const cancelBtn = modalContent.querySelector('[data-action="cancel"]');
+            cancelBtn.addEventListener("click", closeModal);
+
+            // Attach confirm listener
+            const confirmBtn = modalContent.querySelector('[data-action="confirm"]');
+            if (confirmBtn && typeof onConfirm === "function") {
+              confirmBtn.addEventListener("click", (e) => {
+                e.preventDefault(); // prevent form submission if needed
+                onConfirm();
+                closeModal();
+              });
+            }
+          }
+
+          function closeModal() {
+            modalOverlay.classList.add("hidden");
+            modalOverlay.classList.remove("flex");
+            modalContent.innerHTML = "";
+          }
+
+          // Attach to all modal buttons
+          document.querySelectorAll('[data-action="open-modal"]').forEach(btn => {
+            btn.addEventListener("click", () => {
+              const modalType = btn.dataset.modal;
+
+              if (modalType === "delete_collection") {
+                openModal("tpl-delete-collection", () => {
+                  console.log("Collection deleted!"); // Replace with actual deletion logic
+                });
+              }
+
+              if (modalType === "publish") {
+              openModal("tpl-publish", () => {
+                const form = modalContent.querySelector('form[data-form="publish"]');
+                const formData = new FormData(form);
+                // TODO: send formData to server via fetch/AJAX
+                console.log("Publishing game:", Object.fromEntries(formData));
+              });
+                }
+
+            if (modalType === "become_dev") {
+              openModal("tpl-become-dev", () => {
+                const form = modalContent.querySelector('form[data-form="become_dev"]');
+                const formData = new FormData(form);
+                // TODO: send formData to server via fetch/AJAX
+                console.log("Become Developer form submitted:", Object.fromEntries(formData));
+              });
+            }
+
+            if (modalType === "create_collection") {
+              openModal("tpl-create-collection", () => {
+                const form = modalContent.querySelector('form[data-form="create_collection"]');
+                const formData = new FormData(form);
+                const name = formData.get("collection_name").trim();
+
+                if (name) {
+                  console.log("Новая коллекция создана:", name);
+                  // TODO: send data to backend via fetch/AJAX
+                }
+              });
+            }
+
+            if (modalType === "logout") {
+              openModal('tpl-logout-confirm', () => {
+                const confirmBtn = document.getElementById('confirmLogout');
+
+                confirmBtn.addEventListener('click', () => {
+                  console.log('User confirmed logout!');
+                  // Replace with actual logout logic:
+                  // window.location.href = '/logout';
+                  closeModal();
+                });
+              });
+            }
+        });
+      });
+    });
+
+
+    </script>
 </div>

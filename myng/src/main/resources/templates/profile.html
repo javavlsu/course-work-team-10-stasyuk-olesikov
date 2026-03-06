@@ -182,9 +182,6 @@
         </div>
       </div>
 
-        <!-- ===== РАЗДЕЛ КОЛЛЕКЦИИ ===== -->
-        <div id="collections-wrapper"></div>
-
         <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden z-50 flex justify-center overflow-y-auto">
             <div class="flex-1 flex items-center justify-center min-h-screen px-4 py-8">
                 <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -194,7 +191,6 @@
                 </div>
             </div>
         </div>
-
 
         <!-- ===== DELETE COLLECTION TEMPLATE ===== -->
         <template id="tpl-delete-collection">
@@ -334,46 +330,6 @@
                             class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
                     >
                         <i class="fas fa-paper-plane"></i> Отправить
-                    </button>
-                </div>
-            </form>
-        </template>
-
-        <template id="tpl-create-collection">
-            <form data-form="create_collection" class="space-y-4">
-                <!-- Header -->
-                <div class="text-center">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1 flex items-center justify-center gap-2">
-                        <i class="fas fa-plus-circle text-blue-500"></i>
-                        Создать коллекцию
-                    </h3>
-                    <p class="text-gray-500 text-sm">Введите название новой коллекции</p>
-                </div>
-
-                <!-- Input field -->
-                <div>
-                    <input
-                            name="collection_name"
-                            placeholder="Название коллекции"
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                    />
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex justify-end gap-3 mt-2">
-                    <button
-                            type="button"
-                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
-                            data-action="cancel"
-                    >
-                        Отмена
-                    </button>
-                    <button
-                            type="submit"
-                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
-                    >
-                        <i class="fas fa-check"></i> OK
                     </button>
                 </div>
             </form>
@@ -528,296 +484,83 @@
 
         </script>
 
+        <!-- ===== РАЗДЕЛ КОЛЛЕКЦИИ ===== -->
+        <div id="collections-wrapper"></div>
 
         <!-- ===== РАЗДЕЛ: ОТЗЫВЫ ===== -->
-      <div id="reviews-section" class="section-block hidden">
-        <h3
-          class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-        >
-          <i class="fas fa-star text-yellow-500"></i>
-          Мои отзывы
-        </h3>
+        <div id="reviews-wrapper"></div>
 
-        <div class="space-y-4">
-          <!-- Отзыв 1 -->
-          <article
-            class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
-                >
-                  AB
-                </div>
-                <div>
-                  <div class="font-semibold text-gray-900">Александр</div>
-                  <div class="text-sm text-gray-500">12 янв 2025</div>
-                </div>
-              </div>
-              <div class="review-rating text-xl">★★★★☆</div>
-            </div>
-            <p class="text-gray-700">
-              Отличная игра! Механики интересные, играл с удовольствием.
-              Особенно понравилась боевая система и арт-дизайн.
-            </p>
-            <div
-              class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100"
-            >
-              <span class="text-sm text-gray-500">
-                <i class="fas fa-gamepad mr-1"></i>
-                Cyber Knight
-              </span>
-              <button
-                class="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                <i class="fas fa-pencil-alt mr-1"></i>
-                Редактировать
-              </button>
-              <button
-                class="text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                <i class="fas fa-trash-alt mrgit-1"></i>
-                Удалить
-              </button>
-            </div>
-          </article>
+        <!-- ===== РАЗДЕЛ: УВЕДОМЛЕНИЯ ===== -->
+        <div id="notifications-wrapper"></div>
 
-          <!-- Отзыв 2 -->
-          <article
-            class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
-                >
-                  AB
-                </div>
-                <div>
-                  <div class="font-semibold text-gray-900">Александр</div>
-                  <div class="text-sm text-gray-500">10 янв 2025</div>
-                </div>
-              </div>
-              <div class="review-rating text-xl">★★★☆☆</div>
-            </div>
-            <p class="text-gray-700">
-              Хорошая идея, но нужно доработать UX. Управление не всегда
-              отзывчивое, баги в диалогах. Жду обновлений!
-            </p>
-            <div
-              class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100"
-            >
-              <span class="text-sm text-gray-500">
-                <i class="fas fa-gamepad mr-1"></i>
-                Lost in Space
-              </span>
-              <button
-                class="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                <i class="fas fa-pencil-alt mr-1"></i>
-                Редактировать
-              </button>
-              <button
-                class="text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                <i class="fas fa-trash-alt mr-1"></i>
-                Удалить
-              </button>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <!-- ===== РАЗДЕЛ: УВЕДОМЛЕНИЯ ===== -->
-      <div id="notifications-section" class="section-block hidden">
-        <h3
-          class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-        >
-          <i class="fas fa-bell text-blue-600"></i>
-          Уведомления
-        </h3>
-
-        <div class="space-y-3">
-          <!-- Уведомление 1 -->
-          <div
-            class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow flex items-start gap-4"
-          >
-            <div
-              class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"
-            >
-              <i class="fas fa-rocket"></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h4 class="font-semibold text-gray-900">
-                    Новая версия игры опубликована
-                  </h4>
-                  <p class="text-sm text-gray-600 mt-1">
-                    Cyber Knight 1.2.0 — улучшена графика, добавлен новый
-                    уровень
-                  </p>
-                </div>
-                <span class="text-xs text-gray-500">12 янв 2025</span>
-              </div>
-            </div>
-            <button class="text-gray-400 hover:text-gray-600">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-
-          <!-- Уведомление 2 -->
-          <div
-            class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow flex items-start gap-4"
-          >
-            <div
-              class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"
-            >
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h4 class="font-semibold text-gray-900">
-                    Ваш отзыв был удалён
-                  </h4>
-                  <p class="text-sm text-gray-600 mt-1">
-                    Причина: нарушение правил сообщества (спам)
-                  </p>
-                </div>
-                <span class="text-xs text-gray-500">11 янв 2025</span>
-              </div>
-            </div>
-            <button class="text-gray-400 hover:text-gray-600">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== РАЗДЕЛ: МОИ ИГРЫ ===== -->
-      <div id="games-section" class="section-block hidden">
-        <h3
-          class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-        >
-          <i class="fas fa-gamepad text-green-600"></i>
-          Мои игры
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Игра 1 -->
-          <article
-            class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-          >
-            <div
-              class="h-40 bg-gradient-to-br from-emerald-500 to-teal-600"
-            ></div>
-            <div class="p-5">
-              <div class="flex justify-between items-start mb-2">
-                <h4 class="text-lg font-bold text-gray-900">Pixel Knights</h4>
-                <span
-                  class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full"
-                  >Опубликована</span
-                >
-              </div>
-              <p class="text-gray-600 text-sm mb-4">
-                Ретро платформер с элементами RPG
-              </p>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span><i class="fas fa-download"></i> 1.2K</span>
-                  <span><i class="fas fa-star"></i> 4.5</span>
-                </div>
-                <button
-                  class="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  Управлять
-                  <i class="fas fa-chevron-right ml-1 text-xs"></i>
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Игра 2 -->
-          <article
-            class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-          >
-            <div
-              class="h-40 bg-gradient-to-br from-orange-500 to-red-600"
-            ></div>
-            <div class="p-5">
-              <div class="flex justify-between items-start mb-2">
-                <h4 class="text-lg font-bold text-gray-900">Space Arena</h4>
-                <span
-                  class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full"
-                  >На модерации</span
-                >
-              </div>
-              <p class="text-gray-600 text-sm mb-4">
-                Космический шутер с мультиплеером
-              </p>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span><i class="fas fa-download"></i> 0</span>
-                  <span><i class="fas fa-star"></i> 0</span>
-                </div>
-                <button
-                  class="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  Управлять
-                  <i class="fas fa-chevron-right ml-1 text-xs"></i>
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
+        <!-- ===== РАЗДЕЛ: МОИ ИГРЫ ===== -->
+        <div id="my-games-wrapper"></div>
 
         <!-- ===== РАЗДЕЛ: ИГРЫ КОЛЛЕКЦИИ ===== -->
         <div id="collection-games-wrapper"></div>
 
         <script>
-            // Простая логика для вкладок
-            document.addEventListener("DOMContentLoaded", function () {
-              const tabs = document.querySelectorAll(".tab-btn");
-              const sections = {
-                "collections-section": document.getElementById("collections-section"),
-                "reviews-section": document.getElementById("reviews-section"),
-                "notifications-section": document.getElementById(
-                  "notifications-section",
-                ),
-                "games-section": document.getElementById("games-section"),
+            document.addEventListener("DOMContentLoaded", () => {
+              const wrappers = {
+                "collections-section": document.getElementById("collections-wrapper"),
+                "reviews-section": document.getElementById("reviews-wrapper"),
+                "notifications-section": document.getElementById("notifications-wrapper"),
+                "games-section": document.getElementById("my-games-wrapper")
               };
 
-              tabs.forEach((tab) => {
-                tab.addEventListener("click", function () {
-                  const targetId = this.dataset.target;
+              const tabs = document.querySelectorAll("[data-target]");
+              const userId = [[${user.id}]];
 
-                  // Убираем активный класс у всех табов
-                  tabs.forEach((t) => {
-                    t.classList.remove(
-                      "bg-blue-600",
-                      "text-white",
-                      "border-blue-600",
-                    );
-                    t.classList.add("text-gray-600", "hover:bg-gray-100");
-                  });
+              function hideAll() {
+                Object.values(wrappers).forEach(w => w.classList.add("hidden"));
+              }
 
-                  // Добавляем активный класс текущему табу
-                  this.classList.add("bg-blue-600", "text-white", "border-blue-600");
-                  this.classList.remove("text-gray-600", "hover:bg-gray-100");
+              function activateTab(tab) {
+                tabs.forEach(t => t.classList.remove("bg-blue-600","text-white","border-blue-600"));
+                tab.classList.add("bg-blue-600","text-white","border-blue-600");
+              }
 
-                  // Скрываем все секции
-                  Object.values(sections).forEach((section) => {
-                    if (section) section.classList.add("hidden");
-                  });
+              function load(url, wrapper) {
+                fetch(url)
+                  .then(r => r.text())
+                  .then(html => wrapper.innerHTML = html);
+              }
 
-                  // Показываем нужную секцию
-                  if (sections[targetId]) {
-                    sections[targetId].classList.remove("hidden");
-                  }
+              tabs.forEach(tab => {
+                tab.addEventListener("click", () => {
+                  const target = tab.dataset.target;
+                  const wrapper = wrappers[target];
+                  if (!wrapper) return;
+
+                  hideAll();
+                  activateTab(tab);
+                  wrapper.classList.remove("hidden");
+
+                  if (target === "collections-section") load(`/collections/user/${userId}`, wrapper);
+                  if (target === "reviews-section") load(`/reviews/user/${userId}`, wrapper);
+                  if (target === "notifications-section") load(`/notifications/user/${userId}`, wrapper);
+                  if (target === "games-section") load(`/games/developer/${userId}`, wrapper);
                 });
+              });
+
+              document.addEventListener("click", e => {
+                const card = e.target.closest(".collection-card");
+                if (card) {
+                  const id = card.dataset.collectionId;
+                  const wrapper = document.getElementById("collection-games-wrapper");
+                  hideAll();
+                  wrapper.classList.remove("hidden");
+
+                  fetch(`/collections/${id}`)
+                    .then(r => r.text())
+                    .then(html => wrapper.innerHTML = html);
+                }
+
+                if (e.target.id === "back-to-collections") {
+                  hideAll();
+                  wrappers["collections-section"].classList.remove("hidden");
+                  load(`/collections/user/${userId}`, wrappers["collections-section"]);
+                }
               });
             });
 
@@ -885,76 +628,6 @@
                 reader.readAsDataURL(file);
               });
 
-              document.addEventListener("DOMContentLoaded", () => {
-                const tabs = document.querySelectorAll('[data-target]');
-                const sections = document.querySelectorAll(".section-block");
-
-                tabs.forEach(tab => {
-                  tab.addEventListener("click", () => {
-                    const targetId = tab.dataset.target;
-
-                    // Hide all sections
-                    sections.forEach(sec => sec.classList.add("hidden"));
-
-                    // Show only the clicked section
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) targetSection.classList.remove("hidden");
-
-                    // Optional: toggle active styling
-                    tabs.forEach(t => t.classList.remove("bg-blue-600", "text-white", "border-blue-600"));
-                    tab.classList.add("bg-blue-600", "text-white", "border-blue-600");
-                  });
-                });
-              });
-
-            /*
-            // Grab elements
-            const collectionsContainer = document.getElementById('collections-container');
-            const gamesContainer = document.getElementById('games-container');
-            const gamesTitle = document.getElementById('games-title');
-            const gamesList = document.getElementById('games-list');
-            const backButton = document.getElementById('back-to-collections');
-
-            // Click handler for collections
-            document.querySelectorAll('.collection-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const collectionId = card.dataset.collectionId;
-
-                    // Find the collection in the DOM
-                    const article = card.closest('article');
-                    const title = article.querySelector('h4').textContent;
-
-                    // Collect games from Thymeleaf-rendered data
-                    // We can store games in a hidden <script> tag or data attribute
-                    const gamesData = JSON.parse(article.dataset.games || '[]');
-
-                    showGames(title, gamesData);
-                });
-            });
-
-            // Back button
-            backButton.addEventListener('click', () => {
-                gamesContainer.classList.add('hidden');
-                collectionsContainer.classList.remove('hidden');
-            });
-
-            // Show games function
-            function showGames(title, games) {
-                gamesTitle.textContent = title;
-                gamesList.innerHTML = '';
-
-                games.forEach(game => {
-                    const li = document.createElement('li');
-                    li.className = "p-2 border rounded bg-white shadow-sm";
-                    li.textContent = game.name; // assuming game has a 'name' property
-                    gamesList.appendChild(li);
-                });
-
-                collectionsContainer.classList.add('hidden');
-                gamesContainer.classList.remove('hidden');
-            }
-            */
-
             const userId = [[${user.id}]];
 
             // Load collections when profile page loads
@@ -974,7 +647,7 @@
                 fetch(`/collections/${collectionId}`)
                     .then(response => response.text())
                     .then(html => {
-                        document.getElementById('games-wrapper').innerHTML = html;
+                        document.getElementById('collection-games-wrapper').innerHTML = html;
 
                         // Hide collections section
                         document.getElementById('collections-wrapper').style.display = 'none';
@@ -984,7 +657,7 @@
             // Back button handler (works because event delegation)
             document.addEventListener('click', function (e) {
                 if (e.target.id === 'back-to-collections') {
-                    document.getElementById('games-wrapper').innerHTML = '';
+                    document.getElementById('collection-games-wrapper').innerHTML = '';
                     document.getElementById('collections-wrapper').style.display = 'block';
                 }
             });
