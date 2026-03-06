@@ -484,93 +484,99 @@
 
         </script>
 
-        <!-- ===== РАЗДЕЛ КОЛЛЕКЦИИ ===== -->
-        <div id="collections-wrapper"></div>
-
-        <!-- ===== РАЗДЕЛ: ОТЗЫВЫ ===== -->
-        <div id="reviews-wrapper"></div>
-
-        <!-- ===== РАЗДЕЛ: УВЕДОМЛЕНИЯ ===== -->
-        <div id="notifications-wrapper"></div>
-
-        <!-- ===== РАЗДЕЛ: МОИ ИГРЫ ===== -->
-        <div id="my-games-wrapper"></div>
-
-        <!-- ===== РАЗДЕЛ: ИГРЫ КОЛЛЕКЦИИ ===== -->
-        <div id="collection-games-wrapper"></div>
+        <!-- ===== SECTION WRAPPERS ===== -->
+        <div id="collections-wrapper" class="hidden"></div>
+        <div id="reviews-wrapper" class="hidden"></div>
+        <div id="notifications-wrapper" class="hidden"></div>
+        <div id="my-games-wrapper" class="hidden"></div>
+        <div id="collection-games-wrapper" class="hidden"></div>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
+              const userId = [[${user.id}]];
+
+              // Section wrappers mapped to tab targets
               const wrappers = {
                 "collections-section": document.getElementById("collections-wrapper"),
                 "reviews-section": document.getElementById("reviews-wrapper"),
                 "notifications-section": document.getElementById("notifications-wrapper"),
-                "games-section": document.getElementById("my-games-wrapper")
+                "games-section": document.getElementById("my-games-wrapper"),
+                "collection-games": document.getElementById("collection-games-wrapper")
               };
 
+              // Tab buttons
               const tabs = document.querySelectorAll("[data-target]");
-              const userId = [[${user.id}]];
 
-              function hideAll() {
-                Object.values(wrappers).forEach(w => w.classList.add("hidden"));
-              }
-
-              function activateTab(tab) {
+              // Utility functions
+              const hideAll = () => Object.values(wrappers).forEach(w => w.classList.add("hidden"));
+              const activateTab = (tab) => {
                 tabs.forEach(t => t.classList.remove("bg-blue-600","text-white","border-blue-600"));
                 tab.classList.add("bg-blue-600","text-white","border-blue-600");
-              }
+              };
+              const load = (url, wrapper) => fetch(url).then(r => r.text()).then(html => wrapper.innerHTML = html);
 
-              function load(url, wrapper) {
-                fetch(url)
-                  .then(r => r.text())
-                  .then(html => wrapper.innerHTML = html);
-              }
+              // Show specific tab
+              const showTab = (target) => {
+                const wrapper = wrappers[target];
+                if (!wrapper) return;
+                hideAll();
+                wrapper.classList.remove("hidden");
 
+                switch(target) {
+                  case "collections-section":
+                    load(`/collections/user/${userId}`, wrapper);
+                    break;
+                  case "reviews-section":
+                    load(`/reviews/user/${userId}`, wrapper);
+                    break;
+                  case "notifications-section":
+                    load(`/notifications/user/${userId}`, wrapper);
+                    break;
+                  case "games-section":
+                    load(`/games/developer/${userId}`, wrapper);
+                    break;
+                }
+              };
+
+              // Initial load: collections tab
+              showTab("collections-section");
+
+              // Tab click
               tabs.forEach(tab => {
                 tab.addEventListener("click", () => {
-                  const target = tab.dataset.target;
-                  const wrapper = wrappers[target];
-                  if (!wrapper) return;
-
-                  hideAll();
                   activateTab(tab);
-                  wrapper.classList.remove("hidden");
-
-                  if (target === "collections-section") load(`/collections/user/${userId}`, wrapper);
-                  if (target === "reviews-section") load(`/reviews/user/${userId}`, wrapper);
-                  if (target === "notifications-section") load(`/notifications/user/${userId}`, wrapper);
-                  if (target === "games-section") load(`/games/developer/${userId}`, wrapper);
+                  showTab(tab.dataset.target);
                 });
               });
 
+              // Delegated clicks
               document.addEventListener("click", e => {
+                // Open a specific collection's games
                 const card = e.target.closest(".collection-card");
                 if (card) {
-                  const id = card.dataset.collectionId;
-                  const wrapper = document.getElementById("collection-games-wrapper");
+                  const collectionId = card.dataset.collectionId;
                   hideAll();
+                  const wrapper = wrappers["collection-games"];
                   wrapper.classList.remove("hidden");
-
-                  fetch(`/collections/${id}`)
-                    .then(r => r.text())
-                    .then(html => wrapper.innerHTML = html);
+                  load(`/collections/${collectionId}`, wrapper);
+                  return;
                 }
 
+                // Back button from collection games
                 if (e.target.id === "back-to-collections") {
-                  hideAll();
-                  wrappers["collections-section"].classList.remove("hidden");
-                  load(`/collections/user/${userId}`, wrappers["collections-section"]);
+                  showTab("collections-section");
+                  wrappers["collection-games"].innerHTML = '';
+                  return;
                 }
               });
-            });
 
+              // ========== PROFILE EDIT LOGIC ==========
               const editBtn = document.getElementById("edit-profile-btn");
               const cancelBtn = document.getElementById("cancel-edit-btn");
               const saveBtn = document.getElementById("save-profile-btn");
 
               const usernameText = document.getElementById("username-text");
               const usernameInput = document.getElementById("username-input");
-
               const aboutText = document.getElementById("about-text");
               const aboutInput = document.getElementById("about-input");
 
@@ -578,36 +584,26 @@
               const avatarText = document.getElementById("avatar-text");
               const avatarImg = document.getElementById("avatar-img");
 
-              // Enable edit mode
               editBtn.addEventListener("click", () => {
                 usernameInput.value = usernameText.textContent;
                 aboutInput.value = aboutText.textContent.replace("Обо мне: ", "");
-
                 [usernameText, aboutText].forEach(el => el.classList.add("hidden"));
                 [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
                 editBtn.classList.add("hidden");
               });
 
-              // Cancel edit
               cancelBtn.addEventListener("click", () => {
                 [usernameText, aboutText].forEach(el => el.classList.remove("hidden"));
                 [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.add("hidden"));
                 editBtn.classList.remove("hidden");
-
-                // reset avatar preview
                 if (avatarImg.src) avatarImg.classList.add("hidden");
                 avatarText.classList.remove("hidden");
               });
 
-              // Save changes
               saveBtn.addEventListener("click", () => {
                 usernameText.textContent = usernameInput.value;
                 aboutText.textContent = `Обо мне: ${aboutInput.value}`;
-
-                // Toggle visibility
                 cancelBtn.click();
-
-                // TODO: send data to server via fetch/AJAX
                 console.log({
                   username: usernameInput.value,
                   about: aboutInput.value,
@@ -615,7 +611,6 @@
                 });
               });
 
-              // Avatar preview
               avatarInput.addEventListener("change", (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -627,41 +622,7 @@
                 };
                 reader.readAsDataURL(file);
               });
-
-            const userId = [[${user.id}]];
-
-            // Load collections when profile page loads
-            fetch(`/collections/user/${userId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('collections-wrapper').innerHTML = html;
-                });
-
-            // Delegate click event for collection cards
-            document.addEventListener('click', function (e) {
-                const card = e.target.closest('.collection-card');
-                if (!card) return;
-
-                const collectionId = card.dataset.collectionId;
-
-                fetch(`/collections/${collectionId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        document.getElementById('collection-games-wrapper').innerHTML = html;
-
-                        // Hide collections section
-                        document.getElementById('collections-wrapper').style.display = 'none';
-                    });
             });
-
-            // Back button handler (works because event delegation)
-            document.addEventListener('click', function (e) {
-                if (e.target.id === 'back-to-collections') {
-                    document.getElementById('collection-games-wrapper').innerHTML = '';
-                    document.getElementById('collections-wrapper').style.display = 'block';
-                }
-            });
-
         </script>
     </section>
 </html>
