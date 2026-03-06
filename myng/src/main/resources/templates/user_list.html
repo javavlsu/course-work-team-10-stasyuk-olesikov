@@ -217,7 +217,7 @@
                 <!-- Действия -->
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-2">
-                    <!-- Изменить роль -->
+                    <!-- Изменить роль (будет позже) -->
                     <button
                       class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
@@ -228,7 +228,7 @@
                       Роль
                     </button>
 
-                    <!-- Предупреждение -->
+                    <!-- Предупреждение (будет позже) -->
                     <button
                       class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
@@ -239,15 +239,25 @@
                       Предупр.
                     </button>
 
-                    <!-- Блокировка -->
+                    <!-- Блокировка/Разблокировка в зависимости от статуса -->
                     <button
+                      th:if="${!bannedMap[user.id]}"
                       class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
-                      data-action="open-modal"
-                      data-modal="block"
+                      onclick="openBlockModal(this)"
                     >
                       <i class="fas fa-ban"></i>
                       Блок
+                    </button>
+
+                    <button
+                      th:if="${bannedMap[user.id]}"
+                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
+                      onclick="openUnblockModal(this)"
+                    >
+                      <i class="fas fa-lock-open"></i>
+                      Разблок.
                     </button>
                   </div>
                 </td>
@@ -462,7 +472,6 @@
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <i class="fas fa-ban text-red-500"></i>
             Блокировка пользователя
           </h3>
           <button
@@ -482,7 +491,7 @@
               ИВ
             </div>
             <div>
-              <div class="font-medium text-gray-900">@ivan_b</div>
+              <div class="font-medium text-gray-900"></div>
               <div class="text-xs text-gray-500">Статус: Активен</div>
             </div>
           </div>
@@ -714,6 +723,133 @@
             .forEach((modal) => {
               modal.style.display = "none";
             });
+        }
+      });
+    </script>
+
+    <script>
+      let selectedUserId = null;
+
+      function openBlockModal(button) {
+        selectedUserId = button.getAttribute("data-user-id");
+
+        const userName = button
+          .closest("tr")
+          .querySelector(".font-medium.text-gray-900").textContent;
+        document.querySelector(
+          "#blockModal .font-medium.text-gray-900",
+        ).textContent = userName;
+
+        openModal("blockModal");
+      }
+
+      function openUnblockModal(button) {
+        selectedUserId = button.getAttribute("data-user-id");
+
+        const userName = button
+          .closest("tr")
+          .querySelector(".font-medium.text-gray-900").textContent;
+        document.querySelector(
+          "#unblockModal .font-medium.text-gray-900",
+        ).textContent = userName;
+
+        openModal("unblockModal");
+      }
+
+      // Функции для работы с модальными окнами
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+        selectedUserId = null;
+      }
+
+      // Блокировка пользователя
+      async function blockUser() {
+        const reason = document.querySelector("#blockModal textarea").value;
+        const durationSelect = document.querySelector("#blockModal select");
+        const durationHours = durationSelect.value;
+        const isPermanent = durationHours === "permanent";
+
+        const requestData = {
+          userId: selectedUserId,
+          reason: reason || "Причина не указана",
+          durationHours: isPermanent ? null : parseInt(durationHours),
+          permanent: isPermanent,
+        };
+
+        try {
+          const response = await fetch("/user-list/ban", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload(); // перезагружаем страницу для обновления статуса
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("blockModal");
+      }
+
+      // Разблокировка пользователя
+      async function unblockUser() {
+        const requestData = {
+          userId: selectedUserId,
+        };
+
+        try {
+          const response = await fetch("/user-list/unban", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload(); // перезагружаем страницу для обновления статуса
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("unblockModal");
+      }
+
+      // Привязка кнопок в модальных окнах
+      document.addEventListener("DOMContentLoaded", function () {
+        // Кнопка блокировки в модалке
+        const blockButton = document.querySelector(
+          "#blockModal button.bg-red-600",
+        );
+        if (blockButton) {
+          blockButton.onclick = blockUser;
+        }
+
+        // Кнопка разблокировки в модалке
+        const unblockButton = document.querySelector(
+          "#unblockModal button.bg-green-600",
+        );
+        if (unblockButton) {
+          unblockButton.onclick = unblockUser;
         }
       });
     </script>
