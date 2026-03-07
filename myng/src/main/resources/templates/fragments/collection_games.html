@@ -1,8 +1,7 @@
 <!-- templates/fragments/games.html -->
 <div th:fragment="gamesFragment(collection, games)"
      id="games-container"
-     class="section-block"
-     th:classappend="${#lists.isEmpty(games)} ? ' hidden'">
+     class="section-block">
 
     <button id="back-to-collections"
             class="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
