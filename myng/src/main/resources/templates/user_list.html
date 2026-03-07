@@ -217,12 +217,11 @@
                 <!-- Действия -->
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-2">
-                    <!-- Изменить роль (будет позже) -->
+                    <!-- Изменить роль -->
                     <button
                       class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
-                      data-action="open-modal"
-                      data-modal="change_role"
+                      onclick="openChangeRoleModal(this)"
                     >
                       <i class="fas fa-user-edit"></i>
                       Роль
@@ -343,24 +342,30 @@
         </div>
 
         <div class="space-y-4">
-          <!-- Информация о пользователе -->
+          <!-- Информация о пользователе (динамически заполняется) -->
           <div class="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
             <div
+              id="changeRoleUserAvatar"
               class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
             >
-              ИВ
+              A
             </div>
             <div>
-              <div class="font-medium text-gray-900">@ivan_b</div>
+              <div id="changeRoleUserName" class="font-medium text-gray-900">
+                @username
+              </div>
               <div class="text-xs text-gray-500">
                 Текущая роль:
                 <span
+                  id="changeRoleCurrentRole"
                   class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs"
-                  >user</span
-                >
+                ></span>
               </div>
             </div>
           </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="changeRoleUserId" />
 
           <!-- Выбор новой роли -->
           <div>
@@ -368,11 +373,12 @@
               >Новая роль</label
             >
             <select
+              id="changeRoleSelect"
               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
             >
               <option value="user">Пользователь (user)</option>
               <option value="dev">Разработчик (dev)</option>
-              <option value="moderator">Модератор (moderator)</option>
+              <option value="mod">Модератор (mod)</option>
               <option value="admin">Администратор (admin)</option>
             </select>
           </div>
@@ -386,8 +392,8 @@
               Отмена
             </button>
             <button
+              onclick="submitChangeRole()"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-              onclick="changeRole()"
             >
               <i class="fas fa-save"></i>
               Сохранить
@@ -472,6 +478,7 @@
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-ban text-red-500"></i>
             Блокировка пользователя
           </h3>
           <button
@@ -483,18 +490,26 @@
         </div>
 
         <div class="space-y-4">
-          <!-- Информация о пользователе -->
+          <!-- Информация о пользователе (динамически заполняется) -->
           <div class="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
             <div
-              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+              id="blockUserAvatar"
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold uppercase"
             >
-              ИВ
+              A
             </div>
             <div>
-              <div class="font-medium text-gray-900"></div>
-              <div class="text-xs text-gray-500">Статус: Активен</div>
+              <div id="blockUserName" class="font-medium text-gray-900">
+                @username
+              </div>
+              <div id="blockUserStatus" class="text-xs text-gray-500">
+                Статус: Активен
+              </div>
             </div>
           </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="blockUserId" />
 
           <!-- Время блокировки -->
           <div>
@@ -502,6 +517,7 @@
               >Срок блокировки</label
             >
             <select
+              id="blockDuration"
               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-red-100 focus:border-red-500 outline-none transition-all bg-white"
             >
               <option value="1">1 час</option>
@@ -516,12 +532,13 @@
             </select>
           </div>
 
-          <!-- Причина блокировки (опционально) -->
+          <!-- Причина блокировки -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >Причина блокировки (необязательно)</label
             >
             <textarea
+              id="blockReason"
               rows="3"
               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-red-100 focus:border-red-500 outline-none transition-all"
               placeholder="Укажите причину блокировки..."
@@ -537,8 +554,8 @@
               Отмена
             </button>
             <button
-              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
               onclick="blockUser()"
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
             >
               <i class="fas fa-ban"></i>
               Заблокировать
@@ -569,20 +586,25 @@
         </div>
 
         <div class="space-y-4">
-          <!-- Информация о пользователе -->
+          <!-- Информация о пользователе (динамически заполняется) -->
           <div class="bg-red-50 border border-red-100 rounded-lg p-4">
             <div class="flex items-center gap-3">
               <div
+                id="unblockUserAvatar"
                 class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-bold"
               >
                 ПС
               </div>
               <div>
-                <div class="font-medium text-gray-900">@petr_s</div>
-                <div class="text-xs text-red-600">Заблокирован 3 дня назад</div>
+                <div id="unblockUserName" class="font-medium text-gray-900">
+                  @petr_s
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="unblockUserId" />
 
           <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
             <div class="flex items-start gap-2">
@@ -668,42 +690,11 @@
         document.getElementById(modalId).style.display = "none";
       }
 
-      // Привязка кнопок к модальным окнам
-      document.querySelectorAll("[data-modal]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const modalId = button.getAttribute("data-modal");
-          const modalMap = {
-            change_role: "changeRoleModal",
-            warn: "warnModal",
-            block: "blockModal",
-            unblock: "unblockModal",
-          };
-          if (modalMap[modalId]) {
-            openModal(modalMap[modalId]);
-          }
-        });
-      });
-
       // Функции действий
-      function changeRole() {
-        console.log("Роль изменена");
-        closeModal("changeRoleModal");
-        // Здесь можно добавить уведомление об успехе
-      }
 
       function issueWarning() {
         console.log("Предупреждение выдано");
         closeModal("warnModal");
-      }
-
-      function blockUser() {
-        console.log("Пользователь заблокирован");
-        closeModal("blockModal");
-      }
-
-      function unblockUser() {
-        console.log("Пользователь разблокирован");
-        closeModal("unblockModal");
       }
 
       // Закрытие по клику на фон
@@ -728,53 +719,104 @@
     </script>
 
     <script>
-      let selectedUserId = null;
-
+      // Функция открытия модального окна блокировки с данными пользователя
       function openBlockModal(button) {
-        selectedUserId = button.getAttribute("data-user-id");
+        // Находим строку пользователя (родительский tr)
+        const row = button.closest("tr");
 
-        const userName = button
-          .closest("tr")
-          .querySelector(".font-medium.text-gray-900").textContent;
-        document.querySelector(
-          "#blockModal .font-medium.text-gray-900",
-        ).textContent = userName;
+        // Получаем данные пользователя из строки таблицы
+        const userId = button.getAttribute("data-user-id");
+        const username = row
+          .querySelector(".font-medium.text-gray-900")
+          .textContent.trim();
 
+        // Получаем первую букву имени (без @)
+        const firstLetter = username.replace("@", "").charAt(0).toUpperCase();
+
+        // Заполняем модальное окно
+        document.getElementById("blockUserId").value = userId;
+        document.getElementById("blockUserName").textContent = username;
+        document.getElementById("blockUserAvatar").textContent = firstLetter;
+
+        // Определяем статус (заблокирован или нет)
+        const statusElement = row.querySelector("td:nth-child(3) span");
+        const isBanned =
+          statusElement && statusElement.classList.contains("bg-red-100");
+        document.getElementById("blockUserStatus").textContent =
+          "Статус: " + (isBanned ? "Заблокирован" : "Активен");
+
+        // Очищаем поля ввода
+        document.getElementById("blockDuration").value = "24"; // значение по умолчанию
+        document.getElementById("blockReason").value = "";
+
+        // Открываем модальное окно
         openModal("blockModal");
       }
 
+      // Функция открытия модального окна разблокировки
       function openUnblockModal(button) {
-        selectedUserId = button.getAttribute("data-user-id");
+        // Проверяем, что кнопка существует
+        if (!button) {
+          console.error("Кнопка не передана");
+          return;
+        }
 
-        const userName = button
-          .closest("tr")
-          .querySelector(".font-medium.text-gray-900").textContent;
-        document.querySelector(
-          "#unblockModal .font-medium.text-gray-900",
-        ).textContent = userName;
+        const row = button.closest("tr");
+        if (!row) {
+          console.error("Не найдена строка таблицы для кнопки:", button);
+          return;
+        }
+
+        const userId = button.getAttribute("data-user-id");
+        if (!userId) {
+          console.error("Не найден data-user-id у кнопки");
+          return;
+        }
+
+        const usernameElement = row.querySelector(".font-medium.text-gray-900");
+        if (!usernameElement) {
+          console.error("Не найден элемент с именем пользователя");
+          return;
+        }
+
+        const username = usernameElement.textContent.trim();
+        const firstLetter = username.replace("@", "").charAt(0).toUpperCase();
+
+        // Заполняем модальное окно разблокировки с проверками
+        const userIdField = document.getElementById("unblockUserId");
+        if (userIdField) {
+          userIdField.value = userId;
+        } else {
+          console.error("Не найден элемент unblockUserId");
+        }
+
+        const userNameField = document.getElementById("unblockUserName");
+        if (userNameField) {
+          userNameField.textContent = username;
+        } else {
+          console.error("Не найден элемент unblockUserName");
+        }
+
+        const userAvatarField = document.getElementById("unblockUserAvatar");
+        if (userAvatarField) {
+          userAvatarField.textContent = firstLetter;
+        } else {
+          console.error("Не найден элемент unblockUserAvatar");
+        }
 
         openModal("unblockModal");
       }
 
-      // Функции для работы с модальными окнами
-      function openModal(modalId) {
-        document.getElementById(modalId).style.display = "flex";
-      }
-
-      function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-        selectedUserId = null;
-      }
-
-      // Блокировка пользователя
+      // Обновленная функция блокировки
       async function blockUser() {
-        const reason = document.querySelector("#blockModal textarea").value;
-        const durationSelect = document.querySelector("#blockModal select");
+        const userId = document.getElementById("blockUserId").value;
+        const reason = document.getElementById("blockReason").value;
+        const durationSelect = document.getElementById("blockDuration");
         const durationHours = durationSelect.value;
         const isPermanent = durationHours === "permanent";
 
         const requestData = {
-          userId: selectedUserId,
+          userId: parseInt(userId),
           reason: reason || "Причина не указана",
           durationHours: isPermanent ? null : parseInt(durationHours),
           permanent: isPermanent,
@@ -783,9 +825,7 @@
         try {
           const response = await fetch("/user-list/ban", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData),
           });
 
@@ -793,7 +833,7 @@
 
           if (result.success) {
             alert(result.message);
-            location.reload(); // перезагружаем страницу для обновления статуса
+            location.reload();
           } else {
             alert("Ошибка: " + result.message);
           }
@@ -804,18 +844,18 @@
         closeModal("blockModal");
       }
 
-      // Разблокировка пользователя
+      // Обновленная функция разблокировки
       async function unblockUser() {
+        const userId = document.getElementById("unblockUserId").value;
+
         const requestData = {
-          userId: selectedUserId,
+          userId: parseInt(userId),
         };
 
         try {
           const response = await fetch("/user-list/unban", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData),
           });
 
@@ -823,7 +863,7 @@
 
           if (result.success) {
             alert(result.message);
-            location.reload(); // перезагружаем страницу для обновления статуса
+            location.reload();
           } else {
             alert("Ошибка: " + result.message);
           }
@@ -834,24 +874,98 @@
         closeModal("unblockModal");
       }
 
-      // Привязка кнопок в модальных окнах
       document.addEventListener("DOMContentLoaded", function () {
-        // Кнопка блокировки в модалке
-        const blockButton = document.querySelector(
-          "#blockModal button.bg-red-600",
-        );
-        if (blockButton) {
-          blockButton.onclick = blockUser;
+        // Кнопки блокировки - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-red-600[data-user-id]")
+          .forEach((button) => {
+            // Убираем старый обработчик и ставим новый
+            button.onclick = function () {
+              openBlockModal(this);
+            };
+          });
+
+        // Кнопки разблокировки - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-green-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openUnblockModal(this);
+            };
+          });
+
+        // Кнопки смены роли - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-blue-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openChangeRoleModal(this);
+            };
+          });
+      });
+
+      // Функция открытия модального окна смены роли
+      function openChangeRoleModal(button) {
+        const row = button.closest("tr");
+        const userId = button.getAttribute("data-user-id");
+        const username = row
+          .querySelector(".font-medium.text-gray-900")
+          .textContent.trim();
+        const currentRole = row
+          .querySelector("td:nth-child(2) span span:not([th\\:case='*'])")
+          .textContent.trim();
+
+        // Определяем текущую роль для enum
+        let currentRoleEnum = "user";
+        if (currentRole.includes("Разработчик")) currentRoleEnum = "dev";
+        else if (currentRole.includes("Модератор")) currentRoleEnum = "mod";
+        else if (currentRole.includes("Администратор"))
+          currentRoleEnum = "admin";
+
+        // Заполняем модальное окно
+        document.getElementById("changeRoleUserId").value = userId;
+        document.getElementById("changeRoleUserName").textContent = username;
+        document.getElementById("changeRoleCurrentRole").textContent =
+          currentRole;
+
+        // Устанавливаем текущую роль в селекте
+        const select = document.getElementById("changeRoleSelect");
+        select.value = currentRoleEnum;
+
+        openModal("changeRoleModal");
+      }
+
+      // Отправка запроса на смену роли
+      async function submitChangeRole() {
+        const userId = document.getElementById("changeRoleUserId").value;
+        const newRole = document.getElementById("changeRoleSelect").value;
+
+        const requestData = {
+          userId: parseInt(userId),
+          newRole: newRole,
+        };
+
+        try {
+          const response = await fetch("/user-list/change-role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload();
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
         }
 
-        // Кнопка разблокировки в модалке
-        const unblockButton = document.querySelector(
-          "#unblockModal button.bg-green-600",
-        );
-        if (unblockButton) {
-          unblockButton.onclick = unblockUser;
-        }
-      });
+        closeModal("changeRoleModal");
+      }
     </script>
   </section>
 </html>

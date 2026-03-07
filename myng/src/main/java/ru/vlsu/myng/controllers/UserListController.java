@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.dto.BanRequest;
+import ru.vlsu.myng.dto.ChangeRoleRequest;
 import ru.vlsu.myng.dto.UnbanRequest;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.services.UserListService;
@@ -78,6 +79,32 @@ public class UserListController {
             userListService.unbanUser(request.getUserId());
             response.put("success", true);
             response.put("message", "Пользователь разблокирован");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Смена роли пользователя (AJAX запрос).
+     */
+    @PostMapping("/user-list/change-role")
+    @ResponseBody
+    public Map<String, Object> changeUserRole(@RequestBody ChangeRoleRequest request,
+            @AuthenticationPrincipal UserDetails currentUser) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Находим текущего админа
+            User admin = userService.findByEmail(currentUser.getUsername());
+
+            // Выполняем смену роли
+            userListService.changeUserRole(request.getUserId(), request.getNewRole(), admin);
+
+            response.put("success", true);
+            response.put("message", "Роль пользователя успешно изменена");
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", e.getMessage());

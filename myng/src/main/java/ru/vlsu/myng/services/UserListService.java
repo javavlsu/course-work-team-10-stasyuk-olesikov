@@ -162,4 +162,39 @@ public class UserListService {
                     banRepository.save(ban);
                 });
     }
+
+    /**
+     * Смена роли пользователя.
+     *
+     * @param userId  ID пользователя
+     * @param newRole новая роль
+     * @param admin   администратор, выполняющий смену роли
+     * @throws RuntimeException если пользователь не найден или недостаточно прав
+     */
+    @Transactional
+    public void changeUserRole(Integer userId, User.Role newRole, User admin) {
+        // 1. Находим пользователя
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // 2. Проверяем, что админ не меняет сам себе роль (опционально)
+        if (user.getId().equals(admin.getId())) {
+            throw new RuntimeException("Нельзя изменить свою собственную роль");
+        }
+
+        // 3. Проверяем, что роль действительно меняется
+        if (user.getRole() == newRole) {
+            throw new RuntimeException("У пользователя уже эта роль");
+        }
+
+        // 4. Сохраняем старую роль для уведомления
+        User.Role oldRole = user.getRole();
+
+        // 5. Меняем роль
+        user.setRole(newRole);
+        userRepository.save(user);
+
+        // 6. Создаем уведомление для пользователя об изменении роли (опционально)
+        // TODO: добавить создание уведомления
+    }
 }
