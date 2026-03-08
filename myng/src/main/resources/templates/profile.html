@@ -707,6 +707,15 @@
                     }
                 }
 
+                if (action === "delete-notification") {
+                    const notificationId = actionEl.dataset.notificationId;
+
+                    await fetch(`/notifications/delete/${notificationId}`, {
+                        method: "POST"
+                    });
+
+                    showTab("notifications-section");
+                }
 
                 /* =========================
                    OPEN MODALS

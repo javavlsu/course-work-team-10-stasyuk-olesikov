@@ -23,6 +23,25 @@ public class NotificationService {
         return notificationRepository.findByUsers(user);
     }
 
+    public void removeNotificationForUser(Integer notificationId, Integer userId) {
+
+        Notification notification = notificationRepository
+                .findById(notificationId)
+                .orElseThrow();
+
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow();
+
+        notification.getUsers().remove(user);
+
+        if (notification.getUsers().isEmpty()) {
+            notificationRepository.delete(notification);
+        } else {
+            notificationRepository.save(notification);
+        }
+    }
+
     public List<Notification> getByType(Notification.Type type) {
         return notificationRepository.findByType(type);
     }
