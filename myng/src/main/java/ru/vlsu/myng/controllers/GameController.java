@@ -1,4 +1,4 @@
-package  ru.vlsu.myng.controllers;
+package ru.vlsu.myng.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

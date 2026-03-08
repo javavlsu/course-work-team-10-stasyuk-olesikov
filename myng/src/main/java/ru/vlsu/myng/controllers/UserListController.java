@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.dto.BanRequest;
 import ru.vlsu.myng.dto.ChangeRoleRequest;
 import ru.vlsu.myng.dto.UnbanRequest;
+import ru.vlsu.myng.dto.WarningRequest;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.services.UserListService;
 import ru.vlsu.myng.services.UserService;
@@ -105,6 +106,32 @@ public class UserListController {
 
             response.put("success", true);
             response.put("message", "Роль пользователя успешно изменена");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Выдача предупреждения пользователю (AJAX запрос).
+     */
+    @PostMapping("/user-list/warning")
+    @ResponseBody
+    public Map<String, Object> issueWarning(@RequestBody WarningRequest request,
+            @AuthenticationPrincipal UserDetails currentUser) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Находим текущего модератора/админа
+            User moderator = userService.findByEmail(currentUser.getUsername());
+
+            // Выдаем предупреждение
+            userListService.issueWarning(request.getUserId(), request.getReason(), moderator);
+
+            response.put("success", true);
+            response.put("message", "Предупреждение выдано");
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", e.getMessage());

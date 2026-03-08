@@ -6,12 +6,17 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import ru.vlsu.myng.entities.Ban;
 import ru.vlsu.myng.entities.User;
+import ru.vlsu.myng.entities.Warning;
+import ru.vlsu.myng.entities.Notification;
 import ru.vlsu.myng.repositories.BanRepository;
+import ru.vlsu.myng.repositories.NotificationRepository;
 import ru.vlsu.myng.repositories.UserRepository;
+import ru.vlsu.myng.repositories.WarningRepository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +30,8 @@ public class UserListService {
 
     private final UserRepository userRepository;
     private final BanRepository banRepository;
+    private final NotificationRepository notificationRepository;
+    private final WarningRepository warningRepository;
 
     /**
      * Получает список всех пользователей.
@@ -88,26 +95,23 @@ public class UserListService {
      */
     @Transactional
     public void banUser(Integer userId, String reason, Integer durationHours, User moderator) {
-        // 1. Находим пользователя
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        // 2. Проверяем, не заблокирован ли уже
         boolean alreadyBanned = banRepository.existsByUser_IdAndStartTimeBeforeAndEndTimeAfter(
                 userId, Instant.now(), Instant.now());
         if (alreadyBanned) {
             throw new RuntimeException("Пользователь уже заблокирован");
         }
 
-        // 3. Создаем бан
         Ban ban = new Ban();
         ban.setUser(user);
         ban.setModerator(moderator);
         ban.setReason(reason);
         ban.setStartTime(Instant.now());
 
-        // 4. Устанавливаем время окончания
         if (durationHours == null || durationHours <= 0) {
+            // ВОЗМОЖНО ПОТОМ ПОМЕНЯТЬ В БД!
             // Бессрочная блокировка - используем максимально допустимую дату для MySQL
             // timestamp
             // 2038-01-19 03:14:07 UTC
@@ -115,14 +119,12 @@ public class UserListService {
         } else {
             ban.setEndTime(Instant.now().plus(durationHours, ChronoUnit.HOURS));
 
-            // Проверяем, не вышли ли за пределы 2038 года
             Instant maxDate = Instant.parse("2038-01-19T03:14:07Z");
             if (ban.getEndTime().isAfter(maxDate)) {
-                ban.setEndTime(maxDate); // ограничиваем максимальной датой
+                ban.setEndTime(maxDate);
             }
         }
 
-        // 5. Сохраняем
         banRepository.save(ban);
     }
 
@@ -134,14 +136,9 @@ public class UserListService {
      */
     @Transactional
     public void unbanUser(Integer userId) {
-        // 1. Находим пользователя
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        // 2. Ищем активный бан
-        // Для простоты будем искать все баны пользователя и деактивировать последний
-        // В реальном проекте лучше добавить метод в репозиторий для поиска активного
-        // бана
         Instant now = Instant.now();
         boolean hasActiveBan = banRepository.existsByUser_IdAndStartTimeBeforeAndEndTimeAfter(
                 userId, now, now);
@@ -150,15 +147,13 @@ public class UserListService {
             throw new RuntimeException("У пользователя нет активной блокировки");
         }
 
-        // Получаем все баны пользователя
         List<Ban> userBans = banRepository.findByUser(user);
 
-        // Находим активный бан (где endTime > now) и устанавливаем endTime = now
         userBans.stream()
                 .filter(ban -> ban.getEndTime().isAfter(now))
                 .findFirst()
                 .ifPresent(ban -> {
-                    ban.setEndTime(now); // завершаем бан сейчас
+                    ban.setEndTime(now);
                     banRepository.save(ban);
                 });
     }
@@ -173,28 +168,118 @@ public class UserListService {
      */
     @Transactional
     public void changeUserRole(Integer userId, User.Role newRole, User admin) {
-        // 1. Находим пользователя
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        // 2. Проверяем, что админ не меняет сам себе роль (опционально)
         if (user.getId().equals(admin.getId())) {
             throw new RuntimeException("Нельзя изменить свою собственную роль");
         }
 
-        // 3. Проверяем, что роль действительно меняется
         if (user.getRole() == newRole) {
             throw new RuntimeException("У пользователя уже эта роль");
         }
 
-        // 4. Сохраняем старую роль для уведомления
         User.Role oldRole = user.getRole();
 
-        // 5. Меняем роль
         user.setRole(newRole);
         userRepository.save(user);
 
-        // 6. Создаем уведомление для пользователя об изменении роли (опционально)
-        // TODO: добавить создание уведомления
+        createRoleChangeNotification(user, oldRole, newRole, admin);
+    }
+
+    /**
+     * Создает уведомление о смене роли.
+     *
+     * @param user    пользователь, которому меняют роль
+     * @param oldRole старая роль
+     * @param newRole новая роль
+     * @param admin   администратор, выполнивший изменение
+     */
+    private void createRoleChangeNotification(User user, User.Role oldRole, User.Role newRole, User admin) {
+        String roleText = switch (newRole) {
+            case user -> "пользователя";
+            case dev -> "разработчика";
+            case mod -> "модератора";
+            case admin -> "администратора";
+        };
+
+        String notificationText = String.format(
+                "Ваша роль изменена с '%s' на '%s' (изменено администратором @%s)",
+                getRoleDisplayName(oldRole),
+                getRoleDisplayName(newRole),
+                admin.getUsername());
+
+        Notification notification = new Notification();
+        notification.setCreatedAt(Instant.now());
+        notification.setType(Notification.Type.system);
+        notification.setText(notificationText);
+
+        notification.setUsers(new HashSet<>());
+        notification.getUsers().add(user);
+
+        notificationRepository.save(notification);
+    }
+
+    /**
+     * Возвращает отображаемое имя роли.
+     */
+    private String getRoleDisplayName(User.Role role) {
+        return switch (role) {
+            case user -> "пользователь";
+            case dev -> "разработчик";
+            case mod -> "модератор";
+            case admin -> "администратор";
+        };
+    }
+
+    /**
+     * Выдача предупреждения пользователю.
+     *
+     * @param userId    ID пользователя
+     * @param reason    причина предупреждения
+     * @param moderator модератор/админ, выдающий предупреждение
+     * @throws RuntimeException если пользователь не найден
+     */
+    @Transactional
+    public void issueWarning(Integer userId, String reason, User moderator) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException("Причина предупреждения не может быть пустой");
+        }
+
+        Warning warning = new Warning();
+        warning.setUser(user);
+        warning.setModerator(moderator);
+        warning.setReason(reason);
+
+        warningRepository.save(warning);
+
+        createWarningNotification(user, reason, moderator);
+    }
+
+    /**
+     * Создает уведомление о предупреждении.
+     *
+     * @param user      пользователь, получивший предупреждение
+     * @param reason    причина предупреждения
+     * @param moderator модератор, выдавший предупреждение
+     */
+    private void createWarningNotification(User user, String reason, User moderator) {
+        String notificationText = String.format(
+                "Вам вынесено предупреждение от модератора @%s: %s",
+                moderator.getUsername(),
+                reason);
+
+        Notification notification = new Notification();
+        notification.setCreatedAt(Instant.now());
+        notification.setType(Notification.Type.warning);
+        notification.setText(notificationText);
+
+        notification.setUsers(new HashSet<>());
+        notification.getUsers().add(user);
+
+        notificationRepository.save(notification);
     }
 }
