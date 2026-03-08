@@ -1,6 +1,7 @@
 package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
+import main.java.ru.vlsu.myng.dto.ReviewUpdate;
 import org.springframework.stereotype.Service;
 
 import ru.vlsu.myng.entities.Game;
@@ -18,6 +19,19 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+
+    public void updateReview(Integer reviewId, ReviewUpdate dto) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow();
+
+        review.setText(dto.getText());
+        review.setRating(dto.getRating());
+
+        reviewRepository.save(review);
+    }
+
+    public void deleteReview(Integer reviewId) {
+        reviewRepository.deleteById(reviewId);
+    }
 
     public List<Review> getByUser(Integer userId) {
         User user = userRepository.findById(userId)

@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.entities.User;
+import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Collection;
 import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.repositories.CollectionRepository;
+import ru.vlsu.myng.repositories.ReviewRepository;
 
 import java.security.Principal;
 import java.util.List;
@@ -20,12 +22,15 @@ public class ProfileController {
 
     private final UserService userService;
     private final CollectionRepository collectionRepository;
+    private final ReviewRepository reviewRepository;
 
     @GetMapping("/profile")
     public String myProfilePage(Principal principal, Model model) {
         String email = principal.getName();
         User user = userService.findByEmail(email);
         model.addAttribute("user", user);
+        List<Review> reviews = reviewRepository.findByUser(user);
+        model.addAttribute("reviews", reviews);
         return "profile";
     }
 

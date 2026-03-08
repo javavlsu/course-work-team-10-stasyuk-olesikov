@@ -44,11 +44,13 @@
                 </p>
 
                 <div class="flex gap-2">
-                    <button
-                            class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center gap-2 justify-center transition-colors duration-200">
-                        <i class="fas fa-plus"></i>
-                        Добавить игру
-                    </button>
+                    <a th:href="@{/catalog}">
+                        <button
+                                class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center gap-2 justify-center transition-colors duration-200">
+                            <i class="fas fa-plus"></i>
+                            Добавить игру
+                        </button>
+                    </a>
 
                     <button
                             class="px-3 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-sm font-medium rounded-lg transition-colors duration-200"

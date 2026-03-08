@@ -402,6 +402,35 @@
             </form>
         </template>
 
+        <template id="tpl-delete-review">
+            <form data-form="delete_review" class="space-y-6">
+                <!-- Warning Icon -->
+                <div class="flex flex-col items-center text-center gap-3">
+                    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-800 text-lg font-semibold">
+                        Вы уверены, что хотите удалить отзыв?
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Это действие необратимо.
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                            data-action="cancel">
+                        Отмена
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition flex items-center gap-2"
+                            data-action="confirm">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </form>
+        </template>
+
         <script>
             document.addEventListener("DOMContentLoaded", () => {
               const userId = [[${user.id}]];
@@ -566,9 +595,9 @@
                 modalContent.innerHTML = "";
               }
 
-              document.addEventListener("click", (event) => {
+              document.addEventListener("click", async (e) => {
 
-                const actionEl = event.target.closest("[data-action]");
+                const actionEl = e.target.closest("[data-action]");
                 if (!actionEl) return;
 
                 const action = actionEl.dataset.action;
@@ -597,6 +626,87 @@
                     }, { once: true });
                   }
                 }
+
+                if (action === "edit-review") {
+                    const editBtn = e.target.closest(".review-edit-btn")
+                    const cancelBtn = e.target.closest(".cancel-review-edit-btn")
+                    const saveBtn = e.target.closest(".save-review-edit-btn")
+                    const star = e.target.closest(".star")
+
+                    /* EDIT */
+
+                    if (editBtn) {
+                        console.log("clicked on review edit button");
+
+                        const card = editBtn.closest(".review-edit-card")
+
+                        card.querySelectorAll(".view-mode").forEach(el => el.classList.add("hidden"))
+                        card.querySelectorAll(".edit-mode").forEach(el => el.classList.remove("hidden"))
+
+                        return
+                    }
+
+                    /* CANCEL */
+
+                    if (cancelBtn) {
+
+                        console.log("clicked on review edit cancel")
+
+                        const card = cancelBtn.closest(".review-edit-card")
+
+                        card.querySelectorAll(".edit-mode").forEach(el => el.classList.add("hidden"))
+                        card.querySelectorAll(".view-mode").forEach(el => el.classList.remove("hidden"))
+
+                        return
+                    }
+
+                    /* STAR RATING */
+
+                    if (star) {
+
+                        console.log("clicked on star rating editing")
+
+                        const card = star.closest(".review-edit-card")
+                        const stars = card.querySelectorAll(".star")
+                        const ratingInput = card.querySelector(".rating-input")
+
+                        const value = star.dataset.value
+                        ratingInput.value = value
+
+                        stars.forEach(s => {
+                            s.classList.toggle("text-yellow-500", s.dataset.value <= value)
+                        })
+
+                        return
+                    }
+
+                    /* SAVE */
+
+                    if (saveBtn) {
+
+                        console.log("clicked save review")
+
+                        const card = saveBtn.closest(".review-edit-card")
+
+                        const id = card.dataset.reviewId
+                        const text = card.querySelector("textarea").value
+                        const rating = card.querySelector(".rating-input").value
+
+                        await fetch(`/reviews/update/${id}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                text: text,
+                                rating: rating
+                            })
+                        })
+
+                        showTab("reviews-section")
+                    }
+                }
+
 
                 /* =========================
                    OPEN MODALS
@@ -680,6 +790,19 @@
                         closeModal();
                       });
                     });
+                  }
+
+                  if (modalType === "delete_review") {
+                      const reviewId = actionEl.dataset.reviewId;
+
+                      openModal("tpl-delete-review", async () => {
+
+                        await fetch(`/reviews/delete/${reviewId}`, {
+                          method: "POST"
+                        });
+
+                        showTab("reviews-section");
+                      });
                   }
 
                 }
