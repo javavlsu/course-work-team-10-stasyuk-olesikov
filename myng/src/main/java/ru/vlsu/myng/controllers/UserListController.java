@@ -1,14 +1,15 @@
 package ru.vlsu.myng.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import ru.vlsu.myng.dto.BanRequest;
 import ru.vlsu.myng.dto.ChangeRoleRequest;
 import ru.vlsu.myng.dto.UnbanRequest;
@@ -28,11 +29,46 @@ public class UserListController {
     private final UserService userService; // нужен для поиска модератора
 
     @GetMapping("/user-list")
-    public String userListPage(Model model) {
-        UserListService.UserListData data = userListService.getUserListWithBannedStatus();
+    public String userListPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("registeredAt").descending());
+
+        // Преобразуем строку роли в enum
+        User.Role roleEnum = null;
+        if (role != null && !role.isEmpty()) {
+            try {
+                roleEnum = User.Role.valueOf(role);
+            } catch (IllegalArgumentException e) {
+                // Логируем ошибку, но не прерываем выполнение
+                System.out.println("Invalid role value: " + role);
+            }
+        }
+
+        UserListService.UserListData data = userListService.getUserListWithBannedStatus(pageable, search, roleEnum,
+                status);
 
         model.addAttribute("users", data.getUsers());
         model.addAttribute("bannedMap", data.getBannedMap());
+
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", data.getUsers().getTotalPages());
+        model.addAttribute("totalElements", data.getUsers().getTotalElements());
+
+        model.addAttribute("searchFilter", search);
+        model.addAttribute("roleFilter", role);
+        model.addAttribute("statusFilter", status);
+
+        int startPage = Math.max(0, page - 2);
+        int endPage = Math.min(page + 2, data.getUsers().getTotalPages() - 1);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
 
         return "user_list";
     }

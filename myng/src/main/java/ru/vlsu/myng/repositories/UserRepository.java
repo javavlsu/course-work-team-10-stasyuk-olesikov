@@ -1,7 +1,11 @@
 package ru.vlsu.myng.repositories;
 
-import ru.vlsu.myng.entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import ru.vlsu.myng.entities.User;
 
 import java.util.Optional;
 import java.util.List;
@@ -124,4 +128,22 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     boolean existsByGithubUsername(String githubUsername);
+
+    // TODO Написать документацию к этому методу
+    /**
+     * 
+     * @param search
+     * @param role
+     * @param pageable
+     * @return
+     */
+    @Query("SELECT u FROM User u WHERE " +
+            "(:search IS NULL OR :search = '' OR " +
+            "LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+            "(:role IS NULL OR :role = '' OR u.role = :role)")
+    Page<User> findWithFilters(
+            @Param("search") String search,
+            @Param("role") User.Role role,
+            Pageable pageable);
 }

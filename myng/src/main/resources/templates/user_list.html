@@ -81,20 +81,72 @@
           </div>
 
           <!-- Активные фильтры -->
-          <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+          <div
+            class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100"
+            th:if="${searchFilter != null or roleFilter != null or statusFilter != null}"
+          >
             <span class="text-sm text-gray-500 mr-2 py-1.5"
               >Активные фильтры:</span
             >
+
+            <!-- Фильтр поиска -->
             <span
+              th:if="${searchFilter != null and searchFilter != ''}"
               class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
             >
-              Роль: Разработчик
-              <button class="hover:text-blue-900">
+              Поиск: <span th:text="${searchFilter}"></span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('search')"
+              >
                 <i class="fas fa-times"></i>
               </button>
             </span>
+
+            <!-- Фильтр роли -->
+            <span
+              th:if="${roleFilter != null and roleFilter != ''}"
+              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
+            >
+              Роль:
+              <span th:switch="${roleFilter}">
+                <span th:case="'user'">Пользователь</span>
+                <span th:case="'dev'">Разработчик</span>
+                <span th:case="'mod'">Модератор</span>
+                <span th:case="'admin'">Администратор</span>
+                <span th:case="*" th:text="${roleFilter}"></span>
+              </span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('role')"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </span>
+
+            <!-- Фильтр статуса -->
+            <span
+              th:if="${statusFilter != null and statusFilter != ''}"
+              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
+            >
+              Статус:
+              <span th:switch="${statusFilter}">
+                <span th:case="'active'">Активен</span>
+                <span th:case="'blocked'">Заблокирован</span>
+                <span th:case="*" th:text="${statusFilter}"></span>
+              </span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('status')"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </span>
+
+            <!-- Кнопка сброса всех фильтров -->
             <button
               class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm"
+              onclick="resetFilters()"
             >
               <i class="fas fa-undo mr-1"></i>
               Сбросить все
@@ -137,9 +189,10 @@
             <tbody class="divide-y divide-gray-200">
               <tr
                 th:each="user : ${users}"
+                th:if="${users.totalElements > 0}"
                 class="hover:bg-blue-50/30 transition-colors"
               >
-                <!-- Пользователь -->
+                <!-- Пользователь (без изменений) -->
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div
@@ -151,15 +204,11 @@
                         class="font-medium text-gray-900"
                         th:text="'@' + ${user.username}"
                       ></div>
-                      <div
-                        class="text-xs text-gray-400"
-                        th:text="${user.githubUsername != null ? user.githubUsername : '—'}"
-                      ></div>
                     </div>
                   </div>
                 </td>
 
-                <!-- Роль -->
+                <!-- Роль (без изменений) -->
                 <td class="px-6 py-4">
                   <span
                     th:switch="${user.role}"
@@ -187,7 +236,7 @@
                   </span>
                 </td>
 
-                <!-- Статус -->
+                <!-- Статус (без изменений) -->
                 <td class="px-6 py-4">
                   <span
                     th:if="${bannedMap[user.id]}"
@@ -196,7 +245,6 @@
                     <i class="fas fa-ban"></i>
                     Заблокирован
                   </span>
-
                   <span
                     th:if="${!bannedMap[user.id]}"
                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
@@ -206,7 +254,7 @@
                   </span>
                 </td>
 
-                <!-- Дата регистрации -->
+                <!-- Дата регистрации (без изменений) -->
                 <td class="px-6 py-4">
                   <div
                     class="text-sm text-gray-900"
@@ -214,10 +262,9 @@
                   ></div>
                 </td>
 
-                <!-- Действия -->
+                <!-- Действия (без изменений) -->
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-2">
-                    <!-- Изменить роль -->
                     <button
                       class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
@@ -226,19 +273,14 @@
                       <i class="fas fa-user-edit"></i>
                       Роль
                     </button>
-
-                    <!-- Предупреждение (будет позже) -->
                     <button
                       class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
                       th:attr="data-user-id=${user.id}"
-                      data-action="open-modal"
-                      data-modal="warn"
+                      onclick="openWarningModal(this)"
                     >
                       <i class="fas fa-exclamation-triangle"></i>
                       Предупр.
                     </button>
-
-                    <!-- Блокировка/Разблокировка в зависимости от статуса -->
                     <button
                       th:if="${!bannedMap[user.id]}"
                       class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
@@ -248,7 +290,6 @@
                       <i class="fas fa-ban"></i>
                       Блок
                     </button>
-
                     <button
                       th:if="${bannedMap[user.id]}"
                       class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
@@ -258,6 +299,19 @@
                       <i class="fas fa-lock-open"></i>
                       Разблок.
                     </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Строка, если пользователей нет -->
+              <tr th:if="${users.totalElements == 0}">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div
+                    class="flex flex-col items-center justify-center text-gray-400"
+                  >
+                    <i class="fas fa-users text-5xl mb-4"></i>
+                    <p class="text-lg">Пользователи не найдены</p>
+                    <p class="text-sm">Попробуйте изменить параметры поиска</p>
                   </div>
                 </td>
               </tr>
@@ -271,48 +325,104 @@
         >
           <div class="flex items-center gap-4">
             <div class="text-sm text-gray-500">
-              Показано <span class="font-medium">1-5</span> из
-              <span class="font-medium">1,547</span> пользователей
+              Показано
+              <span
+                class="font-medium"
+                th:text="${users.number * users.size + 1}"
+                >1</span
+              >-<span
+                class="font-medium"
+                th:text="${users.number * users.size + users.numberOfElements}"
+                >5</span
+              >
+              из
+              <span class="font-medium" th:text="${totalElements}">1,547</span>
+              пользователей
             </div>
+
+            <!-- Селектор количества элементов на странице -->
             <select
+              id="pageSizeSelect"
               class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"
+              onchange="changePageSize(this.value)"
             >
-              <option>10 на странице</option>
-              <option>25 на странице</option>
-              <option>50 на странице</option>
-              <option>100 на странице</option>
+              <option value="10" th:selected="${pageSize == 10}">
+                10 на странице
+              </option>
+              <option value="25" th:selected="${pageSize == 25}">
+                25 на странице
+              </option>
+              <option value="50" th:selected="${pageSize == 50}">
+                50 на странице
+              </option>
+              <option value="100" th:selected="${pageSize == 100}">
+                100 на странице
+              </option>
             </select>
           </div>
-          <div class="flex items-center gap-2">
+
+          <div class="flex items-center gap-2" th:if="${totalPages > 1}">
+            <!-- Кнопка "Назад" -->
+            <a
+              th:if="${currentPage > 0}"
+              th:href="@{/user-list(page=${currentPage - 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </a>
             <button
+              th:if="${currentPage == 0}"
               class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               disabled
             >
               <i class="fas fa-chevron-left"></i>
             </button>
-            <button
-              class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+
+            <!-- Первая страница -->
+            <a
+              th:if="${startPage > 0}"
+              th:href="@{/user-list(page=0, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
             >
               1
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+            </a>
+            <span th:if="${startPage > 1}" class="text-gray-400">...</span>
+
+            <!-- Страницы вокруг текущей -->
+            <a
+              th:each="pageNum : ${#numbers.sequence(startPage, endPage)}"
+              th:href="@{/user-list(page=${pageNum}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              th:class="${pageNum == currentPage} ? 'px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors' : 'px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors'"
+              th:text="${pageNum + 1}"
             >
-              2
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              1
+            </a>
+
+            <!-- Последняя страница -->
+            <span th:if="${endPage < totalPages - 2}" class="text-gray-400"
+              >...</span
             >
-              3
-            </button>
-            <span class="text-gray-400">...</span>
-            <button
+            <a
+              th:if="${endPage < totalPages - 1}"
+              th:href="@{/user-list(page=${totalPages - 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
               class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              th:text="${totalPages}"
             >
               155
-            </button>
-            <button
+            </a>
+
+            <!-- Кнопка "Вперед" -->
+            <a
+              th:if="${currentPage < totalPages - 1}"
+              th:href="@{/user-list(page=${currentPage + 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
               class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </a>
+            <button
+              th:if="${currentPage >= totalPages - 1}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              disabled
             >
               <i class="fas fa-chevron-right"></i>
             </button>
@@ -1065,6 +1175,135 @@
 
         closeModal("warnModal");
       }
+    </script>
+
+    <!-- JS отображения на страницах (пагинация) -->
+    <script>
+      // Функция для применения фильтров
+      function applyFilters() {
+        const search = document.getElementById("user-search").value;
+        const role = document.getElementById("role-filter").value;
+        const status = document.getElementById("status-filter").value;
+        const size = document.getElementById("pageSizeSelect")?.value || 10;
+
+        // Формируем URL с параметрами
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      // Функция для изменения количества элементов на странице
+      function changePageSize(size) {
+        const search = document.getElementById("user-search").value;
+        const role = document.getElementById("role-filter").value;
+        const status = document.getElementById("status-filter").value;
+
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      // Функция для сброса фильтров
+      function resetFilters() {
+        document.getElementById("user-search").value = "";
+        document.getElementById("role-filter").value = "";
+        document.getElementById("status-filter").value = "";
+        window.location.href =
+          "/user-list?page=0&size=" +
+          (document.getElementById("pageSizeSelect")?.value || 10);
+      }
+
+      // Функция для удаления отдельного фильтра
+      function removeFilter(filterType) {
+        const search =
+          filterType === "search"
+            ? ""
+            : document.getElementById("user-search").value;
+        const role =
+          filterType === "role"
+            ? ""
+            : document.getElementById("role-filter").value;
+        const status =
+          filterType === "status"
+            ? ""
+            : document.getElementById("status-filter").value;
+        const size = document.getElementById("pageSizeSelect")?.value || 10;
+
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Привязываем обработчики к фильтрам
+        const applyButton = document.querySelector("button.bg-blue-600");
+        if (applyButton) {
+          applyButton.onclick = applyFilters;
+        }
+
+        // Привязываем обработчик к кнопке сброса
+        const resetButton = document.querySelector("button:has(.fa-undo)");
+        if (resetButton) {
+          resetButton.onclick = resetFilters;
+        }
+
+        // Привязываем обработчики к крестикам фильтров
+        document.querySelectorAll(".bg-blue-50 button").forEach((button) => {
+          button.onclick = function () {
+            const filterText = this.closest(".bg-blue-50")?.textContent.trim();
+            if (filterText?.includes("Роль:")) removeFilter("role");
+            else if (filterText?.includes("Статус:")) removeFilter("status");
+            else removeFilter("search");
+          };
+        });
+
+        // Остальной код для модальных окон...
+
+        // Кнопки блокировки
+        document
+          .querySelectorAll("button.bg-red-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openBlockModal(this);
+            };
+          });
+
+        // Кнопки разблокировки
+        document
+          .querySelectorAll("button.bg-green-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openUnblockModal(this);
+            };
+          });
+
+        // Кнопки смены роли
+        document
+          .querySelectorAll("button.bg-blue-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openChangeRoleModal(this);
+            };
+          });
+
+        // Кнопки предупреждения
+        document
+          .querySelectorAll("button.bg-amber-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openWarningModal(this);
+            };
+          });
+      });
     </script>
   </section>
 </html>
