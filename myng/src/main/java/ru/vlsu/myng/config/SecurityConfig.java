@@ -35,7 +35,7 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
-                                // ВРЕМЕННО отключаем CSRF (только для разработки!)
+                                // ВРЕМЕННО отключаем CSRF
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(authz -> authz
                                                 // 1. ПУБЛИЧНЫЕ СТРАНИЦЫ (доступны всем)
