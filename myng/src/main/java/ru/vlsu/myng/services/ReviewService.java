@@ -1,7 +1,7 @@
 package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
-import main.java.ru.vlsu.myng.dto.ReviewUpdate;
+import ru.vlsu.myng.dto.ReviewUpdate;
 import org.springframework.stereotype.Service;
 
 import ru.vlsu.myng.entities.Game;

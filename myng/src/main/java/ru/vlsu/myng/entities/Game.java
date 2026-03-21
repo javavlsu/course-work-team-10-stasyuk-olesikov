@@ -46,6 +46,9 @@ public class Game {
     @ManyToMany(mappedBy = "games")
     private Set<Collection> collections = new HashSet<>();
 
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    private List<Review> reviews = new ArrayList<>();
+
     public enum Genre {
         action, adventure, rpg, simulation, strategy,
         sports, puzzle, horror, platformer,

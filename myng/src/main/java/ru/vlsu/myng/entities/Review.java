@@ -26,16 +26,17 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String text;
 
+    @Column(name = "created_at")
     private Instant createdAt;
 
     @Column(nullable = false, columnDefinition = "SMALLINT UNSIGNED")
     private Integer reportCount = 0;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "fk_user")
+    @ManyToOne
+    @JoinColumn(name = "fk_user", nullable = false)
     private User user;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "fk_game")
+    @ManyToOne
+    @JoinColumn(name = "fk_game", nullable = false)
     private Game game;
 }

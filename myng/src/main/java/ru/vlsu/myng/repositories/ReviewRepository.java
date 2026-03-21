@@ -3,8 +3,11 @@ package ru.vlsu.myng.repositories;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,14 +15,16 @@ import java.util.Optional;
 /**
  * Компонент слоя доступа к данным для работы с сущностью Review.<br>
  * <br>
- * Обеспечивает операции сохранения, удаления и поиска отзывов пользователей.<br>
+ * Обеспечивает операции сохранения, удаления и поиска отзывов
+ * пользователей.<br>
  * Используется в следующих сценариях:<br>
- *  - пользователь оставляет отзыв на игру;<br>
- *  - проверка наличия существующего отзыва пользователя для игры;<br>
- *  - отображение отзывов игры на странице игры;<br>
- *  - аналитика по рейтингам и количеству отзывов;<br>
+ * - пользователь оставляет отзыв на игру;<br>
+ * - проверка наличия существующего отзыва пользователя для игры;<br>
+ * - отображение отзывов игры на странице игры;<br>
+ * - аналитика по рейтингам и количеству отзывов;<br>
  * <br>
- * Наследует стандартные CRUD-операции из JpaRepository и поддерживает динамические предикаты через JpaSpecificationExecutor.
+ * Наследует стандартные CRUD-операции из JpaRepository и поддерживает
+ * динамические предикаты через JpaSpecificationExecutor.
  */
 public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpecificationExecutor<Review> {
 
@@ -31,7 +36,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      * @return список отзывов игры. Никогда не возвращает null.
      *         Может быть пустым, если отзывов ещё нет.
      *
-     * @throws IllegalArgumentException если game равна null
+     * @throws IllegalArgumentException                    если game равна null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<Review> findByGame(Game game);
@@ -44,7 +49,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      *
      * @return Optional с отзывом. Optional.empty(), если отзыв отсутствует.
      *
-     * @throws IllegalArgumentException если user или game равны null
+     * @throws IllegalArgumentException                    если user или game равны
+     *                                                     null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     Optional<Review> findByUserAndGame(User user, Game game);
@@ -57,7 +63,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      *
      * @return true, если отзыв существует, иначе false.
      *
-     * @throws IllegalArgumentException если user или game равны null
+     * @throws IllegalArgumentException                    если user или game равны
+     *                                                     null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     boolean existsByUserAndGame(User user, Game game);
@@ -70,8 +77,14 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      * @return список отзывов пользователя. Никогда не возвращает null.
      *         Может быть пустым, если отзывов нет.
      *
-     * @throws IllegalArgumentException если user равен null
+     * @throws IllegalArgumentException                    если user равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<Review> findByUser(User user);
+
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.game = :game")
+    Double getAverageRatingByGame(@Param("game") Game game);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.game = :game")
+    Integer countByGame(@Param("game") Game game);
 }

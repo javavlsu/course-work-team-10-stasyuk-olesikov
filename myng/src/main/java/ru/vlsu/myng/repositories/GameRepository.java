@@ -2,7 +2,10 @@ package ru.vlsu.myng.repositories;
 
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,17 +15,16 @@ import java.util.Optional;
  * <br>
  * Обеспечивает операции сохранения, удаления и поиска игр.<br>
  * Используется в следующих сценариях:<br>
- *  - добавление новой игры разработчиком;<br>
- *  - получение списка всех игр разработчика;<br>
- *  - поиск игры по уникальному репозиторию;<br>
- *  - фильтрация игр по жанру;<br>
- *  - проверка существования игры по репозиторию;<br>
- *  - подготовка списка игр для отображения в пользовательском интерфейсе.<br>
+ * - добавление новой игры разработчиком;<br>
+ * - получение списка всех игр разработчика;<br>
+ * - поиск игры по уникальному репозиторию;<br>
+ * - фильтрация игр по жанру;<br>
+ * - проверка существования игры по репозиторию;<br>
+ * - подготовка списка игр для отображения в пользовательском интерфейсе.<br>
  * <br>
  * Наследует стандартные CRUD-операции из JpaRepository.
  */
-public interface GameRepository extends JpaRepository<Game, Integer>
-{
+public interface GameRepository extends JpaRepository<Game, Integer> {
 
     /**
      * Поиск игры по уникальному репозиторию.
@@ -32,7 +34,8 @@ public interface GameRepository extends JpaRepository<Game, Integer>
      * @return Optional с игрой.
      *         Optional.empty() если игра с указанным репозиторием не найдена.
      *
-     * @throws IllegalArgumentException если repo равен null или пустая строка
+     * @throws IllegalArgumentException                    если repo равен null или
+     *                                                     пустая строка
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     Optional<Game> findByRepo(String repo);
@@ -45,7 +48,7 @@ public interface GameRepository extends JpaRepository<Game, Integer>
      * @return список игр. Никогда не возвращает null.
      *         Может быть пустым, если у разработчика ещё нет игр.
      *
-     * @throws IllegalArgumentException если developer равен null
+     * @throws IllegalArgumentException                    если developer равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<Game> findByDeveloper(User developer);
@@ -58,7 +61,7 @@ public interface GameRepository extends JpaRepository<Game, Integer>
      * @return список игр данного жанра. Никогда не возвращает null.
      *         Может быть пустым, если игр с таким жанром нет.
      *
-     * @throws IllegalArgumentException если genre равен null
+     * @throws IllegalArgumentException                    если genre равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<Game> findByGenre(Game.Genre genre);
@@ -70,8 +73,15 @@ public interface GameRepository extends JpaRepository<Game, Integer>
      *
      * @return true если игра с указанным репозиторием существует, иначе false
      *
-     * @throws IllegalArgumentException если repo равен null или пустая строка
+     * @throws IllegalArgumentException                    если repo равен null или
+     *                                                     пустая строка
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     boolean existsByRepo(String repo);
+
+    // EntityGraph говорит Hibernate загрузить эти связи сразу (EAGER) одним
+    // запросом
+    @EntityGraph(attributePaths = { "developer", "tags" })
+    @Query("SELECT DISTINCT g FROM Game g")
+    List<Game> findAllForCatalog();
 }
