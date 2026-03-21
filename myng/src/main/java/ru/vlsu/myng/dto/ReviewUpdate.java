@@ -1,4 +1,4 @@
-package main.java.ru.vlsu.myng.dto;
+package ru.vlsu.myng.dto;
 
 import lombok.Data;
 import lombok.Getter;

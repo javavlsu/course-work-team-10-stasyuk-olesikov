@@ -1,7 +1,7 @@
 package ru.vlsu.myng.controllers;
 
 import lombok.RequiredArgsConstructor;
-import main.java.ru.vlsu.myng.dto.ReviewUpdate;
+import ru.vlsu.myng.dto.ReviewUpdate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

@@ -2,6 +2,7 @@ package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vlsu.myng.entities.Collection;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
@@ -50,5 +51,15 @@ public class CollectionService {
                 .orElseThrow(() -> new IllegalArgumentException("Collection not found"));
 
         collectionRepository.delete(collection);
+    }
+
+    @Transactional
+    public Collection save(Collection collection) {
+        return collectionRepository.save(collection);
+    }
+
+    public Collection findById(Integer id) {
+        return collectionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Collection not found: " + id));
     }
 }
