@@ -4,8 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Collection;
@@ -13,6 +17,8 @@ import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.repositories.CollectionRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
 
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.security.Principal;
 import java.util.List;
 
@@ -44,5 +50,38 @@ public class ProfileController {
         }
 
         return new byte[0];
+    }
+
+    @PostMapping("/profile/{id}/edit")
+    @ResponseBody
+    public ResponseEntity<?> editProfile(
+            @PathVariable Integer id,
+            @RequestParam String username,
+            @RequestParam String about,
+            @RequestParam(required = false) MultipartFile avatar,
+            Principal principal
+    ) {
+        User currentUser = userService.findByEmail(principal.getName());
+
+        if (!currentUser.getId().equals(id)) {
+            return ResponseEntity.badRequest().body("Нельзя редактировать чужой профиль");
+        }
+
+        User user = userService.findById(id);
+
+        user.setUsername(username);
+        user.setBio(about);
+
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                user.setProfilePic(avatar.getBytes());
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().body("Ошибка загрузки файла");
+            }
+        }
+
+        userService.save(user);
+
+        return ResponseEntity.ok().build();
     }
 }
