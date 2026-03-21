@@ -26,7 +26,7 @@ import java.util.Map;
 public class UserListController {
 
     private final UserListService userListService;
-    private final UserService userService; // нужен для поиска модератора
+    private final UserService userService;
 
     @GetMapping("/user-list")
     public String userListPage(
@@ -39,13 +39,11 @@ public class UserListController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("registeredAt").descending());
 
-        // Преобразуем строку роли в enum
         User.Role roleEnum = null;
         if (role != null && !role.isEmpty()) {
             try {
                 roleEnum = User.Role.valueOf(role);
             } catch (IllegalArgumentException e) {
-                // Логируем ошибку, но не прерываем выполнение
                 System.out.println("Invalid role value: " + role);
             }
         }
@@ -84,10 +82,8 @@ public class UserListController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Находим текущего модератора/админа
             User moderator = userService.findByEmail(currentUser.getUsername());
 
-            // Выполняем блокировку
             userListService.banUser(
                     request.getUserId(),
                     request.getReason(),
@@ -134,10 +130,8 @@ public class UserListController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Находим текущего админа
             User admin = userService.findByEmail(currentUser.getUsername());
 
-            // Выполняем смену роли
             userListService.changeUserRole(request.getUserId(), request.getNewRole(), admin);
 
             response.put("success", true);
@@ -160,10 +154,8 @@ public class UserListController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Находим текущего модератора/админа
             User moderator = userService.findByEmail(currentUser.getUsername());
 
-            // Выдаем предупреждение
             userListService.issueWarning(request.getUserId(), request.getReason(), moderator);
 
             response.put("success", true);

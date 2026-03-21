@@ -15,6 +15,5 @@ public class BanRequest {
     private String reason;
     private Integer durationHours;
     
-    // Для варианта "Навсегда" будем передавать null или специальное значение
-    private boolean permanent; // true если блокировка навсегда
+    private boolean permanent;
 }

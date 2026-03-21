@@ -45,7 +45,7 @@ public class SecurityConfig {
                                                                 "/game", // просмотр игр
                                                                 "/catalog", // список игр
                                                                 "/running-game", // игра
-                                                                "/css/**", // стили
+                                                                "/main.css", // стили
                                                                 "/js/**", // скрипты
                                                                 "/images/**" // картинки
                                                 ).permitAll()

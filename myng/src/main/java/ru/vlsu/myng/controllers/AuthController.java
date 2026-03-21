@@ -18,7 +18,6 @@ public class AuthController {
 
     @GetMapping("/auth")
     public String authPage(Model model) {
-        // Добавляем пустой объект для формы регистрации
         if (!model.containsAttribute("userRegistrationDto")) {
             model.addAttribute("userRegistrationDto", new UserRegistrationDto());
         }
@@ -31,16 +30,13 @@ public class AuthController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // Пытаемся зарегистрировать пользователя
             userService.registerNewUser(registrationDto);
 
-            // Если успешно - сообщение об успехе
             redirectAttributes.addFlashAttribute("successMessage",
                     "Регистрация успешна! Теперь можете войти.");
             return "redirect:/auth?success";
 
         } catch (RuntimeException e) {
-            // Если ошибка - показываем сообщение
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             redirectAttributes.addFlashAttribute("userRegistrationDto", registrationDto);
             return "redirect:/auth?error";

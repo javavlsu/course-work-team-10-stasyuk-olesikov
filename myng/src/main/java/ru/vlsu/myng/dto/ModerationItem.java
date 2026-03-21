@@ -9,8 +9,8 @@ import java.time.Instant;
 @Setter
 public class ModerationItem {
 
-    private Long id;             // ID сущности
-    private String type;         // Тип: GAME_VERSION, DEV_APPLICATION, REVIEW
+    private Long id;
+    private String type;         // GAME_VERSION, DEV_APPLICATION, REVIEW
     private Long gameId;         // Для GameVersion и Review
 
     // --- Для DEV_APPLICATION ---
@@ -29,7 +29,7 @@ public class ModerationItem {
     private String reviewText;
     private Integer reportCount;
 
-    private Instant createdAt;   // Время создания
+    private Instant createdAt;
     private String moderatorUsername;
     private Boolean approved;
     private String reason;
