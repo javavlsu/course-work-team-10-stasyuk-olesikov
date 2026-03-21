@@ -30,8 +30,8 @@
                             alt="Avatar"
                             class="w-full h-full object-cover rounded-full"
                     />
-                    <span id="avatar-text" th:if="${user.profilePic == null}">AB</span>
-                    <input type="file" id="avatar-input" class="absolute inset-0 opacity-0 cursor-pointer" />
+                    <!--<span id="avatar-text" th:if="${user.profilePic == null}">AB</span>-->
+                    <input type="file" id="avatar-input" class="absolute inset-0 opacity-0 cursor-pointer hidden" />
                 </div>
 
                 <!-- Информация -->
@@ -354,6 +354,7 @@
                             type="button"
                             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
                             id="confirmLogout"
+                            data-action="confirm"
                     >
                         Выйти
                     </button>
@@ -521,14 +522,14 @@
               const aboutInput = document.getElementById("about-input");
 
               const avatarInput = document.getElementById("avatar-input");
-              const avatarText = document.getElementById("avatar-text");
+              //const avatarText = document.getElementById("avatar-text");
               const avatarImg = document.getElementById("avatar-img");
 
               editBtn.addEventListener("click", () => {
                 usernameInput.value = usernameText.textContent;
                 aboutInput.value = aboutText.textContent.replace("Обо мне: ", "");
                 [usernameText, aboutText].forEach(el => el.classList.add("hidden"));
-                [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
+                [usernameInput, aboutInput, avatarInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
                 editBtn.classList.add("hidden");
               });
 
@@ -536,19 +537,31 @@
                 [usernameText, aboutText].forEach(el => el.classList.remove("hidden"));
                 [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.add("hidden"));
                 editBtn.classList.remove("hidden");
-                if (avatarImg.src) avatarImg.classList.add("hidden");
-                avatarText.classList.remove("hidden");
+                //if (avatarImg.src) avatarImg.classList.add("hidden");
+                //avatarText.classList.remove("hidden");
               });
 
-              saveBtn.addEventListener("click", () => {
-                usernameText.textContent = usernameInput.value;
-                aboutText.textContent = `Обо мне: ${aboutInput.value}`;
-                cancelBtn.click();
-                console.log({
-                  username: usernameInput.value,
-                  about: aboutInput.value,
-                  avatar: avatarInput.files[0]
-                });
+              saveBtn.addEventListener("click", async () => {
+                  const formData = new FormData();
+                  formData.append("username", usernameInput.value);
+                  formData.append("about", aboutInput.value);
+
+                  if (avatarInput.files[0]) {
+                    formData.append("avatar", avatarInput.files[0]);
+                  }
+
+                  const response = await fetch(`/profile/${userId}/edit`, {
+                    method: "POST",
+                    body: formData
+                  });
+
+                  if (response.ok) {
+                    usernameText.textContent = usernameInput.value;
+                    aboutText.textContent = aboutInput.value;
+                    cancelBtn.click();
+                  } else {
+                    console.error("Ошибка при сохранении профиля");
+                  }
               });
 
               avatarInput.addEventListener("change", (e) => {
@@ -558,7 +571,7 @@
                 reader.onload = () => {
                   avatarImg.src = reader.result;
                   avatarImg.classList.remove("hidden");
-                  avatarText.classList.add("hidden");
+                  //avatarText.classList.add("hidden");
                 };
                 reader.readAsDataURL(file);
               });
@@ -607,23 +620,58 @@
                    ========================= */
 
                 if (action === "edit-collection") {
-                  const targetId = actionEl.dataset.target;
+                  const collectionId = actionEl.dataset.collectionId;
+                  const textEl = document.getElementById(`collection-${collectionId}-title-text`);
+                  const inputEl = document.getElementById(`collection-${collectionId}-title-input`);
 
-                  const textEl = document.getElementById(`${targetId}-title-text`);
-                  const inputEl = document.getElementById(`${targetId}-title-input`);
-
+                  // toggle visibility
                   textEl.classList.toggle("hidden");
                   inputEl.classList.toggle("hidden");
 
                   if (!inputEl.classList.contains("hidden")) {
-                    inputEl.value = textEl.textContent;
+                    inputEl.value = textEl.textContent.trim();
                     inputEl.focus();
 
-                    inputEl.addEventListener("blur", () => {
-                      textEl.textContent = inputEl.value || textEl.textContent;
-                      textEl.classList.remove("hidden");
-                      inputEl.classList.add("hidden");
-                    }, { once: true });
+                    const save = async () => {
+                      const newName = inputEl.value.trim();
+                      if (newName === "") return;
+
+                      try {
+                        const response = await fetch(`/collections/${collectionId}/edit`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                            //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content // if Spring Security CSRF enabled
+                          },
+                          body: JSON.stringify({ name: newName })
+                        });
+
+                        if (response.ok) {
+                          textEl.textContent = newName;
+                        } else {
+                          console.error("Failed to save collection name");
+                        }
+                      } catch (err) {
+                        console.error("Error saving collection:", err);
+                      } finally {
+                        // hide input, show text
+                        textEl.classList.remove("hidden");
+                        inputEl.classList.add("hidden");
+                        inputEl.removeEventListener("keydown", keyHandler);
+                      }
+                    };
+
+                    const keyHandler = (evt) => {
+                      if (evt.key === "Enter") save();
+                      if (evt.key === "Escape") {
+                        inputEl.value = textEl.textContent.trim();
+                        textEl.classList.remove("hidden");
+                        inputEl.classList.add("hidden");
+                      }
+                    };
+
+                    inputEl.addEventListener("keydown", keyHandler);
+                    inputEl.addEventListener("blur", save, { once: true });
                   }
                 }
 
@@ -791,14 +839,14 @@
                     }
 
                   if (modalType === "logout") {
-                    openModal("tpl-logout-confirm", () => {
-                      const confirmBtn = document.getElementById("confirmLogout");
-
-                      confirmBtn.addEventListener("click", () => {
-                        console.log("User confirmed logout!");
-                        closeModal();
-                      });
+                    openModal("tpl-logout-confirm", async () => {
+                      console.log("Кнопка выйти нажата");
+                      await fetch("profile/logout",
+                        { method: "POST" });
+                      window.location.href = "/";
                     });
+
+                    console.log("Открыта форма выхода");
                   }
 
                   if (modalType === "delete_review") {

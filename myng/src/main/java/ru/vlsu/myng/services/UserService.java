@@ -112,4 +112,9 @@ public class UserService {
     public boolean isEmailTaken(String email) {
         return userRepository.existsByEmail(email);
     }
+
+    @Transactional
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }

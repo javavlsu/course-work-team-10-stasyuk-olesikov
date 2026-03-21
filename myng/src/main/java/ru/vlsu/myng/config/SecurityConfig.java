@@ -52,7 +52,8 @@ public class SecurityConfig {
 
                                                 // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)
                                                 .requestMatchers(
-                                                                "/profile/**" // личный кабинет
+                                                                "/profile/**", // личный кабинет
+                                                                "/profile/*/edit"
                                                 ).authenticated()
 
                                                 // 3. СТРАНИЦЫ ДЛЯ РАЗРАБОТЧИКОВ (dev, mod, admin)
