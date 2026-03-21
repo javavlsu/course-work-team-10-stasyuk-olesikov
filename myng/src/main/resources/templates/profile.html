@@ -795,11 +795,35 @@
                   }
 
                   if (modalType === "become_dev") {
-                    openModal("tpl-become-dev", () => {
-                      const form = modalContent.querySelector('form[data-form="become_dev"]');
-                      const formData = new FormData(form);
-                      console.log("Become Developer form submitted:", Object.fromEntries(formData));
+                    openModal("tpl-become-dev", async () => {
+                        const form = modalContent.querySelector('form[data-form="become_dev"]');
+                        const submitBtn = form.querySelector('button[type="submit"]');
+
+                          const formData = new FormData(form);
+                          const data = Object.fromEntries(formData);
+
+                          try {
+                            const response = await fetch("/dev-applications", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json"
+                                //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content
+                              },
+                              body: JSON.stringify(data)
+                            });
+
+                            if (response.ok) {
+                              console.log("Dev application submitted successfully");
+                              closeModal();
+                            } else {
+                              console.error("Failed to submit dev application");
+                            }
+                          } catch (err) {
+                            console.error("Error submitting dev application:", err);
+                          }
                     });
+
+                    console.log("become dev form opened");
                   }
 
                     if (modalType === "create_collection") {
