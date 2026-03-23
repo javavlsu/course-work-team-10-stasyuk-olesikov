@@ -30,7 +30,6 @@ public class GameService {
     private final ReviewRepository reviewRepository;
     private final GameVersionRepository gameVersionRepository;
     private final UserRepository userRepository;
-    private final TagRepository tagRepository; // Добавляем TagRepository
 
     public List<Game> getDeveloperGames(Integer userId) {
         User developer = userRepository.findById(userId)
@@ -116,7 +115,6 @@ public class GameService {
                 .totalViews(totalViews != null ? totalViews : 0)
                 .totalLaunches(totalLaunches != null ? totalLaunches : 0)
                 .firstReleaseDate(firstReleaseDate)
-                // Добавляем вычисление цвета
                 .themeColor(getGenreColor(game.getGenre()))
                 .build();
     }
@@ -125,7 +123,6 @@ public class GameService {
         if (genre == null)
             return "from-indigo-500 to-purple-600";
 
-        // Используем name() для получения строкового значения enum
         switch (genre.name().toLowerCase()) {
             case "action":
                 return "from-red-500 to-orange-600";

@@ -54,46 +54,73 @@
       </button>
     </div>
 
-    <!-- Сетка игр -->
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
     >
       <article
         th:each="game : ${games}"
-        class="game-card flex flex-col h-full bg-white rounded-xl shadow-md hover:shadow-xl transition-all"
+        class="game-card group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
       >
         <div
-          class="shrink-0 w-full h-48 bg-gradient-to-br"
+          class="shrink-0 w-full h-40 bg-gradient-to-br relative transition-transform duration-500 group-hover:scale-105"
           th:classappend="${game.themeColor}"
-        ></div>
+        >
+          <div
+            class="absolute top-4 right-4 bg-white/90 backdrop-blur px-2 py-1 rounded-lg shadow-sm flex items-center gap-1"
+          >
+            <span class="text-yellow-500 text-xs"
+              ><i class="fas fa-star"></i
+            ></span>
+            <span
+              class="text-sm font-bold text-gray-800"
+              th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}"
+              >4.5</span
+            >
+          </div>
+        </div>
 
-        <div class="p-5 flex flex-col flex-1">
+        <div class="p-6 flex flex-col flex-1">
           <div class="flex-1">
             <div class="flex justify-between items-start mb-2">
               <h3
-                class="text-xl font-bold text-gray-900"
+                class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors"
                 th:text="${game.name}"
               >
-                Name
+                Название игры
               </h3>
             </div>
 
-            <p
-              class="text-gray-600 text-sm line-clamp-2 mb-4"
-              th:text="${game.description}"
-            >
-              Descr
-            </p>
-
-            <div class="flex flex-wrap mb-4">
+            <div class="flex items-center gap-2 text-xs text-gray-400 mb-3">
+              <span class="flex items-center gap-1">
+                <i class="far fa-user"></i>
+                <span th:text="${game.developerUsername}">admin</span>
+              </span>
+              <span>•</span>
               <span
-                class="text-xs bg-gray-100 px-2 py-1 rounded mr-2 mb-2"
+                th:text="${game.firstReleaseDate != null ? #strings.substring(game.firstReleaseDate.toString(), 0, 10) : 'Скоро'}"
+              >
+                01.01.2024
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+              <p
+                class="text-gray-600 text-sm line-clamp-2 mb-4 h-10"
+                th:text="${game.description}"
+              >
+                Описание игры...
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1 mb-6">
+              <span
+                class="text-[10px] uppercase tracking-wider font-semibold bg-gray-900 px-2 py-0.5 rounded"
                 th:text="${game.genre}"
-                >Genre</span
+                >Action</span
               >
               <span
                 th:each="tag : ${game.tags}"
-                class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded mr-2 mb-2"
+                class="text-[10px] uppercase tracking-wider font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded"
                 th:text="${tag}"
                 >Tag</span
               >
@@ -101,9 +128,26 @@
           </div>
 
           <div class="pt-4 mt-auto border-t border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex gap-4 text-gray-500 text-sm">
+                <span title="Просмотры">
+                  <i class="far fa-eye mr-1"></i>
+                  <span th:text="${game.totalViews}">0</span>
+                </span>
+                <span title="Запуски">
+                  <i class="fas fa-play mr-1 text-xs"></i>
+                  <span th:text="${game.totalLaunches}">0</span>
+                </span>
+                <span title="Отзывы">
+                  <i class="far fa-comment mr-1"></i>
+                  <span th:text="${game.reviewsCount}">0</span>
+                </span>
+              </div>
+            </div>
+
             <a
-              th:href="@{/game/{id}(id=${game.id})}"
-              class="flex items-center justify-center w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              th:href="@{/games/{id}(id=${game.id})}"
+              class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-100 hover:shadow-blue-200 active:scale-[0.98]"
             >
               Играть
             </a>
@@ -158,61 +202,4 @@
       </nav>
     </div>
   </section>
-
-  <!-- Добавляем JavaScript для фильтрации и цветов жанров -->
-  <script th:inline="javascript">
-    function getGenreColor(genre) {
-      const colors = {
-        action: "from-red-500 to-orange-600",
-        adventure: "from-yellow-500 to-orange-600",
-        rpg: "from-purple-500 to-pink-600",
-        simulation: "from-green-500 to-emerald-600",
-        strategy: "from-blue-500 to-cyan-600",
-        sports: "from-green-500 to-blue-600",
-        puzzle: "from-indigo-500 to-purple-600",
-        horror: "from-gray-700 to-gray-900",
-        platformer: "from-cyan-500 to-blue-600",
-        sandbox: "from-yellow-500 to-red-600",
-        visual_novel: "from-pink-500 to-purple-600",
-        roguelike: "from-orange-500 to-red-600",
-      };
-      return colors[genre] || "from-indigo-500 to-purple-600";
-    }
-
-    // Простая клиентская фильтрация (пока для демонстрации)
-    document.addEventListener("DOMContentLoaded", function () {
-      const searchInput = document.getElementById("searchInput");
-      const genreFilter = document.getElementById("genreFilter");
-      const applyBtn = document.getElementById("applyFiltersBtn");
-      const gameCards = document.querySelectorAll(".game-card");
-
-      function filterGames() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedGenre = genreFilter.value;
-
-        gameCards.forEach((card) => {
-          const gameName = card.querySelector("h3").textContent.toLowerCase();
-          const gameGenre = card.querySelector(
-            ".flex.flex-wrap.gap-2 span:first-child",
-          ).textContent;
-
-          const matchesSearch = gameName.includes(searchTerm);
-          const matchesGenre = !selectedGenre || gameGenre === selectedGenre;
-
-          card.style.display = matchesSearch && matchesGenre ? "flex" : "none";
-        });
-      }
-
-      if (applyBtn) {
-        applyBtn.addEventListener("click", filterGames);
-      }
-      if (searchInput) {
-        searchInput.addEventListener("keyup", function (e) {
-          if (e.key === "Enter") filterGames();
-        });
-      }
-    });
-
-    window.getGenreColor = getGenreColor;
-  </script>
 </html>

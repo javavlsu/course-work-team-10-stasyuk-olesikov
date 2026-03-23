@@ -21,7 +21,7 @@ public class GameController {
     }
 
     @GetMapping("/developer/{userId}")
-    public String getDeveloperGames(@PathVariable Long userId, Model model) {
+    public String getDeveloperGames(@PathVariable Integer userId, Model model) {
         model.addAttribute("games", gameService.getDeveloperGames(userId));
         return "fragments/my_games :: myGamesFragment";
     }
