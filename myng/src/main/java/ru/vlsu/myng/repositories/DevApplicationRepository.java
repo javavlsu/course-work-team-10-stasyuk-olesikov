@@ -4,6 +4,7 @@ import ru.vlsu.myng.entities.DevApplication;
 import ru.vlsu.myng.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,13 +29,13 @@ public interface DevApplicationRepository extends JpaRepository<DevApplication, 
      *             Не должен быть null.
      *             Должен быть персистентной сущностью (id != null).
      *
-     * @return Optional с заявкой пользователя.
+     * @return List с заявками пользователя.
      *         Никогда не возвращает null.
-     *         Optional.empty() если пользователь ещё не подавал заявку.
+     *         Пустой список если пользователь ещё не подавал заявку.
      *
      * @throws IllegalArgumentException если user равен null
      * @throws org.springframework.dao.DataAccessException
      *         при ошибке доступа к базе данных
      */
-    Optional<DevApplication> findByUser(User user);
+    List<DevApplication> findByUser(User user);
 }

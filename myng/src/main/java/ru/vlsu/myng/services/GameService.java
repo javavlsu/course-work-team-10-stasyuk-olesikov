@@ -7,10 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import ru.vlsu.myng.entities.Game;
-import ru.vlsu.myng.entities.User;
-import ru.vlsu.myng.entities.Tag;
-import ru.vlsu.myng.entities.GameStats;
+import ru.vlsu.myng.dto.MyGame;
+import ru.vlsu.myng.entities.*;
 import ru.vlsu.myng.repositories.GameRepository;
 import ru.vlsu.myng.repositories.GameStatsRepository;
 import ru.vlsu.myng.repositories.GameVersionRepository;
@@ -22,6 +20,7 @@ import ru.vlsu.myng.dto.GameFilterDTO;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -232,5 +231,36 @@ public class GameService {
             default:
                 return games;
         }
+    }
+
+    public List<MyGame> getGamesForUser(User user) {
+        List<Game> games = gameRepository.findByDeveloper(user);
+
+        return games.stream().map(game -> {
+            GameVersion latestVersion = game.getVersions().stream()
+                    .max(Comparator.comparing(GameVersion::getCreatedAt))
+                    .orElse(null);
+
+            boolean approved = false;
+            if (latestVersion != null) {
+                ModerationVerdict verdict = latestVersion.getModerationVerdict();
+                if (verdict != null && Boolean.TRUE.equals(verdict.getApproved())) {
+                    approved = true;
+                }
+            }
+
+            int views = game.getStats().stream()
+                    .filter(s -> s.getEventType() == GameStats.EventType.view)
+                    .mapToInt(GameStats::getCount)
+                    .sum();
+
+            double rating = game.getReviews().isEmpty() ? 0.0
+                    : game.getReviews().stream()
+                            .mapToDouble(Review::getRating)
+                            .average()
+                            .orElse(0.0);
+
+            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, views, rating);
+        }).collect(Collectors.toList());
     }
 }
