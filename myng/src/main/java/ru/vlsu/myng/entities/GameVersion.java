@@ -37,4 +37,7 @@ public class GameVersion {
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_game")
     private Game game;
+
+    @OneToOne(mappedBy = "gameVersion")
+    private ModerationVerdict moderationVerdict;
 }

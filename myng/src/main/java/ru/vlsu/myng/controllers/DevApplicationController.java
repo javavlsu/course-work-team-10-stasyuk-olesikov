@@ -13,6 +13,7 @@ import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.dto.DevApplicationDto;
 
 import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +29,21 @@ public class DevApplicationController {
             @RequestBody DevApplicationDto dto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principalUser
     ) {
+        // if modverd with approved = null exists return error
+        User u = userService.findByEmail(principalUser.getUsername());
+        List<DevApplication> applist = devApplicationService.findByUser(u);
+        if (!applist.isEmpty())
+        {
+            for (var a : applist)
+            {
+                var modverdict = moderationVerdictService.findByDevApplication(a); // n+1 but don't give a fuck
+                if (modverdict.isPresent() && modverdict.get().getApproved() == null)
+                {
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+        }
+
         User user = userService.findByEmail(principalUser.getUsername());
 
         DevApplication app = new DevApplication();

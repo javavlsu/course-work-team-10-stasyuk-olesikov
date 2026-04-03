@@ -1,5 +1,6 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="layout :: layout(~{::section})">
     <section
       id="profile"
@@ -130,6 +131,7 @@
             Уведомления
           </button>
           <button
+            sec:authorize="hasRole('USER')"
             class="ml-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
             data-action="open-modal"
             data-modal="become_dev"
@@ -327,8 +329,9 @@
                         Отмена
                     </button>
                     <button
-                            type="submit"
+                            type="button"
                             class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                            data-action="confirm"
                     >
                         <i class="fas fa-paper-plane"></i> Отправить
                     </button>
@@ -799,28 +802,27 @@
                         const form = modalContent.querySelector('form[data-form="become_dev"]');
                         const submitBtn = form.querySelector('button[type="submit"]');
 
-                          const formData = new FormData(form);
-                          const data = Object.fromEntries(formData);
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData);
 
-                          try {
-                            const response = await fetch("/dev-applications", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json"
-                                //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content
-                              },
-                              body: JSON.stringify(data)
-                            });
+                        console.log(data);
 
-                            if (response.ok) {
-                              console.log("Dev application submitted successfully");
-                              closeModal();
-                            } else {
-                              console.error("Failed to submit dev application");
-                            }
-                          } catch (err) {
-                            console.error("Error submitting dev application:", err);
-                          }
+                        const response = await fetch("/dev-applications", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                            //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content
+                          },
+                          body: JSON.stringify(data)
+                        });
+
+                        if (response.ok) {
+                          console.log("Dev application submitted successfully");
+                          closeModal();
+                        } else {
+                          console.log("Failed to submit dev application");
+                          alert("Ошибка: вы уже подали заявку");
+                        }
                     });
 
                     console.log("become dev form opened");

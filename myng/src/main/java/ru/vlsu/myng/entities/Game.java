@@ -49,6 +49,10 @@ public class Game {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
+    //@ToString.Exclude
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    private List<GameStats> stats = new ArrayList<>();
+
     public enum Genre {
         action, adventure, rpg, simulation, strategy,
         sports, puzzle, horror, platformer,

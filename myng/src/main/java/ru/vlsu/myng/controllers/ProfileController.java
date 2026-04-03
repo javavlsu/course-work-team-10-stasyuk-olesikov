@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
+import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Collection;
+import ru.vlsu.myng.services.GameService;
 import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.repositories.CollectionRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
@@ -29,6 +31,7 @@ public class ProfileController {
     private final UserService userService;
     private final CollectionRepository collectionRepository;
     private final ReviewRepository reviewRepository;
+    private final GameService gameService;
 
     @GetMapping("/profile")
     public String myProfilePage(Principal principal, Model model) {
@@ -37,6 +40,8 @@ public class ProfileController {
         model.addAttribute("user", user);
         List<Review> reviews = reviewRepository.findByUser(user);
         model.addAttribute("reviews", reviews);
+        List<MyGame> games = gameService.getGamesForUser(user);
+        model.addAttribute("games", games);
         return "profile";
     }
 
