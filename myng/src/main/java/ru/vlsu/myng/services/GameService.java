@@ -3,6 +3,9 @@ package ru.vlsu.myng.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
@@ -15,8 +18,10 @@ import ru.vlsu.myng.repositories.ReviewRepository;
 import ru.vlsu.myng.repositories.UserRepository;
 import ru.vlsu.myng.repositories.TagRepository;
 import ru.vlsu.myng.dto.CatalogGameDTO;
+import ru.vlsu.myng.dto.GameFilterDTO;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,15 +86,12 @@ public class GameService {
      * Конвертирует Game в CatalogGameDTO с дополнительными данными
      */
     private CatalogGameDTO convertToCatalogDto(Game game) {
-        // Получаем средний рейтинг и количество отзывов через репозиторий
         Double avgRating = reviewRepository.getAverageRatingByGame(game);
         Integer reviewsCount = reviewRepository.countByGame(game);
 
-        // Получаем статистику просмотров и запусков
         Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
         Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
 
-        // Получаем дату первого релиза
         Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)
                 .map(version -> version.getCreatedAt())
                 .orElse(null);
@@ -122,34 +124,113 @@ public class GameService {
     private String getGenreColor(Game.Genre genre) {
         if (genre == null)
             return "from-indigo-500 to-purple-600";
-
-        switch (genre.name().toLowerCase()) {
-            case "action":
+        switch (genre) {
+            case action:
                 return "from-red-500 to-orange-600";
-            case "adventure":
+            case adventure:
                 return "from-yellow-500 to-orange-600";
-            case "rpg":
+            case rpg:
                 return "from-purple-500 to-pink-600";
-            case "simulation":
+            case simulation:
                 return "from-green-500 to-emerald-600";
-            case "strategy":
+            case strategy:
                 return "from-blue-500 to-cyan-600";
-            case "sports":
+            case sports:
                 return "from-green-500 to-blue-600";
-            case "puzzle":
+            case puzzle:
                 return "from-indigo-500 to-purple-600";
-            case "horror":
+            case horror:
                 return "from-gray-700 to-gray-900";
-            case "platformer":
+            case platformer:
                 return "from-cyan-500 to-blue-600";
-            case "sandbox":
+            case sandbox:
                 return "from-yellow-500 to-red-600";
-            case "visual_novel":
+            case visual_novel:
                 return "from-pink-500 to-purple-600";
-            case "roguelike":
+            case roguelike:
                 return "from-orange-500 to-red-600";
             default:
                 return "from-indigo-500 to-purple-600";
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CatalogGameDTO> getFilteredGames(GameFilterDTO filter, Pageable pageable) {
+        // 1. Получаем все игры с базовыми фильтрами (поиск, жанр)
+        List<Game> games = gameRepository.findGamesWithBasicFilters(
+                filter.getSearch(),
+                filter.getGenre());
+
+        // 2. Конвертируем в DTO (чтобы получить рейтинг и теги)
+        List<CatalogGameDTO> dtos = games.stream()
+                .map(this::convertToCatalogDto)
+                .collect(Collectors.toList());
+
+        // 3. Фильтрация по тегам (в Java)
+        if (filter.getTags() != null && !filter.getTags().isEmpty()) {
+            dtos = dtos.stream()
+                    .filter(dto -> dto.getTags() != null &&
+                            dto.getTags().stream().anyMatch(filter.getTags()::contains))
+                    .collect(Collectors.toList());
+        }
+
+        // 4. Фильтрация по рейтингу (в Java)
+        if (filter.getMinRating() != null) {
+            dtos = dtos.stream()
+                    .filter(dto -> dto.getAverageRating() >= filter.getMinRating())
+                    .collect(Collectors.toList());
+        }
+
+        // 5. Сортировка (в Java)
+        dtos = sortGames(dtos, filter.getSort());
+
+        // 6. Пагинация (в Java)
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        List<CatalogGameDTO> pagedList = start < end ? dtos.subList(start, end) : Collections.emptyList();
+
+        return new PageImpl<>(pagedList, pageable, dtos.size());
+    }
+
+    private List<CatalogGameDTO> sortGames(List<CatalogGameDTO> games, String sort) {
+        if (sort == null)
+            return games;
+
+        switch (sort) {
+            case "newest":
+                return games.stream()
+                        .sorted((a, b) -> {
+                            if (a.getFirstReleaseDate() == null)
+                                return 1;
+                            if (b.getFirstReleaseDate() == null)
+                                return -1;
+                            return b.getFirstReleaseDate().compareTo(a.getFirstReleaseDate());
+                        })
+                        .collect(Collectors.toList());
+            case "oldest":
+                return games.stream()
+                        .sorted((a, b) -> {
+                            if (a.getFirstReleaseDate() == null)
+                                return 1;
+                            if (b.getFirstReleaseDate() == null)
+                                return -1;
+                            return a.getFirstReleaseDate().compareTo(b.getFirstReleaseDate());
+                        })
+                        .collect(Collectors.toList());
+            case "rating_high":
+                return games.stream()
+                        .sorted((a, b) -> b.getAverageRating().compareTo(a.getAverageRating()))
+                        .collect(Collectors.toList());
+            case "rating_low":
+                return games.stream()
+                        .sorted((a, b) -> a.getAverageRating().compareTo(b.getAverageRating()))
+                        .collect(Collectors.toList());
+            case "popular":
+                return games.stream()
+                        .sorted((a, b) -> b.getTotalLaunches().compareTo(a.getTotalLaunches()))
+                        .collect(Collectors.toList());
+            default:
+                return games;
         }
     }
 }

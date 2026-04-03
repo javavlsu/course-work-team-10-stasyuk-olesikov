@@ -24,34 +24,187 @@
     </div>
 
     <!-- Фильтры и поиск -->
-    <div class="flex flex-col sm:flex-row gap-4 mb-8">
-      <div class="flex-1">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Поиск по названию..."
-          class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-        />
-      </div>
-      <div class="sm:w-48">
-        <select
-          id="genreFilter"
-          class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+    <form method="get" action="/catalog" class="space-y-4 mb-8">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <input
+            type="text"
+            name="search"
+            placeholder="Поиск по названию, описанию или разработчику..."
+            th:value="${currentSearch}"
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+          />
+        </div>
+        <div class="sm:w-48">
+          <select
+            name="genre"
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+          >
+            <option value="">Все жанры</option>
+            <option
+              th:each="g : ${genres}"
+              th:text="${g}"
+              th:value="${g}"
+              th:selected="${currentGenre != null and currentGenre.name() == g.name()}"
+            ></option>
+          </select>
+        </div>
+        <div class="sm:w-48">
+          <select
+            name="minRating"
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+          >
+            <option value="">Любой рейтинг</option>
+            <option value="4.0" th:selected="${currentMinRating == 4.0}">
+              От 4.0 ★
+            </option>
+            <option value="4.5" th:selected="${currentMinRating == 4.5}">
+              От 4.5 ★
+            </option>
+            <option value="4.8" th:selected="${currentMinRating == 4.8}">
+              От 4.8 ★
+            </option>
+          </select>
+        </div>
+        <div class="sm:w-48">
+          <select
+            name="sort"
+            class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white"
+          >
+            <option value="newest" th:selected="${currentSort == 'newest'}">
+              Сначала новые
+            </option>
+            <option value="oldest" th:selected="${currentSort == 'oldest'}">
+              Сначала старые
+            </option>
+            <option
+              value="rating_high"
+              th:selected="${currentSort == 'rating_high'}"
+            >
+              По рейтингу (высокий)
+            </option>
+            <option
+              value="rating_low"
+              th:selected="${currentSort == 'rating_low'}"
+            >
+              По рейтингу (низкий)
+            </option>
+            <option value="popular" th:selected="${currentSort == 'popular'}">
+              По популярности
+            </option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow"
         >
-          <option value="">Все жанры</option>
-          <option
-            th:each="genre : ${T(ru.vlsu.myng.entities.Game.Genre).values()}"
-            th:text="${genre}"
-            th:value="${genre}"
-          ></option>
-        </select>
+          Применить
+        </button>
       </div>
-      <button
-        id="applyFiltersBtn"
-        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow"
+
+      <!-- Фильтр по тегам (чекбоксы) -->
+      <div
+        th:if="${not #lists.isEmpty(allTags)}"
+        class="bg-gray-50 rounded-lg p-4"
       >
-        Фильтр
-      </button>
+        <div class="flex items-center justify-between mb-3">
+          <label class="text-sm font-medium text-gray-700"
+            >Фильтр по тегам:</label
+          >
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <label th:each="tag : ${allTags}" class="inline-flex items-center">
+            <input
+              type="checkbox"
+              name="tags"
+              th:value="${tag.name}"
+              th:checked="${currentTags != null and currentTags.contains(tag.name)}"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span
+              class="ml-2 text-sm text-gray-700"
+              th:text="${tag.name}"
+            ></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Отображение активных фильтров -->
+      <div
+        th:if="${(currentSearch != null and currentSearch != '') or 
+           (currentGenre != null) or 
+           (currentMinRating != null) or 
+           (currentTags != null and not #lists.isEmpty(currentTags))}"
+        class="flex flex-wrap gap-2 pt-2"
+      >
+        <span class="text-sm text-gray-500">Активные фильтры:</span>
+
+        <!-- Фильтр поиска -->
+        <a
+          th:if="${currentSearch != null and currentSearch != ''}"
+          th:href="@{/catalog(search='', genre=${currentGenre}, tags=${currentTags}, minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
+          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200"
+        >
+          Поиск: <span th:text="${currentSearch}"></span>
+          <i class="fas fa-times text-xs"></i>
+        </a>
+
+        <!-- Фильтр жанра -->
+        <a
+          th:if="${currentGenre != null}"
+          th:href="@{/catalog(search=${currentSearch}, genre='', tags=${currentTags}, minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
+          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200"
+        >
+          Жанр: <span th:text="${currentGenre}"></span>
+          <i class="fas fa-times text-xs"></i>
+        </a>
+
+        <!-- Фильтр рейтинга -->
+        <a
+          th:if="${currentMinRating != null}"
+          th:href="@{/catalog(search=${currentSearch}, genre=${currentGenre}, tags=${currentTags}, minRating='', sort=${currentSort}, size=${pageSize})}"
+          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200"
+        >
+          Рейтинг: от <span th:text="${currentMinRating}"></span>
+          <i class="fas fa-times text-xs"></i>
+        </a>
+
+        <!-- Все выбранные теги -->
+        <a
+          th:if="${currentTags != null and not #lists.isEmpty(currentTags)}"
+          th:href="@{/catalog(search=${currentSearch}, genre=${currentGenre}, tags='', minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
+          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200"
+        >
+          Теги: <span th:text="${#strings.setJoin(currentTags, ', ')}"></span>
+          <i class="fas fa-times text-xs"></i>
+        </a>
+
+        <!-- Сброс всех фильтров -->
+        <a
+          th:href="@{/catalog(size=${pageSize})}"
+          class="px-2 py-1 text-gray-500 hover:text-gray-700 text-sm"
+        >
+          <i class="fas fa-undo mr-1"></i> Сбросить все
+        </a>
+      </div>
+    </form>
+
+    <!-- Текущая сортировка (над сеткой игр) -->
+    <div
+      th:if="${currentSort != null}"
+      class="flex items-center justify-end gap-2 text-sm text-gray-500 mb-4"
+    >
+      <span class="font-medium">Сортировка:</span>
+      <span class="px-2 py-1 bg-gray-100 rounded-lg">
+        <span th:switch="${currentSort}">
+          <span th:case="'newest'">Сначала новые</span>
+          <span th:case="'oldest'">Сначала старые</span>
+          <span th:case="'rating_high'">По рейтингу (высокий)</span>
+          <span th:case="'rating_low'">По рейтингу (низкий)</span>
+          <span th:case="'popular'">По популярности</span>
+          <span th:case="*">По умолчанию</span>
+        </span>
+      </span>
     </div>
 
     <div
@@ -168,37 +321,71 @@
       </p>
     </div>
 
-    <!-- Пагинация (пока статическая, добавим позже) -->
-    <div
-      class="flex justify-center mt-12"
-      th:if="${games != null and games.size() > 0}"
-    >
+    <!-- Пагинация -->
+    <div th:if="${totalPages > 0}" class="flex justify-center mt-12">
       <nav class="flex items-center gap-2">
+        <!-- Кнопка "Назад" -->
         <a
-          href="#"
+          th:if="${currentPage > 0}"
+          th:href="@{/catalog(page=${currentPage - 1}, 
+                         search=${currentSearch}, 
+                         genre=${currentGenre}, 
+                         tags=${currentTags},
+                         minRating=${currentMinRating}, 
+                         sort=${currentSort},
+                         size=${pageSize})}"
           class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
-          >Назад</a
         >
+          Назад
+        </a>
+
+        <!-- Кнопка "Назад" неактивна -->
         <a
-          href="#"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >1</a
+          th:if="${currentPage == 0}"
+          class="px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
         >
+          Назад
+        </a>
+
+        <!-- Номера страниц -->
         <a
-          href="#"
-          class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >2</a
+          th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+          th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+          th:href="@{/catalog(page=${i}, 
+                         search=${currentSearch}, 
+                         genre=${currentGenre}, 
+                         tags=${currentTags},
+                         minRating=${currentMinRating}, 
+                         sort=${currentSort},
+                         size=${pageSize})}"
+          th:class="${i == currentPage} ? 'px-4 py-2 bg-blue-600 text-white rounded-lg' : 'px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50'"
+          th:text="${i + 1}"
         >
+          1
+        </a>
+
+        <!-- Кнопка "Вперед" -->
         <a
-          href="#"
-          class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >3</a
-        >
-        <a
-          href="#"
+          th:if="${currentPage < totalPages - 1}"
+          th:href="@{/catalog(page=${currentPage + 1}, 
+                         search=${currentSearch}, 
+                         genre=${currentGenre}, 
+                         tags=${currentTags},
+                         minRating=${currentMinRating}, 
+                         sort=${currentSort},
+                         size=${pageSize})}"
           class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
-          >Вперед</a
         >
+          Вперед
+        </a>
+
+        <!-- Кнопка "Вперед" неактивна -->
+        <a
+          th:if="${currentPage >= totalPages - 1}"
+          class="px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
+        >
+          Вперед
+        </a>
       </nav>
     </div>
   </section>

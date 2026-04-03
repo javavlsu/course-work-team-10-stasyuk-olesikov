@@ -6,9 +6,13 @@ import ru.vlsu.myng.entities.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Компонент слоя доступа к данным для работы с сущностью Game.<br>
@@ -84,4 +88,17 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     @EntityGraph(attributePaths = { "developer", "tags" })
     @Query("SELECT DISTINCT g FROM Game g")
     List<Game> findAllForCatalog();
+
+    /**
+     * Базовый поиск игр (без тегов и рейтинга)
+     */
+    @Query("SELECT DISTINCT g FROM Game g " +
+            "LEFT JOIN g.developer d " +
+            "WHERE (:search IS NULL OR :search = '' OR " +
+            "       LOWER(g.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "       LOWER(g.descr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "       LOWER(d.username) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:genre IS NULL OR g.genre = :genre)")
+    List<Game> findGamesWithBasicFilters(@Param("search") String search,
+            @Param("genre") Game.Genre genre);
 }
