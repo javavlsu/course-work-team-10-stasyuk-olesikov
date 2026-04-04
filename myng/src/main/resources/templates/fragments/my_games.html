@@ -7,10 +7,15 @@
         Мои игры
     </h3>
 
+    <div th:if="${#lists.isEmpty(mygames)}"
+         class="text-gray-500 text-center py-6">
+        Вы пока не загрузили ни одной игры
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         <!-- Dynamic game cards -->
-        <article th:each="game : ${games}"
+        <article th:each="mygame : ${mygames}"
                  class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
 
             <!-- Optional: keep static gradient or randomize later -->
@@ -21,14 +26,14 @@
 
                     <!-- Game name -->
                     <h4 class="text-lg font-bold text-gray-900"
-                        th:text="${game.name}">
+                        th:text="${mygame.name}">
                         Game Name
                     </h4>
 
                     <!-- Status -->
                     <span class="px-2 py-1 text-xs font-medium rounded-full"
-                          th:text="${game.approved ? 'Опубликована' : 'На модерации'}"
-                          th:classappend="${game.approved ? ' bg-green-100 text-green-700' : ' bg-yellow-100 text-yellow-700'}">
+                          th:text="${mygame.status}"
+                          th:classappend="${mygame.approved == true ? 'bg-green-100 text-green-700' : (mygame.approved == false ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')}"
                         Статус
                     </span>
 
@@ -36,7 +41,7 @@
 
                 <!-- Description -->
                 <p class="text-gray-600 text-sm mb-4"
-                   th:text="${game.descr}">
+                   th:text="${mygame.descr}">
                     Description
                 </p>
 
@@ -46,11 +51,11 @@
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span>
                             <i class="fas fa-eye"></i>
-                            <span th:text="${game.viewCount}">0</span>
+                            <span th:text="${mygame.viewCount}">0</span>
                         </span>
                         <span>
                             <i class="fas fa-star"></i>
-                            <span th:text="${game.rating}">0.0</span>
+                            <span th:text="${mygame.rating}">0.0</span>
                         </span>
                     </div>
 

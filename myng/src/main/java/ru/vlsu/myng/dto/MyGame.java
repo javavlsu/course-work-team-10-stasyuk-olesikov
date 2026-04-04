@@ -11,7 +11,8 @@ public class MyGame {
     private Integer id;
     private String name;
     private String descr;
-    private boolean approved; // "Опубликована" or "На модерации"
+    private Boolean approved;
+    private String status; // "Опубликована", "На модерации" или "Отклонена"
     private Integer viewCount;
     private Double rating; // average rating
 }

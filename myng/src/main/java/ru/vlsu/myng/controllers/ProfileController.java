@@ -35,13 +35,12 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String myProfilePage(Principal principal, Model model) {
+        System.out.println("Profile GET endpoint reached");
         String email = principal.getName();
         User user = userService.findByEmail(email);
         model.addAttribute("user", user);
         List<Review> reviews = reviewRepository.findByUser(user);
         model.addAttribute("reviews", reviews);
-        List<MyGame> games = gameService.getGamesForUser(user);
-        model.addAttribute("games", games);
         return "profile";
     }
 

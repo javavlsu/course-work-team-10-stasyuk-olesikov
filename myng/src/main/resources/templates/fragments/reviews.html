@@ -7,6 +7,11 @@
         Мои отзывы
     </h3>
 
+    <div th:if="${#lists.isEmpty(reviews)}"
+         class="text-gray-500 text-center py-6">
+        У вас пока нет отзывов
+    </div>
+
     <div class="space-y-4">
 
         <article th:each="review : ${reviews}"

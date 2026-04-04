@@ -241,12 +241,17 @@ public class GameService {
                     .max(Comparator.comparing(GameVersion::getCreatedAt))
                     .orElse(null);
 
-            boolean approved = false;
+            Boolean approved = null;
             if (latestVersion != null) {
                 ModerationVerdict verdict = latestVersion.getModerationVerdict();
-                if (verdict != null && Boolean.TRUE.equals(verdict.getApproved())) {
-                    approved = true;
-                }
+                approved = verdict.getApproved();
+            }
+
+            String status;
+            if (approved != null) {
+                status = approved ? "Опубликована" : "Отклонена";
+            } else {
+                status = "На модерации";
             }
 
             int views = game.getStats().stream()
@@ -260,7 +265,7 @@ public class GameService {
                             .average()
                             .orElse(0.0);
 
-            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, views, rating);
+            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating);
         }).collect(Collectors.toList());
     }
 }
