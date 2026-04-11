@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import ru.vlsu.myng.dto.MyGame;
+import ru.vlsu.myng.dto.PublishGameRequest;
 import ru.vlsu.myng.entities.*;
 import ru.vlsu.myng.repositories.GameRepository;
 import ru.vlsu.myng.repositories.GameStatsRepository;
@@ -17,6 +18,7 @@ import ru.vlsu.myng.repositories.UserRepository;
 import ru.vlsu.myng.repositories.TagRepository;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
+import ru.vlsu.myng.utils.ValidationUtils;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -267,5 +269,34 @@ public class GameService {
 
             return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating);
         }).collect(Collectors.toList());
+    }
+
+    public void publishGame(PublishGameRequest dto) {
+        /*
+        1.  Check if game already exists via repo parameter.
+        2.  If game doesn't exist already create a Game entity inside the DB;
+            create a GameVersion entity as well; create ModerationVerdict related
+            to that GameVersion.
+        3.  If new tags are present, add them to the Tags table. Link tags and the
+            published game.
+        4.  NOTICE: GameStats entity should be created only after approval of the game;
+            It doesn't make sense to create it right away as nobody will see it anyway.
+            Also, the archive with game files should also be downloaded only after approval.
+        */
+
+        /*
+        The repo link must be in the format
+        https://github.com/[github_username]/[repo-name]
+        The game version must be a string of type
+        v<number>.<number>.<number>...
+        The commit_hash must be a 7 digit hexadecimal number
+        Description must be at most 2000 chars long
+        Game's name is at most 100 chars long
+        File size for the main picture is at most 32 mb
+        The file list is a string of filenames separated by ", "
+        The tags is a string of tags of format "#this-is-tag-name" separated by ", "
+        */
+
+        var errors = ValidationUtils.validatePublishRequest(dto);
     }
 }

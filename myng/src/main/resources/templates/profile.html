@@ -228,7 +228,7 @@
         </template>
 
         <template id="tpl-publish">
-            <form data-form="publish" class="space-y-6 bg-white rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-lg mx-auto relative">
+            <form data-form="publish" class="space-y-6 rounded-2xl p-6 md:p-8 w-full max-w-lg mx-auto relative" novalidate>
 
                 <!-- Header -->
                 <div class="flex flex-col items-center text-center mb-4">
@@ -240,52 +240,83 @@
                 </div>
 
                 <!-- Game Title -->
-                <input name="title" placeholder="Название игры"
-                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                <div>
+                    <input name="title" placeholder="Название игры"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="title"></div>
+                </div>
 
                 <!-- Main Image -->
-                <input name="main_pic" type="file"
-                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                <div>
+                    <input name="main_pic" type="file" accept="image/*"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="main_pic"></div>
+                </div>
 
                 <!-- Description -->
-                <textarea name="description" placeholder="Описание"
-                          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                <div>
+            <textarea name="description" placeholder="Описание"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="description"></div>
+                </div>
 
                 <!-- Genre -->
-                <select name="genre"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
-                    <option value="" disabled selected>Выберите жанр</option>
-                    <option value="action">Экшн</option>
-                    <option value="adventure">Приключения</option>
-                    <option value="rpg">RPG</option>
-                    <option value="simulation">Симулятор</option>
-                    <option value="strategy">Стратегия</option>
-                    <option value="sports">Спортивная игра</option>
-                    <option value="puzzle">Головоломка</option>
-                    <option value="horror">Хоррор</option>
-                    <option value="platformer">Платформер</option>
-                    <option value="sandbox">Песочница</option>
-                    <option value="visual-novel">Визуальная новелла</option>
-                    <option value="roguelike">Roguelike</option>
-                </select>
+                <div>
+                    <select name="genre"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                        <option value="" disabled selected>Выберите жанр</option>
+                        <option value="action">Экшн</option>
+                        <option value="adventure">Приключения</option>
+                        <option value="rpg">RPG</option>
+                        <option value="simulation">Симулятор</option>
+                        <option value="strategy">Стратегия</option>
+                        <option value="sports">Спортивная игра</option>
+                        <option value="puzzle">Головоломка</option>
+                        <option value="horror">Хоррор</option>
+                        <option value="platformer">Платформер</option>
+                        <option value="sandbox">Песочница</option>
+                        <option value="visual-novel">Визуальная новелла</option>
+                        <option value="roguelike">Roguelike</option>
+                    </select>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="genre"></div>
+                </div>
 
                 <!-- Repo Link & Commit Hash -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input name="repo_link" placeholder="Ссылка на репозиторий"
-                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
-                    <input name="commit_hash" placeholder="Хэш коммита"
-                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div>
+                        <input name="repo_link" placeholder="Ссылка на репозиторий"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="repo_link"></div>
+                    </div>
+                    <div>
+                        <input name="commit_hash" placeholder="Хэш коммита"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="commit_hash"></div>
+                    </div>
                 </div>
 
                 <!-- Files & Tags -->
-                <textarea name="files" placeholder="Список файлов"
-                          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
-                <textarea name="tags" placeholder="Теги"
-                          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                <div>
+            <textarea name="files" placeholder="Список файлов"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="files"></div>
+                </div>
+
+                <div>
+            <textarea name="tags" placeholder="Теги"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="tags"></div>
+                </div>
 
                 <!-- Game Version -->
-                <input name="game_ver" placeholder="Версия игры"
-                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                <div>
+                    <input name="game_ver" placeholder="Версия игры"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="game_ver"></div>
+                </div>
+
+                <!-- General error message -->
+                <div class="general-error hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"></div>
 
                 <!-- Actions -->
                 <div class="flex justify-end gap-4 mt-4">
@@ -293,8 +324,9 @@
                             class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition">
                         Отмена
                     </button>
-                    <button type="submit"
-                            class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition flex items-center gap-2">
+                    <button type="button"
+                            class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition flex items-center gap-2"
+                            data-action="confirm">
                         <i class="fas fa-paper-plane"></i>
                         Опубликовать
                     </button>
@@ -604,7 +636,7 @@
                   confirmBtn.addEventListener("click", (e) => {
                     e.preventDefault();
                     onConfirm();
-                    closeModal();
+                    //closeModal();
                   });
                 }
               }
@@ -616,7 +648,6 @@
               }
 
               document.addEventListener("click", async (e) => {
-
                 const actionEl = e.target.closest("[data-action]");
                 if (!actionEl) return;
 
@@ -794,11 +825,154 @@
                   }
 
                   if (modalType === "publish") {
-                    openModal("tpl-publish", () => {
-                      const form = modalContent.querySelector('form[data-form="publish"]');
-                      const formData = new FormData(form);
-                      console.log("Publishing game:", Object.fromEntries(formData));
+                    openModal("tpl-publish", async () => {
+                        const form = modalContent.querySelector('form[data-form="publish"]');
+                        const submitButton = form.querySelector('button[data-action="confirm"]');
+                        const originalButtonText = submitButton.innerHTML;
+
+                        // Helper functions for error handling
+                        const clearAllErrors = () => {
+                            // Clear all error messages
+                            form.querySelectorAll('.error-message').forEach(el => {
+                                el.textContent = '';
+                                el.classList.add('hidden');
+                            });
+
+                            // Remove error styling from inputs
+                            form.querySelectorAll('.error-input').forEach(el => {
+                                el.classList.remove('error-input', 'border-red-500');
+                            });
+
+                            // Hide general error
+                            const generalError = form.querySelector('.general-error');
+                            if (generalError) {
+                                generalError.classList.add('hidden');
+                            }
+                        };
+
+                        const displayErrors = (errors) => {
+                            for (const [fieldName, errorMessage] of Object.entries(errors)) {
+                                const errorElement = form.querySelector(`[data-error-for="${fieldName}"]`);
+                                const inputElement = form.querySelector(`[name="${fieldName}"]`);
+
+                                if (errorElement) {
+                                    errorElement.textContent = errorMessage;
+                                    errorElement.classList.remove('hidden');
+                                }
+
+                                if (inputElement) {
+                                    inputElement.classList.add('error-input', 'border-red-500');
+                                }
+                            }
+
+                            // Scroll to first error
+                            const firstError = form.querySelector('.error-message:not(.hidden)');
+                            if (firstError) {
+                                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        };
+
+                        const showGeneralMessage = (type, message) => {
+                            const generalError = form.querySelector('.general-error');
+                            if (generalError) {
+                                generalError.textContent = message;
+                                generalError.classList.remove('hidden');
+
+                                if (type === 'success') {
+                                    generalError.classList.remove('bg-red-50', 'border-red-200', 'text-red-600');
+                                    generalError.classList.add('bg-green-50', 'border-green-200', 'text-green-600');
+                                } else {
+                                    generalError.classList.remove('bg-green-50', 'border-green-200', 'text-green-600');
+                                    generalError.classList.add('bg-red-50', 'border-red-200', 'text-red-600');
+                                }
+                            }
+                        };
+
+                        // Real-time validation - clear errors as user types
+                        form.querySelectorAll('input, textarea, select').forEach(input => {
+                            input.addEventListener('input', () => {
+                                const errorElement = form.querySelector(`[data-error-for="${input.name}"]`);
+                                if (errorElement) {
+                                    errorElement.classList.add('hidden');
+                                }
+                                input.classList.remove('error-input', 'border-red-500');
+                            });
+                        });
+
+                        clearAllErrors();
+
+                        console.log("publish: before try-catch-finally");
+
+                        let hasValidationErrors = false;
+
+                        try {
+                            const formData = new FormData(form);
+
+                            console.log('Submitting form data:', Object.fromEntries(formData));
+
+                            const response = await fetch('/games/publish', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            console.log('Response status:', response.status);
+
+                            const result = await response.json();
+                            console.log('Response result:', result);
+
+                            if (!response.ok) {
+                                console.log("Response not OK");
+                                // Check if it's a validation error (400 Bad Request)
+                                if (response.status === 400 && result.errors) {
+                                    console.log("Validation errors:", result.errors);
+                                    displayErrors(result.errors);
+                                    showGeneralMessage('error', result.message || 'Пожалуйста, исправьте ошибки в форме');
+                                    hasValidationErrors = true;
+                                    // Don't throw - we want to stay in the form
+                                } else {
+                                    throw new Error(result.message || 'Failed to publish game');
+                                }
+                            } else {
+                                // Success case
+                                if (result.success) {
+                                    console.log("Game published successfully:", result);
+                                    showGeneralMessage('success', result.message);
+
+                                    // Wait a moment to show success message before closing
+                                    setTimeout(() => {
+                                        alert('Игра успешно опубликована!');
+                                        closeModal();
+                                    }, 1000);
+                                    // Don't restore button - modal will close
+                                    return;
+                                } else {
+                                    // Handle case where response is 200 but success is false
+                                    if (result.errors) {
+                                        console.log("Success false with errors:", result.errors);
+                                        displayErrors(result.errors);
+                                        showGeneralMessage('error', result.message);
+                                        hasValidationErrors = true;
+                                    } else {
+                                        throw new Error(result.message || 'Unknown error occurred');
+                                    }
+                                }
+                            }
+
+                        } catch (error) {
+                            console.error("Error publishing game:", error);
+                            showGeneralMessage('error', `Ошибка при публикации: ${error.message}`);
+                            hasValidationErrors = true;
+                        } finally {
+                            // Only restore button if we're staying on the form (has errors)
+                            if (hasValidationErrors) {
+                                console.log("Restoring submit button");
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalButtonText;
+                            }
+                            // If success, the modal will close and we don't need to restore
+                        }
                     });
+
                   }
 
                   if (modalType === "become_dev") {
@@ -863,6 +1037,8 @@
 
                         } catch (err) {
                           console.error("Failed to create collection", err);
+                        } finally {
+                          closeModal();
                         }
 
                       });
