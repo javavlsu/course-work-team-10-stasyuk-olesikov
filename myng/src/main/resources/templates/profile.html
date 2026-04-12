@@ -228,7 +228,7 @@
         </template>
 
         <template id="tpl-publish">
-            <form data-form="publish" class="space-y-6 rounded-2xl p-6 md:p-8 w-full max-w-lg mx-auto relative" novalidate>
+            <form data-form="publish" class="space-y-6 rounded-2xl p-6 md:p-8 w-full max-w-lg mx-auto relative">
 
                 <!-- Header -->
                 <div class="flex flex-col items-center text-center mb-4">
@@ -248,9 +248,9 @@
 
                 <!-- Main Image -->
                 <div>
-                    <input name="main_pic" type="file" accept="image/*"
+                    <input name="mainPic" type="file" accept="image/*"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
-                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="main_pic"></div>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="mainPic"></div>
                 </div>
 
                 <!-- Description -->
@@ -284,14 +284,14 @@
                 <!-- Repo Link & Commit Hash -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <input name="repo_link" placeholder="Ссылка на репозиторий"
+                        <input name="repoLink" placeholder="Ссылка на репозиторий"
                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
-                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="repo_link"></div>
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="repoLink"></div>
                     </div>
                     <div>
-                        <input name="commit_hash" placeholder="Хэш коммита"
+                        <input name="commitHash" placeholder="Хэш коммита"
                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
-                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="commit_hash"></div>
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="commitHash"></div>
                     </div>
                 </div>
 
@@ -310,9 +310,9 @@
 
                 <!-- Game Version -->
                 <div>
-                    <input name="game_ver" placeholder="Версия игры"
+                    <input name="gameVer" placeholder="Версия игры"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
-                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="game_ver"></div>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="gameVer"></div>
                 </div>
 
                 <!-- General error message -->

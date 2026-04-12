@@ -18,6 +18,7 @@ import ru.vlsu.myng.repositories.UserRepository;
 import ru.vlsu.myng.repositories.TagRepository;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
+import ru.vlsu.myng.utils.GithubException;
 import ru.vlsu.myng.utils.ValidationUtils;
 
 import java.time.Instant;
@@ -36,6 +37,7 @@ public class GameService {
     private final ReviewRepository reviewRepository;
     private final GameVersionRepository gameVersionRepository;
     private final UserRepository userRepository;
+    private final GithubService githubService;
 
     public List<Game> getDeveloperGames(Integer userId) {
         User developer = userRepository.findById(userId)
@@ -285,18 +287,19 @@ public class GameService {
         */
 
         /*
-        The repo link must be in the format
-        https://github.com/[github_username]/[repo-name]
-        The game version must be a string of type
-        v<number>.<number>.<number>...
+        The repo link must be in the format https://github.com/[github_username]/[repo-name]
+        The game version must be a string of type v<number>.<number>.<number>...
         The commit_hash must be a 7 digit hexadecimal number
-        Description must be at most 2000 chars long
-        Game's name is at most 100 chars long
-        File size for the main picture is at most 32 mb
-        The file list is a string of filenames separated by ", "
-        The tags is a string of tags of format "#this-is-tag-name" separated by ", "
+        Description must be at least 10 and at most 2000 chars long
+        Game's name must be at least 3 and at most 100 chars long
+        File is required, it's a picture and its size must at most be 32 mb
+        The file list is a string of filenames separated by ", " (file0.ext0, file0.ext1, file1.ext0)
+        The tags is a string of tags of format "#this-is-tag-name" separated by ", ". It must have at least one tag.
         */
 
-        var errors = ValidationUtils.validatePublishRequest(dto);
+        githubService.validateRepoExists(dto.getRepoLink());
+        githubService.validateCommitExists(dto.getRepoLink(), dto.getCommitHash());
+
+
     }
 }
