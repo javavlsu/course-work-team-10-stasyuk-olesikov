@@ -104,7 +104,7 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
 
         /**
          * Получаем игры отсортированные по колличеству запусков
-         *
+         * 
          * @param pageable
          * @return
          */

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import ru.vlsu.myng.dto.MyGame;
@@ -21,7 +22,10 @@ import ru.vlsu.myng.dto.GameFilterDTO;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +63,55 @@ public class GameService {
 
     public Game save(Game game) {
         return gameRepository.save(game);
+    }
+
+    /**
+     * Популярная игра (больше всего запусков за все время)
+     */
+    @Transactional(readOnly = true)
+    public CatalogGameDTO getMostLaunchedGame() {
+        List<Game> games = gameRepository.findTopGamesByLaunches(PageRequest.of(0, 1));
+        return games.isEmpty() ? null : convertToCatalogDto(games.get(0));
+    }
+
+    /**
+     * Новинка (самая последняя добавленная версия в системе)
+     */
+    @Transactional(readOnly = true)
+    public CatalogGameDTO getNewestGame() {
+        GameVersion latestVersion = gameVersionRepository.findFirstByOrderByCreatedAtDesc();
+        if (latestVersion == null)
+            return null;
+        return convertToCatalogDto(latestVersion.getGame());
+    }
+
+    /**
+     * Лучшее за месяц (высший средний рейтинг по отзывам за последние 30 дней)
+     */
+    @Transactional(readOnly = true)
+    public CatalogGameDTO getTopRatingGameMonth() {
+        Instant monthAgo = Instant.now().minus(30, ChronoUnit.DAYS);
+        List<Game> games = reviewRepository.findTopRatedGamesSince(monthAgo, PageRequest.of(0, 1));
+
+        // Если за месяц никто не ставил оценки, берем просто лучшую игру по рейтингу за
+        // все время
+        if (games.isEmpty()) {
+            List<Game> allTimeBest = reviewRepository.findTopRatedGamesSince(Instant.EPOCH, PageRequest.of(0, 1));
+            return allTimeBest.isEmpty() ? null : convertToCatalogDto(allTimeBest.get(0));
+        }
+
+        return convertToCatalogDto(games.get(0));
+    }
+
+    /**
+     * Список популярных игр для мини-каталога
+     */
+    @Transactional(readOnly = true)
+    public List<CatalogGameDTO> getPopularGames(int limit) {
+        List<Game> games = gameRepository.findTopGamesByLaunches(PageRequest.of(0, limit));
+        return games.stream()
+                .map(this::convertToCatalogDto)
+                .collect(Collectors.toList());
     }
 
     /**

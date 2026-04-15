@@ -1,420 +1,333 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout :: layout(~{::section})">
-
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="app">
-  <!-- ========== Главная страница ========== -->
-  <section
-    id="home"
-    class="page block"
-    role="main"
-    aria-labelledby="home-title"
-  >
-    <!-- Шапка с навигацией -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-      <div
-        class="flex flex-col md:flex-row md:items-center justify-between gap-4"
-      >
-        <div>
-          <h1
-            id="home-title"
-            class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
-          >
-            <i class="fas fa-rocket text-blue-500"></i>
-            Публикуй свои инди-игры и находи игроков
-          </h1>
-          <p class="text-gray-600 flex items-center gap-2">
-            <i class="fas fa-gamepad text-blue-500"></i>
-            Платформа для независимых разработчиков и ценителей инди-игр
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Блок с популярными карточками -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <!-- Популярная игра недели -->
-      <div
-        class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-      >
-        <div class="p-5">
-          <h3
-            class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
-          >
-            <i class="fas fa-fire text-orange-500"></i>
-            Популярная игра недели
-          </h3>
-          <div
-            class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-gamepad text-4xl"></i>
-          </div>
-          <p class="text-gray-600 text-sm mb-4">
-            Киберпанк-платформер с уникальной механикой взлома. Исследуйте
-            мрачный мир будущего.
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="text-xs text-gray-500">4.5</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="app">
+    <section
+      id="home"
+      class="page block"
+      role="main"
+      aria-labelledby="home-title"
+    >
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div>
+            <h1
+              id="home-title"
+              class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
             >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
+              <i class="fas fa-rocket text-blue-500"></i> Публикуй свои
+              инди-игры и находи игроков
+            </h1>
+            <p class="text-gray-600 flex items-center gap-2">
+              <i class="fas fa-gamepad text-blue-500"></i> Платформа для
+              независимых разработчиков и ценителей инди-игр
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Новинка -->
-      <div
-        class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-      >
-        <div class="p-5">
-          <h3
-            class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
-          >
-            <i class="fas fa-sparkles text-green-500"></i>
-            Новинка недели
-          </h3>
-          <div
-            class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-puzzle-piece text-4xl"></i>
-          </div>
-          <p class="text-gray-600 text-sm mb-4">
-            Головоломка с нелинейным сюжетом. Каждое решение влияет на
-            развитие истории.
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">4.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div
+          th:if="${featuredGame != null}"
+          class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col"
+        >
+          <div class="p-5 flex flex-col h-full">
+            <h3
+              class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
             >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
+              <i class="fas fa-fire text-orange-500"></i> Популярная игра
+            </h3>
+            <div
+              class="bg-gradient-to-br rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
+              th:classappend="${featuredGame.themeColor}"
+            >
+              <i class="fas fa-gamepad text-4xl"></i>
+            </div>
+            <h4
+              class="font-bold text-gray-900 truncate"
+              th:text="${featuredGame.name}"
+            >
+              Название
+            </h4>
+            <div class="mt-2 mb-4 min-h-[4.5rem]">
+              <p
+                class="text-gray-600 text-sm"
+                th:text="${featuredGame.description}"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 3;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
+                Описание...
+              </p>
+            </div>
+
+            <div class="pt-4 mt-auto border-t border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex gap-4 text-gray-500 text-sm">
+                  <span class="text-xs text-gray-500">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                    <span
+                      th:text="${#numbers.formatDecimal(featuredGame.averageRating, 1, 1)}"
+                      >0.0</span
+                    >
+                  </span>
+                  <span title="Просмотры">
+                    <i class="far fa-eye mr-1"></i>
+                    <span th:text="${featuredGame.totalViews}">0</span>
+                  </span>
+                  <span title="Запуски">
+                    <i class="fas fa-play mr-1 text-xs"></i>
+                    <span th:text="${featuredGame.totalLaunches}">0</span>
+                  </span>
+                  <span title="Отзывы">
+                    <i class="far fa-comment mr-1"></i>
+                    <span th:text="${featuredGame.reviewsCount}">0</span>
+                  </span>
+                </div>
+              </div>
+
+              <a
+                th:href="@{/games/{id}(id=${featuredGame.id})}"
+                class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-100 hover:shadow-blue-200 active:scale-[0.98]"
+              >
+                Играть
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div
+          th:if="${newestGame != null}"
+          class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col"
+        >
+          <div class="p-5 flex flex-col h-full">
+            <h3
+              class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
+            >
+              <i class="fas fa-star text-green-500"></i> Новинка недели
+            </h3>
+            <div
+              class="bg-gradient-to-br rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
+              th:classappend="${newestGame.themeColor}"
+            >
+              <i class="fas fa-certificate text-4xl"></i>
+            </div>
+            <h4
+              class="font-bold text-gray-900 truncate"
+              th:text="${newestGame.name}"
+            >
+              Название
+            </h4>
+            <div class="mt-2 mb-4 min-h-[4.5rem]">
+              <p
+                class="text-gray-600 text-sm"
+                th:text="${newestGame.description}"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 3;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
+                Описание...
+              </p>
+            </div>
+            <div class="pt-4 mt-auto border-t border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex gap-4 text-gray-500 text-sm">
+                  <span class="text-xs text-gray-500">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                    <span
+                      th:text="${#numbers.formatDecimal(featuredGame.averageRating, 1, 1)}"
+                      >0.0</span
+                    >
+                  </span>
+                  <span title="Просмотры">
+                    <i class="far fa-eye mr-1"></i>
+                    <span th:text="${newestGame.totalViews}">0</span>
+                  </span>
+                  <span title="Запуски">
+                    <i class="fas fa-play mr-1 text-xs"></i>
+                    <span th:text="${newestGame.totalLaunches}">0</span>
+                  </span>
+                  <span title="Отзывы">
+                    <i class="far fa-comment mr-1"></i>
+                    <span th:text="${newestGame.reviewsCount}">0</span>
+                  </span>
+                  <span class="text-xs text-gray-500">
+                    <i class="far fa-calendar-alt mr-1"></i>
+                    <span
+                      th:text="${#temporals.format(newestGame.firstReleaseDate, 'dd.MM.yyyy')}"
+                      >Дата</span
+                    >
+                  </span>
+                </div>
+              </div>
+
+              <a
+                th:href="@{/games/{id}(id=${newestGame.id})}"
+                class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-100 hover:shadow-blue-200 active:scale-[0.98]"
+              >
+                Играть
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div
+          th:if="${bestOfMonth != null}"
+          class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col"
+        >
+          <div class="p-5 flex flex-col h-full">
+            <h3
+              class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
+            >
+              <i class="fas fa-trophy text-yellow-500"></i> Лучшее за месяц
+            </h3>
+            <div
+              class="bg-gradient-to-br rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
+              th:classappend="${bestOfMonth.themeColor}"
+            >
+              <i class="fas fa-medal text-4xl"></i>
+            </div>
+            <h4
+              class="font-bold text-gray-900 truncate"
+              th:text="${bestOfMonth.name}"
+            >
+              Название
+            </h4>
+            <div class="mt-2 mb-4 min-h-[4.5rem]">
+              <p
+                class="text-gray-600 text-sm"
+                th:text="${bestOfMonth.description}"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 3;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
+                Описание...
+              </p>
+            </div>
+            <div class="pt-4 mt-auto border-t border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex gap-4 text-gray-500 text-sm">
+                  <span class="text-xs text-gray-500">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                    <span
+                      th:text="${#numbers.formatDecimal(bestOfMonth.averageRating, 1, 1)}"
+                      >0.0</span
+                    >
+                  </span>
+                  <span title="Просмотры">
+                    <i class="far fa-eye mr-1"></i>
+                    <span th:text="${bestOfMonth.totalViews}">0</span>
+                  </span>
+                  <span title="Запуски">
+                    <i class="fas fa-play mr-1 text-xs"></i>
+                    <span th:text="${bestOfMonth.totalLaunches}">0</span>
+                  </span>
+                  <span title="Отзывы">
+                    <i class="far fa-comment mr-1"></i>
+                    <span th:text="${bestOfMonth.reviewsCount}">0</span>
+                  </span>
+                </div>
+              </div>
+
+              <a
+                th:href="@{/games/{id}(id=${bestOfMonth.id})}"
+                class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-100 hover:shadow-blue-200 active:scale-[0.98]"
+              >
+                Играть
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Лучшее -->
-      <div
-        class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-      >
-        <div class="p-5">
-          <h3
-            class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2"
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2
+          class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2"
+        >
+          <i class="fas fa-fire text-orange-500"></i> Мини каталог популярных
+          игр
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article
+            th:each="game : ${popularGames}"
+            class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col h-full"
           >
-            <i class="fas fa-trophy text-yellow-500"></i>
-            Лучшее за месяц
-          </h3>
-          <div
-            class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg h-40 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-dragon text-4xl"></i>
-          </div>
-          <p class="text-gray-600 text-sm mb-4">
-            Ролевая игра с открытым миром. Сражайтесь с драконами и
-            исследуйте древние руины.
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">5.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+            <div
+              class="rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80 bg-gradient-to-br"
+              th:classappend="${game.themeColor}"
             >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
+              <i class="fas fa-gamepad text-3xl"></i>
+            </div>
+            <h3
+              class="text-lg font-semibold text-gray-900 mb-1 truncate"
+              th:text="${game.name}"
+            >
+              Название...
+            </h3>
+            <div class="mt-2 mb-4 min-h-[4.5rem]">
+              <p
+                class="text-gray-600 text-sm"
+                th:text="${game.description}"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 3;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
+                Описание...
+              </p>
+            </div>
+
+            <div class="pt-4 mt-auto border-t border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex gap-4 text-gray-500 text-sm">
+                  <span class="text-xs text-gray-500">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                    <span
+                      th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}"
+                      >0.0</span
+                    >
+                  </span>
+                  <span title="Просмотры">
+                    <i class="far fa-eye mr-1"></i>
+                    <span th:text="${game.totalViews}">0</span>
+                  </span>
+                  <span title="Запуски">
+                    <i class="fas fa-play mr-1 text-xs"></i>
+                    <span th:text="${game.totalLaunches}">0</span>
+                  </span>
+                  <span title="Отзывы">
+                    <i class="far fa-comment mr-1"></i>
+                    <span th:text="${game.reviewsCount}">0</span>
+                  </span>
+                </div>
+              </div>
+
+              <a
+                th:href="@{/games/{id}(id=${game.id})}"
+                class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-100 hover:shadow-blue-200 active:scale-[0.98]"
+              >
+                Играть
+              </a>
+            </div>
+          </article>
         </div>
       </div>
-    </div>
-
-    <!-- Мини каталог популярных игр -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-      <h2
-        class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-      >
-        <i class="fas fa-fire text-orange-500"></i>
-        Мини каталог популярных игр
-      </h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Игра 1 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-gamepad text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Cyber Knight
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Киберпанк-платформер с элементами RPG
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="text-xs text-gray-500">4.5</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-
-        <!-- Игра 2 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-dragon text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Pixel Quest
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Ретро платформер в стиле 16-бит
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-500 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">5.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-
-        <!-- Игра 3 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-puzzle-piece text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Space Explorers
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Космическая стратегия с мультиплеером
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">3.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-
-        <!-- Игра 4 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-skull text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Dungeon Crawler
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Roguelike dungeon crawler с процедурной генерацией
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">4.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-
-        <!-- Игра 5 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-red-500 to-pink-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-car text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Neon Racer
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Киберпанк-гонки с уникальным саундтреком
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="far fa-star"></i>
-                <i class="far fa-star"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">2.0</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-
-        <!-- Игра 6 -->
-        <article
-          class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-        >
-          <div
-            class="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg h-32 mb-3 flex items-center justify-center text-white opacity-80"
-          >
-            <i class="fas fa-leaf text-3xl"></i>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-1">
-            Eco Builder
-          </h3>
-          <p class="text-gray-600 text-sm mb-3">
-            Стратегия про строительство экологичного города
-          </p>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="flex text-yellow-400 text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-                <i class="far fa-star"></i>
-              </div>
-              <span class="text-xs text-gray-500">3.5</span>
-            </div>
-            <a
-              href="#game"
-              data-action="open-page"
-              data-target="game"
-              class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
-            >
-              Открыть
-              <i class="fas fa-arrow-right text-xs"></i>
-            </a>
-          </div>
-        </article>
-      </div>
-    </div>
+    </section>
   </section>
-
-  <!-- ========== Страница каталога (скрыта) ========== -->
-  <section
-    id="catalog"
-    class="page hidden"
-    role="region"
-    aria-labelledby="catalog-title"
-  >
-    <!-- Контент каталога (оставлен как есть) -->
-  </section>
-</section>
 </html>
