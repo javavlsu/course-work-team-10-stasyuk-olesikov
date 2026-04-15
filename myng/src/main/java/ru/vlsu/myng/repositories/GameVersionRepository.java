@@ -54,4 +54,11 @@ public interface GameVersionRepository extends JpaRepository<GameVersion, Intege
     Optional<GameVersion> findByCommitHash(String commitHash);
 
     Optional<GameVersion> findFirstByGameOrderByCreatedAtAsc(Game game);
+
+    /**
+     * Находим самую последнюю версию среди всех игр
+     * 
+     * @return
+     */
+    GameVersion findFirstByOrderByCreatedAtDesc();
 }

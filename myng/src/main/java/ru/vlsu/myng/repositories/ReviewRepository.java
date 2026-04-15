@@ -4,11 +4,14 @@ import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
 
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,4 +90,14 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.game = :game")
     Integer countByGame(@Param("game") Game game);
+
+    /**
+     * Считаем средний рейтинг только по тем отзывам, которые были оставлены
+     * недавно.
+     * 
+     */
+    @Query("SELECT r.game FROM Review r WHERE r.createdAt > :since " +
+            "GROUP BY r.game " +
+            "ORDER BY AVG(r.rating) DESC")
+    List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 }
