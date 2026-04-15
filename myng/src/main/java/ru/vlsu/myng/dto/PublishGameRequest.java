@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 import ru.vlsu.myng.utils.MaxFileSize;
+import ru.vlsu.myng.utils.UniqueRepo;
 
 @Data
 public class PublishGameRequest {
@@ -24,6 +25,7 @@ public class PublishGameRequest {
             regexp = "^https://github\\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/?$",
             message = "Ссылка должна быть в формате https://github.com/user/repo"
     )
+    @UniqueRepo
     private String repoLink;
 
     @NotBlank(message = "Хэш коммита обязателен")

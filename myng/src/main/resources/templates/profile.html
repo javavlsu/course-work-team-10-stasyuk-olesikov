@@ -275,7 +275,7 @@
                         <option value="horror">Хоррор</option>
                         <option value="platformer">Платформер</option>
                         <option value="sandbox">Песочница</option>
-                        <option value="visual-novel">Визуальная новелла</option>
+                        <option value="visual_novel">Визуальная новелла</option>
                         <option value="roguelike">Roguelike</option>
                     </select>
                     <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="genre"></div>
@@ -904,6 +904,12 @@
                         console.log("publish: before try-catch-finally");
 
                         let hasValidationErrors = false;
+
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = `
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Проверка...
+                        `;
 
                         try {
                             const formData = new FormData(form);

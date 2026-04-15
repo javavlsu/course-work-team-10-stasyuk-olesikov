@@ -18,14 +18,10 @@ import ru.vlsu.myng.repositories.UserRepository;
 import ru.vlsu.myng.repositories.TagRepository;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
-import ru.vlsu.myng.utils.GithubException;
-import ru.vlsu.myng.utils.ValidationUtils;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +34,8 @@ public class GameService {
     private final GameVersionRepository gameVersionRepository;
     private final UserRepository userRepository;
     private final GithubService githubService;
+    private final UserService userService;
+    private final TagService tagService;
 
     public List<Game> getDeveloperGames(Integer userId) {
         User developer = userRepository.findById(userId)
@@ -275,7 +273,7 @@ public class GameService {
 
     public void publishGame(PublishGameRequest dto) {
         /*
-        1.  Check if game already exists via repo parameter.
+        1.  Check if game already exists via repo parameter. DONE
         2.  If game doesn't exist already create a Game entity inside the DB;
             create a GameVersion entity as well; create ModerationVerdict related
             to that GameVersion.
@@ -299,6 +297,34 @@ public class GameService {
 
         githubService.validateRepoExists(dto.getRepoLink());
         githubService.validateCommitExists(dto.getRepoLink(), dto.getCommitHash());
+        githubService.validateFilesExistInCommit(dto.getRepoLink(), dto.getCommitHash(), dto.getFiles());
+
+        Game game = new Game();
+
+        game.setName(dto.getTitle());
+        game.setDescr(dto.getDescription());
+        game.setRepo(dto.getRepoLink());
+
+        game.setGenre(
+                Game.Genre.valueOf(
+                        dto.getGenre().trim().toLowerCase().replace("-", "_")
+                )
+        );
+
+        User currentUser = userService.getCurrentUser();
+        game.setDeveloper(currentUser);
+
+        Set<Tag> tags = Arrays.stream(dto.getTags().split(","))
+                .map(String::trim)
+                .map(tag -> tag.startsWith("#") ? tag.substring(1) : tag)
+                .map(String::toLowerCase)
+                .map(tagName -> tagService.findOrCreate(tagName))
+                .collect(Collectors.toSet());
+
+        game.setTags(tags);
+
+        gameRepository.save(game);
+
 
 
     }

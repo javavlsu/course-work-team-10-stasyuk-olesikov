@@ -1,6 +1,9 @@
 package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,6 +114,25 @@ public class UserService {
      */
     public boolean isEmailTaken(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalStateException("User not found: " + username));
+        }
+
+        throw new IllegalStateException("Unknown authentication principal: " + principal);
     }
 
     @Transactional

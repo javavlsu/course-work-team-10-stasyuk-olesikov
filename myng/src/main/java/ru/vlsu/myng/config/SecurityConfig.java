@@ -42,7 +42,7 @@ public class SecurityConfig {
                                                 .requestMatchers(
                                                                 "/", // главная
                                                                 "/auth/**", // вход/регистрация
-                                                                "/game", // просмотр игр
+                                                                "/games/*", // просмотр игр
                                                                 "/catalog", // список игр
                                                                 "/running-game", // игра
                                                                 "/main.css", // стили
@@ -53,8 +53,8 @@ public class SecurityConfig {
                                                 // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)
                                                 .requestMatchers(
                                                                 "/profile/**", // личный кабинет
-                                                                "/profile/*/edit"
-                                                ).authenticated()
+                                                                "/profile/*/edit")
+                                                .authenticated()
 
                                                 // 3. СТРАНИЦЫ ДЛЯ РАЗРАБОТЧИКОВ (dev, mod, admin)
                                                 .requestMatchers(
