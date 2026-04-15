@@ -11,21 +11,13 @@ import org.springframework.data.domain.Pageable;
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
 import ru.vlsu.myng.entities.*;
-import ru.vlsu.myng.repositories.GameRepository;
-import ru.vlsu.myng.repositories.GameStatsRepository;
-import ru.vlsu.myng.repositories.GameVersionRepository;
-import ru.vlsu.myng.repositories.ReviewRepository;
-import ru.vlsu.myng.repositories.UserRepository;
-import ru.vlsu.myng.repositories.TagRepository;
+import ru.vlsu.myng.repositories.*;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +28,7 @@ public class GameService {
     private final GameStatsRepository gameStatsRepository;
     private final ReviewRepository reviewRepository;
     private final GameVersionRepository gameVersionRepository;
+    private final ModerationVerdictRepository moderationVerdictRepository;
     private final UserRepository userRepository;
     private final GithubService githubService;
     private final UserService userService;
@@ -359,9 +352,7 @@ public class GameService {
         game.setRepo(dto.getRepoLink());
 
         game.setGenre(
-                Game.Genre.valueOf(
-                        dto.getGenre().trim().toLowerCase().replace("-", "_")
-                )
+                Game.Genre.valueOf(dto.getGenre())
         );
 
         User currentUser = userService.getCurrentUser();
@@ -378,7 +369,23 @@ public class GameService {
 
         gameRepository.save(game);
 
+        GameVersion version = new GameVersion();
+        version.setGame(game);
+        version.setCommitHash(dto.getCommitHash());
+        version.setName(dto.getGameVer());
+        version.setCreatedAt(Instant.now());
+        version.setDir(null);
 
+        gameVersionRepository.save(version);
 
+        ModerationVerdict verdict = new ModerationVerdict();
+        verdict.setGameVersion(version);
+        verdict.setApproved(null);
+        verdict.setReason(null);
+        verdict.setModerator(null);
+
+        moderationVerdictRepository.save(verdict);
+
+        version.setModerationVerdict(verdict);
     }
 }

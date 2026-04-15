@@ -31,8 +31,8 @@ public class GameVersion {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "LONGBLOB")
-    private byte[] archiveFile;
+    @Column(length = 500)
+    private String dir;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_game")

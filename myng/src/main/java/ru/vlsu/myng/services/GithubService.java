@@ -150,11 +150,11 @@ public class GithubService {
                 }
             }
 
-            if (!repoFiles.contains("index.html")) {
+            System.out.println(repoFiles);
+
+            if (!isValidFileMatch(requestedFiles, "index.html")) {
                 throw new GithubException("files", "Список файлов должен содержать index.html");
             }
-
-            System.out.println(repoFiles);
 
             List<String> missing = new ArrayList<>();
 
