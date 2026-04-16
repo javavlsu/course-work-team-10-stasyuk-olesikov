@@ -102,4 +102,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
     List<Review> findTop10ByGameOrderByCreatedAtDesc(Game game);
+
+    boolean existsByGameAndUser(Game game, User user);
 }

@@ -287,35 +287,27 @@ public class GameService {
      */
     @Transactional(readOnly = true)
     public GamePageDTO getGamePageData(Integer gameId) {
-        System.out.println("=== GameService: Getting game page data for id: " + gameId);
 
         Game game = getGameById(gameId);
-        System.out.println("=== GameService: Game found: " + game.getName());
 
         // Получаем статистику
         Double avgRating = reviewRepository.getAverageRatingByGame(game);
-        System.out.println("=== GameService: avgRating = " + avgRating);
 
         Integer reviewsCount = reviewRepository.countByGame(game);
-        System.out.println("=== GameService: reviewsCount = " + reviewsCount);
 
         Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
-        System.out.println("=== GameService: totalViews = " + totalViews);
 
         Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
-        System.out.println("=== GameService: totalLaunches = " + totalLaunches);
 
         // Получаем версии
         List<GameVersion> versions = game.getVersions().stream()
                 .sorted((v1, v2) -> v2.getCreatedAt().compareTo(v1.getCreatedAt()))
                 .collect(Collectors.toList());
-        System.out.println("=== GameService: versions count = " + versions.size());
 
         GameVersion latestVersion = versions.isEmpty() ? null : versions.get(0);
 
         // Получаем последние 10 отзывов
         List<Review> recentReviews = reviewRepository.findTop10ByGameOrderByCreatedAtDesc(game);
-        System.out.println("=== GameService: recent reviews count = " + recentReviews.size());
 
         // Дата первого релиза
         Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)
