@@ -448,7 +448,7 @@ public class GameService {
         version.setCommitHash(dto.getCommitHash());
         version.setName(dto.getGameVer());
         version.setCreatedAt(Instant.now());
-        version.setFiles(null);
+        version.setFiles(dto.getFiles());
 
         gameVersionRepository.save(version);
 
