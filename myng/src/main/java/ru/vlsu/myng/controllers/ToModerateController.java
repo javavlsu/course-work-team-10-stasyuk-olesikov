@@ -1,24 +1,43 @@
 package ru.vlsu.myng.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import ru.vlsu.myng.dto.ModerationItem;
+import ru.vlsu.myng.services.ModerationVerdictService;
 import ru.vlsu.myng.services.ToModerateService;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/to-moderate")
 public class ToModerateController {
 
     private final ToModerateService toModerateService;
+    private final ModerationVerdictService moderationVerdictService;
 
-    @GetMapping("/to-moderate")
+    @GetMapping("")
     public String toModeratePage(Model model) {
         List<ModerationItem> items = toModerateService.getPendingModerationItems();
         model.addAttribute("items", items);
         return "to_moderate";
+    }
+
+    @PostMapping("/approve/{moderationVerdictId}")
+    public ResponseEntity<Void> approve(@PathVariable Integer moderationVerdictId) {
+        moderationVerdictService.approve(moderationVerdictId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reject/{moderationVerdictId}")
+    public ResponseEntity<Void> reject(
+            @PathVariable Integer moderationVerdictId,
+            @RequestParam String reason
+    ) {
+        moderationVerdictService.reject(moderationVerdictId, reason);
+        return ResponseEntity.ok().build();
     }
 }

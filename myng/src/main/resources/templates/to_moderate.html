@@ -220,22 +220,22 @@
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
 
-                            <form th:action="@{/moderation/approve/{id}(id=${item.id})}"
-                                  method="post">
-                                <button type="submit"
-                                        class="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg">
-                                    Принять
-                                </button>
-                            </form>
+                            <button type="button"
+                                    data-action="open-modal"
+                                    data-modal="accept"
+                                    th:attr="data-id=${item.id}"
+                                    class="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg">
+                                Принять
+                            </button>
 
-                            <form th:action="@{/moderation/reject/{id}(id=${item.id})}"
-                                  method="post">
-                                <button type="submit"
-                                        th:text="${item.type == 'REVIEW'} ? 'Удалить' : 'Отклонить'"
-                                        class="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs rounded-lg">
-                                    Отклонить
-                                </button>
-                            </form>
+                            <button type="button"
+                                    data-action="open-modal"
+                                    data-modal="decline"
+                                    th:text="${item.type == 'REVIEW'} ? 'Удалить' : 'Отклонить'"
+                                    th:attr="data-id=${item.id}"
+                                    class="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs rounded-lg">
+                                Отклонить
+                            </button>
 
                         </div>
                     </td>
@@ -338,6 +338,7 @@
                 </button>
                 <button
                         type="submit"
+                        data-action="confirm"
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
                 >
                     <i class="fas fa-check"></i> Ок
@@ -364,7 +365,8 @@
                     Отмена
                 </button>
                 <button
-                        type="submit"
+                        type="button"
+                        data-action="confirm"
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
                 >
                     <i class="fas fa-check"></i> Да
@@ -402,68 +404,93 @@
       </style>
 
     <script>
-      function openModal(templateId, onSubmit) {
-          const overlay = document.getElementById('modal-overlay');
-          const modalContent = document.getElementById('modal-content');
+        const modalOverlay = document.getElementById("modal-overlay");
+        const modalContent = document.getElementById("modal-content");
 
-          // Clear old content
-          modalContent.innerHTML = '';
+        function openModal(templateId, onConfirm) {
+          modalContent.innerHTML = "";
 
-          // Clone template content
-          const tpl = document.getElementById(templateId);
-          modalContent.appendChild(tpl.content.cloneNode(true));
+          const template = document.getElementById(templateId);
+          const clone = template.content.cloneNode(true);
+          modalContent.appendChild(clone);
 
-          // Show overlay
-          overlay.classList.remove('hidden');
+          modalOverlay.classList.remove("hidden");
+          modalOverlay.classList.add("flex");
 
-          // Cancel button
-          overlay.querySelectorAll('[data-action="cancel"]').forEach(btn => {
-            btn.addEventListener('click', () => {
-              overlay.classList.add('hidden');
-            });
-          });
+          const cancelBtn = modalContent.querySelector('[data-action="cancel"]');
+          if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
 
-          // Submit handler
-          const form = modalContent.querySelector('form');
-          if (form) {
-            form.addEventListener('submit', e => {
+          const confirmBtn = modalContent.querySelector('[data-action="confirm"]');
+          if (confirmBtn && typeof onConfirm === "function") {
+            confirmBtn.addEventListener("click", (e) => {
               e.preventDefault();
-              onSubmit?.();
-              overlay.classList.add('hidden');
+              onConfirm();
+              //closeModal();
             });
           }
         }
 
-      document.querySelectorAll('[data-action="open-modal"]').forEach(btn => {
-          btn.addEventListener("click", () => {
-            const modalType = btn.dataset.modal;
+        function closeModal() {
+          modalOverlay.classList.add("hidden");
+          modalOverlay.classList.remove("flex");
+          modalContent.innerHTML = "";
+        }
 
-            if (modalType === "decline") {
-              openModal("tpl-decline", () => {
-                const form = document.querySelector('form[data-form="decline"]');
-                const formData = new FormData(form);
-                console.log("Declined with reason:", formData.get("reason"));
+        document.addEventListener("click", async (e) => {
+            const actionEl = e.target.closest("[data-action]");
+            if (!actionEl) return;
+            const action = actionEl.dataset.action;
 
-                // Close the modal by hiding the overlay
-                const overlay = document.getElementById('modal-overlay');
-                overlay.classList.add('hidden');
-              });
+            if (action === "open-modal") {
+              const modalType = actionEl.dataset.modal;
+
+              if (modalType === "decline") {
+                openModal("tpl-decline", async () => {
+                    const form = document.querySelector('form[data-form="decline"]');
+                    const formData = new FormData(form);
+
+                    const reason = formData.get("reason");
+                    const id = form.dataset.id; // assuming you store verdict id here
+
+                    const response = await fetch(`/to-moderate/reject/${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({
+                            reason: reason
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.error("Reject failed");
+                        return;
+                    }
+
+                    console.log("Rejected with reason:", reason);
+                    closeModal();
+                });
+              }
+
+              if (modalType === "accept") {
+                openModal("tpl-accept", async () => {
+                    const form = document.querySelector('form[data-form="accept"]');
+                    const id = form.dataset.id; // verdict id
+
+                    const response = await fetch(`/to-moderate/approve/${id}`, {
+                        method: "POST"
+                    });
+
+                    if (!response.ok) {
+                        console.error("Approve failed");
+                        return;
+                    }
+
+                    console.log("Accepted!");
+                    closeModal();
+                });
+              }
             }
-
-            if (modalType === "modal_entity_to_moderate") {
-              openModal("tpl-accept", () => {
-                const form = document.querySelector('form[data-form="accept"]');
-                const formData = new FormData(form);
-
-                // TODO: do whatever "accept" should do
-                console.log("Accepted!");
-
-                // Close the modal
-                const overlay = document.getElementById('modal-overlay');
-                overlay.classList.add('hidden');
-              });
-            }
-          });
         });
   </script>
 

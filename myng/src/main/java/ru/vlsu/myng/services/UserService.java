@@ -126,10 +126,10 @@ public class UserService {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UserDetails userDetails) {
-            String username = userDetails.getUsername();
+            String email = userDetails.getUsername();
 
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalStateException("User not found: " + username));
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("User not found: " + email));
         }
 
         throw new IllegalStateException("Unknown authentication principal: " + principal);
