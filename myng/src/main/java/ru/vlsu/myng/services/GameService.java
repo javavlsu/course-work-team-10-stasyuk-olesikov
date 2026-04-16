@@ -14,6 +14,7 @@ import ru.vlsu.myng.entities.*;
 import ru.vlsu.myng.repositories.*;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
+import ru.vlsu.myng.dto.GamePageDTO;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -281,6 +282,75 @@ public class GameService {
         }
     }
 
+    /**
+     * Получить игру для страницы игры с полными данными
+     */
+    @Transactional(readOnly = true)
+    public GamePageDTO getGamePageData(Integer gameId) {
+        System.out.println("=== GameService: Getting game page data for id: " + gameId);
+
+        Game game = getGameById(gameId);
+        System.out.println("=== GameService: Game found: " + game.getName());
+
+        // Получаем статистику
+        Double avgRating = reviewRepository.getAverageRatingByGame(game);
+        System.out.println("=== GameService: avgRating = " + avgRating);
+
+        Integer reviewsCount = reviewRepository.countByGame(game);
+        System.out.println("=== GameService: reviewsCount = " + reviewsCount);
+
+        Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
+        System.out.println("=== GameService: totalViews = " + totalViews);
+
+        Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
+        System.out.println("=== GameService: totalLaunches = " + totalLaunches);
+
+        // Получаем версии
+        List<GameVersion> versions = game.getVersions().stream()
+                .sorted((v1, v2) -> v2.getCreatedAt().compareTo(v1.getCreatedAt()))
+                .collect(Collectors.toList());
+        System.out.println("=== GameService: versions count = " + versions.size());
+
+        GameVersion latestVersion = versions.isEmpty() ? null : versions.get(0);
+
+        // Получаем последние 10 отзывов
+        List<Review> recentReviews = reviewRepository.findTop10ByGameOrderByCreatedAtDesc(game);
+        System.out.println("=== GameService: recent reviews count = " + recentReviews.size());
+
+        // Дата первого релиза
+        Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)
+                .map(GameVersion::getCreatedAt)
+                .orElse(null);
+
+        // Дата последнего обновления
+        Instant lastUpdateDate = latestVersion != null ? latestVersion.getCreatedAt() : null;
+
+        // Цвет темы
+        String themeColor = getGenreColor(game.getGenre());
+
+        GamePageDTO dto = GamePageDTO.builder()
+                .id(game.getId())
+                .name(game.getName())
+                .description(game.getDescr())
+                .themeColor(themeColor)
+                .genre(game.getGenre())
+                .developer(game.getDeveloper())
+                .tags(game.getTags())
+                .averageRating(avgRating != null ? avgRating : 0.0)
+                .totalViews(totalViews != null ? totalViews : 0)
+                .totalLaunches(totalLaunches != null ? totalLaunches : 0)
+                .reviewsCount(reviewsCount != null ? reviewsCount : 0)
+                .versions(versions)
+                .latestVersion(latestVersion)
+                .recentReviews(recentReviews)
+                .firstReleaseDate(firstReleaseDate)
+                .lastUpdateDate(lastUpdateDate)
+                .build();
+
+        System.out.println("=== GameService: DTO created successfully");
+        return dto;
+    }
+
     public List<MyGame> getGamesForUser(User user) {
         List<Game> games = gameRepository.findByDeveloper(user);
 
@@ -319,27 +389,32 @@ public class GameService {
 
     public void publishGame(PublishGameRequest dto) {
         /*
-        1.  Check if game already exists via repo parameter. DONE
-        2.  If game doesn't exist already create a Game entity inside the DB;
-            create a GameVersion entity as well; create ModerationVerdict related
-            to that GameVersion.
-        3.  If new tags are present, add them to the Tags table. Link tags and the
-            published game.
-        4.  NOTICE: GameStats entity should be created only after approval of the game;
-            It doesn't make sense to create it right away as nobody will see it anyway.
-            Also, the archive with game files should also be downloaded only after approval.
-        */
+         * 1. Check if game already exists via repo parameter. DONE
+         * 2. If game doesn't exist already create a Game entity inside the DB;
+         * create a GameVersion entity as well; create ModerationVerdict related
+         * to that GameVersion.
+         * 3. If new tags are present, add them to the Tags table. Link tags and the
+         * published game.
+         * 4. NOTICE: GameStats entity should be created only after approval of the
+         * game;
+         * It doesn't make sense to create it right away as nobody will see it anyway.
+         * Also, the archive with game files should also be downloaded only after
+         * approval.
+         */
 
         /*
-        The repo link must be in the format https://github.com/[github_username]/[repo-name]
-        The game version must be a string of type v<number>.<number>.<number>...
-        The commit_hash must be a 7 digit hexadecimal number
-        Description must be at least 10 and at most 2000 chars long
-        Game's name must be at least 3 and at most 100 chars long
-        File is required, it's a picture and its size must at most be 32 mb
-        The file list is a string of filenames separated by ", " (file0.ext0, file0.ext1, file1.ext0)
-        The tags is a string of tags of format "#this-is-tag-name" separated by ", ". It must have at least one tag.
-        */
+         * The repo link must be in the format
+         * https://github.com/[github_username]/[repo-name]
+         * The game version must be a string of type v<number>.<number>.<number>...
+         * The commit_hash must be a 7 digit hexadecimal number
+         * Description must be at least 10 and at most 2000 chars long
+         * Game's name must be at least 3 and at most 100 chars long
+         * File is required, it's a picture and its size must at most be 32 mb
+         * The file list is a string of filenames separated by ", " (file0.ext0,
+         * file0.ext1, file1.ext0)
+         * The tags is a string of tags of format "#this-is-tag-name" separated by ", ".
+         * It must have at least one tag.
+         */
 
         githubService.validateRepoExists(dto.getRepoLink());
         githubService.validateCommitExists(dto.getRepoLink(), dto.getCommitHash());
@@ -352,8 +427,7 @@ public class GameService {
         game.setRepo(dto.getRepoLink());
 
         game.setGenre(
-                Game.Genre.valueOf(dto.getGenre())
-        );
+                Game.Genre.valueOf(dto.getGenre()));
 
         User currentUser = userService.getCurrentUser();
         game.setDeveloper(currentUser);
@@ -374,7 +448,7 @@ public class GameService {
         version.setCommitHash(dto.getCommitHash());
         version.setName(dto.getGameVer());
         version.setCreatedAt(Instant.now());
-        version.setDir(null);
+        version.setFiles(null);
 
         gameVersionRepository.save(version);
 

@@ -139,4 +139,13 @@ public class UserService {
     public User save(User user) {
         return userRepository.save(user);
     }
+
+    public boolean isCurrentUserDev() {
+        try {
+            User currentUser = getCurrentUser();
+            return currentUser != null && currentUser.getRole() == User.Role.dev;
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
 }

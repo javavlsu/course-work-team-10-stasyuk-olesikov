@@ -8,10 +8,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import ru.vlsu.myng.dto.GamePageDTO;
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
 import ru.vlsu.myng.services.GameService;
 import ru.vlsu.myng.services.UserService;
+import ru.vlsu.myng.entities.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +28,22 @@ public class GameController {
     private final GameService gameService;
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public String getGamePage(@PathVariable Integer id, Model model) {
+        try {
+            System.out.println("=== DEBUG: Getting game with id: " + id);
+            GamePageDTO game = gameService.getGamePageData(id);
+            System.out.println("=== DEBUG: Game found: " + game.getName());
 
-    @GetMapping("/")
-    public String indexPage() {
-        return "game";
+            model.addAttribute("game", game);
+            model.addAttribute("isDev", userService.isCurrentUserDev());
+
+            return "game";
+        } catch (Exception e) {
+            System.err.println("=== ERROR: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/";
+        }
     }
 
     @GetMapping("/developer/{userId}")
@@ -50,7 +65,6 @@ public class GameController {
 
         return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "Game published successfully"
-        ));
+                "message", "Game published successfully"));
     }
 }
