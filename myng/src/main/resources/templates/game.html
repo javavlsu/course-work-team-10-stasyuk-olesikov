@@ -9,6 +9,39 @@
     role="region"
     aria-labelledby="game-title"
   >
+    <!-- Flash сообщения -->
+    <div
+      th:if="${session.success != null}"
+      class="fixed top-20 right-4 z-50 mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-lg animate-pulse"
+      role="alert"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${session.success}"></span>
+      </div>
+    </div>
+
+    <div
+      th:if="${session.error != null}"
+      class="fixed top-20 right-4 z-50 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg animate-pulse"
+      role="alert"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${session.error}"></span>
+      </div>
+    </div>
+
+    <script>
+      // Автоматическое скрытие flash-сообщений через 5 секунд
+      setTimeout(() => {
+        const successMsg = document.querySelector('[class*="bg-green-100"]');
+        const errorMsg = document.querySelector('[class*="bg-red-100"]');
+        if (successMsg) successMsg.style.display = "none";
+        if (errorMsg) errorMsg.style.display = "none";
+      }, 5000);
+    </script>
+
     <!-- Шапка с навигацией -->
     <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
       <div
@@ -266,25 +299,62 @@
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
               <i class="fas fa-star text-yellow-500"></i>
-              Отзывы
+              <span th:if="${isDeveloper}">Отзывы к вашей игре</span>
+              <span th:unless="${isDeveloper}">Отзывы</span>
               <span
                 class="text-sm font-normal text-gray-500 ml-2"
                 th:text="${game.reviewsCount + ' ' + (game.reviewsCount == 1 ? 'отзыв' : (game.reviewsCount < 5 ? 'отзыва' : 'отзывов'))}"
-                >128 отзывов</span
               >
+              </span>
             </h3>
 
-            <button
-              data-action="open-modal"
-              data-modal="review"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
-            >
-              <i class="fas fa-pen"></i> Написать
-            </button>
+            <!-- Кнопка написания отзыва - ТОЛЬКО ОДИН БЛОК -->
+            <div>
+              <!-- Если разработчик - показываем инфо -->
+              <div
+                th:if="${isDeveloper}"
+                class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg flex items-center gap-2"
+              >
+                <i class="fas fa-info-circle"></i> Разработчик не может
+                оставлять отзывы к своей игре
+              </div>
+
+              <!-- Если не разработчик -->
+              <div th:unless="${isDeveloper}">
+                <!-- Авторизован и еще не оставлял отзыв -->
+                <button
+                  th:if="${isAuthenticated and !hasUserReviewed}"
+                  data-action="open-modal"
+                  data-modal="review"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                >
+                  <i class="fas fa-pen"></i> Написать отзыв
+                </button>
+
+                <!-- Авторизован и уже оставил отзыв -->
+                <div
+                  th:if="${isAuthenticated and hasUserReviewed}"
+                  class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg flex items-center gap-2"
+                >
+                  <i class="fas fa-check-circle text-green-500"></i> Вы уже
+                  оставили отзыв
+                </div>
+
+                <!-- Не авторизован -->
+                <a
+                  th:unless="${isAuthenticated}"
+                  href="/auth"
+                  class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition flex items-center gap-2"
+                >
+                  <i class="fas fa-sign-in-alt"></i> Зарегистрируйтесь или
+                  войдите для написания отзыва
+                </a>
+              </div>
+            </div>
           </div>
 
+          <!-- Список отзывов -->
           <div class="space-y-4">
-            <!-- Динамические отзывы -->
             <article
               th:each="review : ${game.recentReviews}"
               class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
@@ -294,22 +364,16 @@
                   <div
                     class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
                     th:text="${#strings.substring(review.user.username, 0, 2).toUpperCase()}"
-                  >
-                    АБ
-                  </div>
+                  ></div>
                   <div>
                     <div
                       class="font-semibold text-gray-900"
                       th:text="${review.user.username}"
-                    >
-                      Александр
-                    </div>
+                    ></div>
                     <div
                       class="text-xs text-gray-500"
                       th:text="${#temporals.format(review.createdAt, 'dd MMMM yyyy', new java.util.Locale('ru'))}"
-                    >
-                      12 января 2025
-                    </div>
+                    ></div>
                   </div>
                 </div>
                 <div class="flex items-center gap-1 text-yellow-500 text-sm">
@@ -322,9 +386,15 @@
               <p
                 class="text-gray-700 text-sm leading-relaxed"
                 th:text="${review.text}"
+              ></p>
+
+              <div
+                th:if="${review.user.id == game.developer.id}"
+                class="mt-2 text-xs text-blue-600 flex items-center gap-1"
               >
-                Отличная игра!
-              </p>
+                <i class="fas fa-code-branch"></i> <span>Разработчик</span>
+              </div>
+
               <div class="flex items-center gap-3 mt-3 text-xs">
                 <button class="text-gray-500 hover:text-blue-600">
                   <i class="far fa-flag mr-1"></i> Пожаловаться
@@ -332,7 +402,6 @@
               </div>
             </article>
 
-            <!-- Сообщение, если нет отзывов -->
             <div
               th:if="${#lists.isEmpty(game.recentReviews)}"
               class="text-center py-8 text-gray-500"
@@ -342,7 +411,6 @@
             </div>
           </div>
 
-          <!-- Кнопка "Показать еще" (если отзывов больше 10) -->
           <div th:if="${game.reviewsCount > 10}" class="mt-4 text-center">
             <button
               class="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -356,6 +424,7 @@
 
     <!-- Модальное окно для отзыва -->
     <div
+      th:if="${isAuthenticated and !hasUserReviewed and !isDeveloper}"
       id="reviewModal"
       class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
       style="display: none"
@@ -364,7 +433,7 @@
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
             <i class="fas fa-pen text-blue-500"></i>
-            Написать отзыв
+            Написать отзыв об игре "<span th:text="${game.name}"></span>"
           </h3>
           <button
             class="text-gray-400 hover:text-gray-600"
@@ -383,7 +452,7 @@
             <!-- Рейтинг звездами -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Ваша оценка</label
+                >Ваша оценка *</label
               >
               <div class="flex gap-2 text-2xl" id="starRating">
                 <i
@@ -407,7 +476,13 @@
                   data-rating="5"
                 ></i>
               </div>
-              <input type="hidden" id="reviewRating" name="rating" value="0" />
+              <input
+                type="hidden"
+                id="reviewRating"
+                name="rating"
+                value="0"
+                required
+              />
             </div>
 
             <!-- Текст отзыва -->
@@ -415,15 +490,15 @@
               <label
                 for="reviewText"
                 class="block text-sm font-medium text-gray-700 mb-2"
-                >Текст отзыва</label
+                >Текст отзыва *</label
               >
               <textarea
                 id="reviewText"
-                name="comment"
+                name="text"
                 rows="4"
+                required
                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
                 placeholder="Поделитесь впечатлениями об игре..."
-                required
               ></textarea>
             </div>
 
@@ -441,7 +516,7 @@
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
               >
                 <i class="fas fa-paper-plane"></i>
-                Опубликовать
+                Опубликовать отзыв
               </button>
             </div>
           </div>
@@ -797,6 +872,30 @@
           }
         });
       }
+
+      // Валидация формы перед отправкой
+      document
+        .getElementById("reviewForm")
+        ?.addEventListener("submit", function (e) {
+          const rating = parseInt(
+            document.getElementById("reviewRating").value,
+          );
+          const text = document.getElementById("reviewText").value.trim();
+
+          if (rating === 0) {
+            e.preventDefault();
+            alert("Пожалуйста, поставьте оценку от 1 до 5 звезд");
+            return false;
+          }
+
+          if (text.length < 10) {
+            e.preventDefault();
+            alert("Пожалуйста, напишите отзыв (минимум 10 символов)");
+            return false;
+          }
+
+          return true;
+        });
 
       // Закрытие по клику на фон
       document.querySelectorAll(".fixed.inset-0").forEach((modal) => {

@@ -119,7 +119,14 @@ public class UserService {
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        // Проверяем, существует ли аутентификация
+        if (authentication == null) {
+            throw new IllegalStateException("No authentication found");
+        }
+
+        // Проверяем, аутентифицирован ли пользователь и не анонимный ли он
+        if (!authentication.isAuthenticated() ||
+                authentication.getPrincipal().equals("anonymousUser")) {
             throw new IllegalStateException("User is not authenticated");
         }
 

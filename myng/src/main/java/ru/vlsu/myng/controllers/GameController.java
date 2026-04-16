@@ -2,20 +2,24 @@ package ru.vlsu.myng.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ru.vlsu.myng.dto.GamePageDTO;
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
 import ru.vlsu.myng.services.GameService;
+import ru.vlsu.myng.services.ReviewService;
 import ru.vlsu.myng.services.UserService;
+import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,23 +31,103 @@ public class GameController {
 
     private final GameService gameService;
     private final UserService userService;
+    private final ReviewService reviewService;
 
     @GetMapping("/{id}")
-    public String getGamePage(@PathVariable Integer id, Model model) {
+    public String getGamePage(@PathVariable Integer id, Model model, Principal principal) {
         try {
-            System.out.println("=== DEBUG: Getting game with id: " + id);
             GamePageDTO game = gameService.getGamePageData(id);
-            System.out.println("=== DEBUG: Game found: " + game.getName());
-
             model.addAttribute("game", game);
-            model.addAttribute("isDev", userService.isCurrentUserDev());
+
+            // Получаем текущего пользователя через Principal (как в профиле)
+            User currentUser = null;
+            boolean isAuthenticated = false;
+
+            if (principal != null) {
+                String email = principal.getName();
+                currentUser = userService.findByEmail(email);
+                isAuthenticated = currentUser != null;
+            }
+
+            // Проверяем, является ли текущий пользователь разработчиком игры
+            boolean isDeveloper = isAuthenticated &&
+                    currentUser != null &&
+                    game.getDeveloper() != null &&
+                    currentUser.getId().equals(game.getDeveloper().getId());
+
+            // Проверял ли пользователь уже отзыв
+            boolean hasUserReviewed = false;
+            if (isAuthenticated && currentUser != null) {
+                Game gameEntity = gameService.getGameById(id);
+                hasUserReviewed = reviewService.hasUserReviewedGame(gameEntity, currentUser);
+            }
+
+            System.out.println("=== FINAL VALUES ===");
+            System.out.println("isAuthenticated: " + isAuthenticated);
+            System.out.println("isDeveloper: " + isDeveloper);
+            System.out.println("hasUserReviewed: " + hasUserReviewed);
+            System.out.println("currentUser: "
+                    + (currentUser != null ? currentUser.getUsername() + " (role: " + currentUser.getRole() + ")"
+                            : "null"));
+
+            model.addAttribute("isAuthenticated", isAuthenticated);
+            model.addAttribute("isDeveloper", isDeveloper);
+            model.addAttribute("hasUserReviewed", hasUserReviewed);
+            model.addAttribute("isDev", currentUser != null && currentUser.getRole() == User.Role.dev);
 
             return "game";
         } catch (Exception e) {
-            System.err.println("=== ERROR: " + e.getMessage());
+            System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
             return "redirect:/";
         }
+    }
+
+    @PostMapping("/{id}/reviews")
+    public String addReview(@PathVariable Integer id,
+            @RequestParam Byte rating,
+            @RequestParam String text,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = userService.getCurrentUser();
+            Game game = gameService.getGameById(id);
+
+            // Проверки
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Необходимо авторизоваться");
+                return "redirect:/auth";
+            }
+
+            if (game.getDeveloper().getId().equals(currentUser.getId())) {
+                redirectAttributes.addFlashAttribute("error", "Разработчик не может оставлять отзывы к своей игре");
+                return "redirect:/games/" + id;
+            }
+
+            if (reviewService.hasUserReviewedGame(game, currentUser)) {
+                redirectAttributes.addFlashAttribute("error", "Вы уже оставили отзыв к этой игре");
+                return "redirect:/games/" + id;
+            }
+
+            if (rating < 1 || rating > 5) {
+                redirectAttributes.addFlashAttribute("error", "Некорректная оценка");
+                return "redirect:/games/" + id;
+            }
+
+            if (text == null || text.trim().length() < 10) {
+                redirectAttributes.addFlashAttribute("error", "Текст отзыва должен содержать минимум 10 символов");
+                return "redirect:/games/" + id;
+            }
+
+            // Создаем отзыв через сервис
+            reviewService.createReview(game, currentUser, rating, text);
+
+            redirectAttributes.addFlashAttribute("success", "Отзыв успешно добавлен!");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Ошибка при добавлении отзыва: " + e.getMessage());
+        }
+
+        return "redirect:/games/" + id;
     }
 
     @GetMapping("/developer/{userId}")
@@ -58,8 +142,6 @@ public class GameController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> publishGame(
             @Valid @ModelAttribute PublishGameRequest request) {
-
-        Map<String, Object> response = new HashMap<>();
 
         gameService.publishGame(request);
 
