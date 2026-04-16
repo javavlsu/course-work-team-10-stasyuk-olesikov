@@ -7,9 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import ru.vlsu.myng.entities.GameVersion;
 import ru.vlsu.myng.utils.GithubException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 // perhaps add caching later to avoid excess calls to GitHub API
 @Service
@@ -19,6 +27,9 @@ public class GithubService {
 
     @Value("${github.token}")
     private String githubToken;
+
+    @Value("${app.storage.path}")
+    private String storagePath;
 
     public GithubService(WebClient.Builder builder) {
         this.webClient = builder
@@ -111,13 +122,16 @@ public class GithubService {
         }
     }
 
+    private String extractPath(String url) {
+        return url.replace("https://github.com/", "").replaceAll("/$", "");
+    }
 
     public void validateFilesExistInCommit(String repoUrl, String commitHash, String files) {
         String[] path = extractPath(repoUrl).split("/");
         String owner = path[0];
         String repo = path[1];
 
-        List<String> requestedFiles = Arrays.stream(files.split("\\s*,\\s*"))
+        List<String> requestedPaths = Arrays.stream(files.split("\\s*,\\s*"))
                 .map(String::trim)
                 .toList();
 
@@ -142,27 +156,31 @@ public class GithubService {
                 throw new GithubException("files", "Не удалось получить дерево файлов коммита");
             }
 
-            List<String> repoFiles = new ArrayList<>();
-
+            List<String> repoPaths = new ArrayList<>();
             for (JsonNode node : response.get("tree")) {
-                if ("blob".equals(node.get("type").asText())) {
-                    repoFiles.add(node.get("path").asText());
+                String type = node.get("type").asText();
+                String pathValue = node.get("path").asText();
+
+                if ("blob".equals(type) || "tree".equals(type)) {
+                    repoPaths.add(pathValue);
                 }
             }
 
-            System.out.println(repoFiles);
+            boolean hasIndexHtml = requestedPaths.stream()
+                    .map(p -> p.replaceAll("/+$", "")) // normalize trailing slashes
+                    .anyMatch(p -> p.endsWith("/index.html") || p.equals("index.html"));
 
-            if (!isValidFileMatch(requestedFiles, "index.html")) {
-                throw new GithubException("files", "Список файлов должен содержать index.html");
+            if (!hasIndexHtml) {
+                throw new GithubException(
+                        "files",
+                        "Список должен содержать index.html (в корне или в папке)"
+                );
             }
 
             List<String> missing = new ArrayList<>();
 
-            for (String requested : requestedFiles) {
-
-                boolean match = isValidFileMatch(repoFiles, requested);
-
-                if (!match) {
+            for (String requested : requestedPaths) {
+                if (!existsInRepo(repoPaths, requested)) {
                     missing.add(requested);
                 }
             }
@@ -170,7 +188,7 @@ public class GithubService {
             if (!missing.isEmpty()) {
                 throw new GithubException(
                         "files",
-                        "Файлы не найдены в коммите: " + String.join(", ", missing)
+                        "Файлы/папки не найдены в коммите: " + String.join(", ", missing)
                 );
             }
 
@@ -181,19 +199,123 @@ public class GithubService {
         }
     }
 
-    private String extractPath(String url) {
-        return url.replace("https://github.com/", "").replaceAll("/$", "");
+    private boolean existsInRepo(List<String> repoPaths, String requested) {
+
+        String normalized = requested.endsWith("/")
+                ? requested.substring(0, requested.length() - 1)
+                : requested;
+
+        boolean exactMatch = repoPaths.stream()
+                .anyMatch(path ->
+                        path.equals(normalized) ||
+                                path.endsWith("/" + normalized)
+                );
+
+        if (exactMatch) {
+            return true;
+        }
+
+        return repoPaths.stream()
+                .anyMatch(path ->
+                        path.startsWith(normalized + "/") ||
+                                path.contains("/" + normalized + "/")
+                );
     }
 
-    private boolean isValidFileMatch(List<String> repoFiles, String requested) {
+    public void downloadGameVersion(GameVersion version) {
+        String repoUrl = version.getGame().getRepo();
+        String commit = version.getCommitHash();
 
-        List<String> matches = repoFiles.stream()
-                .filter(path ->
-                        path.equals(requested) ||
-                                path.endsWith("/" + requested)
-                )
+        String[] path = extractPath(repoUrl).split("/");
+        String owner = path[0];
+        String repo = path[1];
+
+        Path targetDir = buildTargetPath(version);
+
+        try {
+            Files.createDirectories(targetDir);
+
+            Path zipFile = downloadZip(owner, repo, commit);
+            extractNeededFiles(zipFile, targetDir, version.getFiles());
+
+            Files.deleteIfExists(zipFile);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка загрузки файлов из GitHub", e);
+        }
+    }
+
+    private Path buildTargetPath(GameVersion version) {
+        return Paths.get(storagePath,
+                "gamefiles",
+                "game_" + version.getGame().getId(),
+                "ver_" + version.getId());
+    }
+
+    private Path downloadZip(String owner, String repo, String commit) throws IOException
+    {
+
+        String url = String.format(
+                "https://api.github.com/repos/%s/%s/zipball/%s",
+                owner, repo, commit
+        );
+
+        Path tempFile = Files.createTempFile("repo-", ".zip");
+
+        webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .doOnNext(bytes -> {
+                    try {
+                        Files.write(tempFile, bytes);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .block();
+
+        return tempFile;
+    }
+
+    private void extractNeededFiles(Path zipPath, Path targetDir, String files) throws IOException {
+        List<String> requested = Arrays.stream(files.split("\\s*,\\s*"))
+                .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
                 .toList();
 
-        return matches.size() == 1;
+        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipPath))) {
+
+            ZipEntry entry;
+
+            while ((entry = zis.getNextEntry()) != null) {
+
+                String fullPath = entry.getName();
+
+                // remove root folder
+                String relativePath = fullPath.substring(fullPath.indexOf("/") + 1);
+
+                if (relativePath.isBlank()) continue;
+
+                boolean shouldExtract = requested.stream()
+                        .anyMatch(req ->
+                                relativePath.equals(req) ||
+                                        relativePath.startsWith(req + "/")
+                        );
+
+                if (!shouldExtract) continue;
+
+                Path normalized = targetDir.resolve(relativePath).normalize();
+
+                if (!normalized.startsWith(targetDir)) {
+                    throw new RuntimeException("Invalid path in zip: " + relativePath);
+                }
+                if (entry.isDirectory()) {
+                    Files.createDirectories(normalized);
+                } else {
+                    Files.createDirectories(normalized.getParent());
+                    Files.copy(zis, normalized, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
     }
 }

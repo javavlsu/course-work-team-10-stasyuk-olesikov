@@ -31,8 +31,8 @@ public class GameVersion {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(length = 500)
-    private String dir;
+    @Column(columnDefinition = "TEXT")
+    private String files;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_game")

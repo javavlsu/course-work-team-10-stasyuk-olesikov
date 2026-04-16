@@ -35,10 +35,9 @@ public class PublishGameRequest {
     )
     private String commitHash;
 
-    @NotBlank(message = "Список файлов обязателен")
     @Pattern(
-            regexp = "^([a-zA-Z0-9_\\-.]+\\.[a-zA-Z0-9]+)(,\\s*[a-zA-Z0-9_\\-.]+\\.[a-zA-Z0-9]+)*$",
-            message = "Файлы должны быть в формате: file1.ext, file2.ext"
+            regexp = "^([a-zA-Z0-9_\\-./]+)(,\\s*[a-zA-Z0-9_\\-./]+)*$",
+            message = "Введите названия файлов и папок в формате: file.ext, folder, dir/file.ext"
     )
     private String files;
 
