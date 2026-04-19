@@ -105,7 +105,8 @@
 
                 <tbody class="divide-y divide-gray-200">
                 <tr th:each="item : ${items}"
-                    class="hover:bg-blue-50/30 transition-colors">
+                    th:attr="data-id=${item.moderationVerdictId}"
+                    class="moderation-item hover:bg-blue-50/30 transition-colors">
 
                     <!-- ID -->
                     <td class="px-6 py-4">
@@ -355,6 +356,8 @@
                 <p class="text-gray-500 text-sm">Вы уверены, что хотите принять этот элемент?</p>
             </div>
 
+            <p class="from-error"></p>
+
             <!-- Buttons -->
             <div class="flex justify-end gap-3 mt-2">
                 <button
@@ -469,30 +472,64 @@
 
                     console.log("Rejected with reason:", reason);
                     closeModal();
+                    removeItemFromList(id);
                 });
               }
 
               if (modalType === "accept") {
                 openModal("tpl-accept", async () => {
                     const form = document.querySelector('form[data-form="accept"]');
+                    const confirmBtn = form.querySelector('[data-action="confirm"]');
 
-                    console.log("verdict id: " + id);
+                    const originalHTML = confirmBtn.innerHTML;
 
-                    const response = await fetch(`/to-moderate/approve/${id}`, {
-                        method: "POST"
-                    });
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Загрузка...`;
 
-                    if (!response.ok) {
-                        console.error("Approve failed");
-                        return;
+                    try {
+                        const response = await fetch(`/to-moderate/approve/${id}`, {
+                            method: "POST"
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(errorText || "Approve failed");
+                        }
+
+                        console.log("Accepted!");
+                        closeModal();
+                        removeItemFromList(id);
+                    } catch (err) {
+                        console.error(err);
+
+                        showFormError(form, err.message);
+                    } finally {
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = originalHTML;
                     }
-
-                    console.log("Accepted!");
-                    closeModal();
                 });
               }
             }
         });
+
+        function showFormError(form, message) {
+            let errorEl = form.querySelector(".form-error");
+
+            if (!errorEl) {
+                errorEl = document.createElement("div");
+                errorEl.className = "form-error text-red-600 text-sm";
+                form.prepend(errorEl);
+            }
+
+            errorEl.textContent = message;
+        }
+
+        function removeItemFromList(id) {
+            const item = document.querySelector(`.moderation-item[data-id="${id}"]`);
+            if (item) {
+                item.remove();
+            }
+        }
   </script>
 
   </section>

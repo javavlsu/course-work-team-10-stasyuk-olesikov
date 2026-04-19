@@ -27,14 +27,12 @@ public class ModerationVerdictService {
             throw new IllegalStateException("Verdict already decided");
         }
 
-        verdict.setApproved(true);
-
         var gv = verdict.getGameVersion();
         if (gv != null) {
-            System.out.println("Before game download");
             githubService.downloadGameVersion(gv);
-            System.out.println("After game download");
         }
+
+        verdict.setApproved(true);
 
         moderationVerdictRepository.save(verdict);
     }
