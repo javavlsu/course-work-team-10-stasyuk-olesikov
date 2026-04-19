@@ -2,6 +2,9 @@ package ru.vlsu.myng.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +20,7 @@ import ru.vlsu.myng.services.GameService;
 import ru.vlsu.myng.services.ReviewService;
 import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.entities.Game;
+import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
 
 import java.security.Principal;
@@ -39,7 +43,7 @@ public class GameController {
             GamePageDTO game = gameService.getGamePageData(id);
             model.addAttribute("game", game);
 
-            // Получаем текущего пользователя через Principal (как в профиле)
+            // Получаем текущего пользователя
             User currentUser = null;
             boolean isAuthenticated = false;
 
@@ -62,22 +66,14 @@ public class GameController {
                 hasUserReviewed = reviewService.hasUserReviewedGame(gameEntity, currentUser);
             }
 
-            System.out.println("=== FINAL VALUES ===");
-            System.out.println("isAuthenticated: " + isAuthenticated);
-            System.out.println("isDeveloper: " + isDeveloper);
-            System.out.println("hasUserReviewed: " + hasUserReviewed);
-            System.out.println("currentUser: "
-                    + (currentUser != null ? currentUser.getUsername() + " (role: " + currentUser.getRole() + ")"
-                            : "null"));
-
             model.addAttribute("isAuthenticated", isAuthenticated);
             model.addAttribute("isDeveloper", isDeveloper);
             model.addAttribute("hasUserReviewed", hasUserReviewed);
             model.addAttribute("isDev", currentUser != null && currentUser.getRole() == User.Role.dev);
+            model.addAttribute("currentUserId", currentUser != null ? currentUser.getId() : null);
 
             return "game";
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
             return "redirect:/";
         }
@@ -87,6 +83,7 @@ public class GameController {
     public String addReview(@PathVariable Integer id,
             @RequestParam Byte rating,
             @RequestParam String text,
+            @RequestParam(required = false) String gameId,
             RedirectAttributes redirectAttributes) {
         try {
             User currentUser = userService.getCurrentUser();
@@ -118,9 +115,7 @@ public class GameController {
                 return "redirect:/games/" + id;
             }
 
-            // Создаем отзыв через сервис
             reviewService.createReview(game, currentUser, rating, text);
-
             redirectAttributes.addFlashAttribute("success", "Отзыв успешно добавлен!");
 
         } catch (Exception e) {
@@ -128,6 +123,45 @@ public class GameController {
         }
 
         return "redirect:/games/" + id;
+    }
+
+    @PostMapping("/reviews/{reviewId}/report")
+    @ResponseBody
+    public ResponseEntity<?> reportReview(@PathVariable Integer reviewId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Нужна авторизация");
+        }
+
+        User currentUser = userService.findByEmail(principal.getName());
+        Review review = reviewService.getReviewById(reviewId);
+
+        if (review.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.badRequest().body("Нельзя жаловаться на свой отзыв");
+        }
+
+        reviewService.incrementReportCount(reviewId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/reviews/more")
+    public String getMoreReviews(@PathVariable Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            Model model,
+            Principal principal) {
+        Game game = gameService.getGameById(id);
+        List<Review> moreReviews = reviewService.findByGameOrderByCreatedAtDesc(
+                game,
+                PageRequest.of(page, 5));
+
+        // Передаем ID пользователя, чтобы кнопка "Пожаловаться" работала корректно
+        User currentUser = (principal != null) ? userService.findByEmail(principal.getName()) : null;
+        model.addAttribute("currentUserId", currentUser != null ? currentUser.getId() : null);
+        model.addAttribute("isAuthenticated", principal != null);
+        model.addAttribute("reviews", moreReviews);
+
+        // Возвращаем только фрагмент списка
+        return "fragments/review_items :: reviewList";
     }
 
     @GetMapping("/developer/{userId}")

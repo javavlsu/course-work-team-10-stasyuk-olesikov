@@ -306,8 +306,9 @@ public class GameService {
 
         GameVersion latestVersion = versions.isEmpty() ? null : versions.get(0);
 
-        // Получаем последние 10 отзывов
-        List<Review> recentReviews = reviewRepository.findTop10ByGameOrderByCreatedAtDesc(game);
+        List<Review> recentReviews = reviewRepository.findByGameOrderByCreatedAtDesc(
+                game,
+                PageRequest.of(0, 5));
 
         // Дата первого релиза
         Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)

@@ -15,7 +15,6 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-
     @GetMapping("/user/{userId}")
     public String getUserReviews(@PathVariable Integer userId, Model model) {
         model.addAttribute("reviews", reviewService.getByUser(userId));
@@ -25,13 +24,12 @@ public class ReviewController {
     @PostMapping("/update/{id}")
     @ResponseBody
     public void updateReview(@PathVariable Integer id,
-                             @RequestBody ReviewUpdate dto) {
+            @RequestBody ReviewUpdate dto) {
         reviewService.updateReview(id, dto);
     }
 
-
     @PostMapping("/delete/{id}")
     public void deleteReview(@PathVariable Integer id) {
-        reviewService.deleteReview(id);
+        reviewService.delete(id);
     }
 }

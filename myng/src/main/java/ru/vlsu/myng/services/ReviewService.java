@@ -2,6 +2,8 @@ package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
 import ru.vlsu.myng.dto.ReviewUpdate;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +33,13 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    public void deleteReview(Integer reviewId) {
-        reviewRepository.deleteById(reviewId);
+    /**
+     * Получить отзыв по ID
+     */
+    @Transactional(readOnly = true)
+    public Review getReviewById(Integer id) {
+        return reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Отзыв не найден"));
     }
 
     public List<Review> getByUser(Integer userId) {
@@ -84,5 +91,22 @@ public class ReviewService {
         review.setReportCount(0);
 
         return reviewRepository.save(review);
+    }
+
+    /**
+     * Увеличить жалобы на отзыв
+     */
+    @Transactional()
+    public void incrementReportCount(Integer id) {
+        Review review = getReviewById(id);
+        review.setReportCount(review.getReportCount() + 1);
+    }
+
+    /**
+     * Получить отзывы по игре
+     */
+    @Transactional(readOnly = true)
+    public List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable) {
+        return reviewRepository.findByGameOrderByCreatedAtDesc(game, pageable);
     }
 }
