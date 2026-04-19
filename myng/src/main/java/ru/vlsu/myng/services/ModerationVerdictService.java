@@ -31,7 +31,9 @@ public class ModerationVerdictService {
 
         var gv = verdict.getGameVersion();
         if (gv != null) {
+            System.out.println("Before game download");
             githubService.downloadGameVersion(gv);
+            System.out.println("After game download");
         }
 
         moderationVerdictRepository.save(verdict);

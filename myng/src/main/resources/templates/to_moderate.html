@@ -223,7 +223,7 @@
                             <button type="button"
                                     data-action="open-modal"
                                     data-modal="accept"
-                                    th:attr="data-id=${item.id}"
+                                    th:attr="data-id=${item.moderationVerdictId}"
                                     class="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg">
                                 Принять
                             </button>
@@ -232,7 +232,7 @@
                                     data-action="open-modal"
                                     data-modal="decline"
                                     th:text="${item.type == 'REVIEW'} ? 'Удалить' : 'Отклонить'"
-                                    th:attr="data-id=${item.id}"
+                                    th:attr="data-id=${item.moderationVerdictId}"
                                     class="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs rounded-lg">
                                 Отклонить
                             </button>
@@ -443,6 +443,7 @@
 
             if (action === "open-modal") {
               const modalType = actionEl.dataset.modal;
+              const id = actionEl.dataset.id;
 
               if (modalType === "decline") {
                 openModal("tpl-decline", async () => {
@@ -450,7 +451,6 @@
                     const formData = new FormData(form);
 
                     const reason = formData.get("reason");
-                    const id = form.dataset.id; // assuming you store verdict id here
 
                     const response = await fetch(`/to-moderate/reject/${id}`, {
                         method: "POST",
@@ -475,7 +475,8 @@
               if (modalType === "accept") {
                 openModal("tpl-accept", async () => {
                     const form = document.querySelector('form[data-form="accept"]');
-                    const id = form.dataset.id; // verdict id
+
+                    console.log("verdict id: " + id);
 
                     const response = await fetch(`/to-moderate/approve/${id}`, {
                         method: "POST"

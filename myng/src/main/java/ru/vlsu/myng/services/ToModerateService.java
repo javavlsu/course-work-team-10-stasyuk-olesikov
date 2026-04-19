@@ -22,6 +22,7 @@ public class ToModerateService {
                 .forEach(v -> {
                     var version = v.getGameVersion();
                     ModerationItem item = new ModerationItem();
+                    item.setModerationVerdictId(v.getId());
                     item.setId(version.getId().longValue());
                     item.setType("GAME_VERSION");
                     item.setGameId(version.getGame().getId().longValue());
@@ -37,6 +38,7 @@ public class ToModerateService {
                 .forEach(v -> {
                     var app = v.getDevApplication();
                     ModerationItem item = new ModerationItem();
+                    item.setModerationVerdictId(v.getId());
                     item.setId(app.getId().longValue());
                     item.setType("DEV_APPLICATION");
                     item.setUsername(app.getUser().getUsername());
@@ -51,6 +53,7 @@ public class ToModerateService {
                 .forEach(v -> {
                     var review = v.getReview();
                     ModerationItem item = new ModerationItem();
+                    item.setModerationVerdictId(v.getId());
                     item.setId(review.getId().longValue());
                     item.setType("REVIEW");
                     item.setGameId(review.getGame().getId().longValue());

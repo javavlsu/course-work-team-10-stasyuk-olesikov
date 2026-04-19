@@ -9,6 +9,8 @@ import java.time.Instant;
 @Setter
 public class ModerationItem {
 
+    private Integer moderationVerdictId;
+
     private Long id;
     private String type;         // GAME_VERSION, DEV_APPLICATION, REVIEW
     private Long gameId;         // Для GameVersion и Review
