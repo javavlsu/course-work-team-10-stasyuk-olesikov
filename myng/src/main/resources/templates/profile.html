@@ -821,6 +821,7 @@
                         });
 
                         showTab("collections-section");
+                        closeModal();
                       });
                   }
 
@@ -1030,7 +1031,7 @@
                               "Content-Type": "application/x-www-form-urlencoded"
                             },
                             body: new URLSearchParams({
-                              collection_name: name,
+                              name: name,
                               userId: userId
                             })
                           });
@@ -1038,13 +1039,11 @@
                           const data = await response.json();
 
                           console.log("Collection created:", data);
-
-                          showTab("collections-section");
-
                         } catch (err) {
                           console.error("Failed to create collection", err);
                         } finally {
                           closeModal();
+                          showTab("collections-section");
                         }
 
                       });
@@ -1071,6 +1070,7 @@
                         });
 
                         showTab("reviews-section");
+                        closeModal();
                       });
                   }
 

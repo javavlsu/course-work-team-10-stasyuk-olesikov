@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import ru.vlsu.myng.dto.CreateCollectionDto;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.entities.Collection;
 import ru.vlsu.myng.services.CollectionService;
@@ -44,12 +45,17 @@ public class CollectionController {
 
     @PostMapping("/create")
     @ResponseBody
-    public Collection createCollection(
-            @RequestParam String collection_name,
-            @RequestParam Integer userId
-    ) {
+    public CreateCollectionDto createCollection(
+            @ModelAttribute CreateCollectionDto dto
+            ) {
 
-        return collectionService.createCollection(userId, collection_name);
+        Collection collection = collectionService.createCollection(dto.getUserId(), dto.getName());
+
+        CreateCollectionDto res = new CreateCollectionDto();
+        res.setUserId(collection.getId());
+        res.setName(collection.getName());
+
+        return res;
     }
 
     @PostMapping("/delete/{collectionId}")

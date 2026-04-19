@@ -3,10 +3,12 @@ package ru.vlsu.myng.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import ru.vlsu.myng.entities.GameVersion;
 import ru.vlsu.myng.utils.GithubException;
 
@@ -32,7 +34,10 @@ public class GithubService {
     private String storagePath;
 
     public GithubService(WebClient.Builder builder) {
+        HttpClient httpClient = HttpClient.create()
+                .followRedirect(true);
         this.webClient = builder
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl("https://api.github.com")
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
                 .defaultHeader(HttpHeaders.USER_AGENT, "MyNG")
@@ -232,8 +237,12 @@ public class GithubService {
 
         Path targetDir = buildTargetPath(version);
 
+        System.out.println("Game download target directory: " + targetDir);
+
         try {
+            System.out.println("Before create dirs");
             Files.createDirectories(targetDir);
+            System.out.println("After create dirs");
 
             Path zipFile = downloadZip(owner, repo, commit);
             extractNeededFiles(zipFile, targetDir, version.getFiles());
@@ -241,6 +250,7 @@ public class GithubService {
             Files.deleteIfExists(zipFile);
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Ошибка загрузки файлов из GitHub", e);
         }
     }
@@ -254,7 +264,6 @@ public class GithubService {
 
     private Path downloadZip(String owner, String repo, String commit) throws IOException
     {
-
         String url = String.format(
                 "https://api.github.com/repos/%s/%s/zipball/%s",
                 owner, repo, commit
@@ -264,9 +273,19 @@ public class GithubService {
 
         webClient.get()
                 .uri(url)
-                .retrieve()
-                .bodyToMono(byte[].class)
+                .exchangeToMono(response -> {
+                    System.out.println("Status: " + response.statusCode());
+
+                    if (!response.statusCode().is2xxSuccessful()) {
+                        return response.bodyToMono(String.class)
+                                .doOnNext(body -> System.out.println("Error body: " + body))
+                                .then(Mono.error(new RuntimeException("Request failed")));
+                    }
+
+                    return response.bodyToMono(byte[].class);
+                })
                 .doOnNext(bytes -> {
+                    System.out.println("Received bytes: " + bytes.length);
                     try {
                         Files.write(tempFile, bytes);
                     } catch (IOException e) {
@@ -274,6 +293,8 @@ public class GithubService {
                     }
                 })
                 .block();
+
+        System.out.println("tempFile: " + tempFile.toString());
 
         return tempFile;
     }
@@ -294,6 +315,8 @@ public class GithubService {
                 // remove root folder
                 String relativePath = fullPath.substring(fullPath.indexOf("/") + 1);
 
+                System.out.println(relativePath);
+
                 if (relativePath.isBlank()) continue;
 
                 boolean shouldExtract = requested.stream()
@@ -304,9 +327,10 @@ public class GithubService {
 
                 if (!shouldExtract) continue;
 
-                Path normalized = targetDir.resolve(relativePath).normalize();
+                Path normalizedTargetDir = targetDir.normalize();
+                Path normalized = normalizedTargetDir.resolve(relativePath).normalize();
 
-                if (!normalized.startsWith(targetDir)) {
+                if (!normalized.startsWith(normalizedTargetDir)) {
                     throw new RuntimeException("Invalid path in zip: " + relativePath);
                 }
                 if (entry.isDirectory()) {
