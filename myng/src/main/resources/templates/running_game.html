@@ -36,7 +36,10 @@
           <div class="flex items-center gap-3">
             <span class="text-gray-400 text-sm flex items-center gap-2">
               <i class="fas fa-gamepad"></i>
-              Cyber Knight v1.3
+              <span th:text="${game.name}">Game Name</span>
+              <span class="text-gray-500 text-xs" th:text="${version.name}">v1.0</span>
+              <i class="fas fa-star text-yellow-500"></i>
+              <span th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}">0.0</span>
             </span>
             <button
               class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors flex items-center gap-2"
@@ -48,29 +51,18 @@
           </div>
         </div>
 
-        <!-- Game content with screenshot -->
+
         <div
           class="game-content w-full h-full flex items-center justify-center relative"
-          style="background: linear-gradient(45deg, #1a1a1a, #2d2d2d)"
+          style="background: white"
         >
-          <!-- Скриншот игры -->
-          <img
-            th:src="@{../images/cyber.jpg}"
-            alt="Game screenshot"
-            class="w-full h-full object-cover"
-            onerror="
-              this.style.display = 'none';
-              this.nextElementSibling.style.display = 'flex';
-            "
-          />
-
-          <!-- Заглушка, если скриншот не загрузится -->
-          <div
-            class="hidden absolute inset-0 flex items-center justify-center text-white text-2xl font-bold flex-col gap-4"
+          <iframe
+              th:src="${entryPoint}"
+              sandbox="allow-scripts allow-pointer-lock"
+              class="w-full h-full border-0"
+              allow="fullscreen; autoplay"
           >
-            <i class="fas fa-gamepad text-6xl text-gray-600"></i>
-            <span class="text-gray-500">Игровое поле</span>
-          </div>
+          </iframe>
 
           <!-- Оверлей с подсказкой управления -->
           <div
@@ -91,14 +83,6 @@
               <span>esc — выход из полноэкранного режима</span>
             </span>
           </div>
-        </div>
-      </div>
-
-      <!-- Дополнительная информация -->
-      <div class="mt-6 text-black/70 text-sm flex items-center gap-6">
-        <div class="flex items-center gap-2">
-          <i class="fas fa-star text-yellow-500"></i>
-          <span>Средняя оценка: 4.5</span>
         </div>
       </div>
 
@@ -149,7 +133,6 @@
               const gameContainer = document.querySelector(".game-container");
               const exitBtn = document.getElementById("exit-game-btn");
 
-              // Функция проверки полноэкранного режима
               function isFullscreen() {
                 return (
                   document.fullscreenElement ||
@@ -159,7 +142,6 @@
                 );
               }
 
-              // Функция выхода из полноэкранного режима
               function exitFullscreen() {
                 if (document.exitFullscreen) {
                   document.exitFullscreen();
@@ -172,7 +154,6 @@
                 }
               }
 
-              // Обработчик кнопки полного экрана
               fullscreenBtn.addEventListener("click", function () {
                 if (!isFullscreen()) {
                   // Войти в полноэкранный режим
@@ -186,27 +167,21 @@
                     gameContainer.msRequestFullscreen();
                   }
 
-                  // Меняем иконку и текст кнопки
                   fullscreenBtn.innerHTML =
                     '<i class="fas fa-compress"></i> Выйти из полного экрана';
                 } else {
-                  // Выйти из полноэкранного режима
                   exitFullscreen();
 
-                  // Меняем иконку и текст кнопки обратно
                   fullscreenBtn.innerHTML =
                     '<i class="fas fa-expand"></i> Полный экран';
                 }
               });
 
-              // Обработчик кнопки выхода
               exitBtn.addEventListener("click", function (e) {
                 e.preventDefault();
 
-                // Если в полноэкранном режиме, сначала выйти из него
                 if (isFullscreen()) {
                   exitFullscreen();
-                  // Небольшая задержка перед переходом, чтобы выход из полноэкранного режима успел выполниться
                   setTimeout(() => {
                     window.location.href = "game.html";
                   }, 100);
@@ -215,7 +190,6 @@
                 }
               });
 
-              // Обработчик клавиши Escape для обновления текста кнопки
               document.addEventListener("fullscreenchange", updateButtonText);
               document.addEventListener("webkitfullscreenchange", updateButtonText);
               document.addEventListener("mozfullscreenchange", updateButtonText);
@@ -231,7 +205,6 @@
                 }
               }
 
-              // Обработчик клавиши Escape
               document.addEventListener("keydown", function (e) {
                 if (e.key === "Escape" && isFullscreen()) {
                   updateButtonText();

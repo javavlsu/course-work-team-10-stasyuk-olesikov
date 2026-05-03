@@ -58,4 +58,11 @@ public class Game {
         sports, puzzle, horror, platformer,
         sandbox, visual_novel, roguelike
     }
+
+    public double getAverageRating() {
+        return reviews.stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
 }
