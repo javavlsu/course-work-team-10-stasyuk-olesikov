@@ -46,8 +46,7 @@ public class CollectionController {
     @PostMapping("/create")
     @ResponseBody
     public CreateCollectionDto createCollection(
-            @ModelAttribute CreateCollectionDto dto
-            ) {
+            @ModelAttribute CreateCollectionDto dto) {
 
         Collection collection = collectionService.createCollection(dto.getUserId(), dto.getName());
 
@@ -68,8 +67,7 @@ public class CollectionController {
     public ResponseEntity<?> editCollectionName(
             @PathVariable Integer id,
             @RequestBody CollectionName dto,
-            Principal principal
-    ) {
+            Principal principal) {
         Collection collection = collectionService.findById(id);
         User currentUser = userService.findByEmail(principal.getName());
 
@@ -81,5 +79,20 @@ public class CollectionController {
         collectionService.save(collection);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{collectionId}/add-game/{gameId}")
+    public ResponseEntity<?> addGame(@PathVariable Integer collectionId,
+            @PathVariable Integer gameId,
+            Principal principal) {
+        if (principal == null)
+            return ResponseEntity.status(401).build();
+
+        try {
+            collectionService.addGameToCollection(collectionId, gameId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

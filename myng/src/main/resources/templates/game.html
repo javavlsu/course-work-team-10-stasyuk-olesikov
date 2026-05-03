@@ -86,7 +86,7 @@
 
           <!-- Edit overlay (только для dev) -->
           <div
-            th:if="${isDev}"
+            th:if="${isDeveloper}"
             id="avatarOverlay"
             class="absolute inset-0 bg-black/60 hidden items-center justify-center cursor-pointer"
           >
@@ -184,21 +184,44 @@
               <i class="fas fa-play"></i> Играть
             </button>
 
-            <button
-              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
-            >
-              <i class="fas fa-plus-circle"></i> В коллекцию
-            </button>
+            <!-- Внутри секции кнопок -->
+            <div th:if="${isAuthenticated}" class="flex items-center gap-2">
+              <!-- Если есть коллекции, куда можно добавить -->
+              <div
+                th:if="${not #lists.isEmpty(userCollections)}"
+                class="flex gap-2"
+              >
+                <select
+                  id="collectionSelect"
+                  class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled selected>
+                    Добавить в коллекцию...
+                  </option>
+                  <option
+                    th:each="col : ${userCollections}"
+                    th:value="${col.id}"
+                    th:text="${col.name}"
+                  ></option>
+                </select>
+                <button
+                  id="confirmAddBtn"
+                  th:data-game-id="${game.id}"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
 
-            <!-- Кнопка редактирования только для dev -->
-            <button
-              th:if="${isDev}"
-              id="editBtn"
-              class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
-            >
-              <i class="fas fa-edit"></i>
-              <span id="editBtnText">Редактировать</span>
-            </button>
+              <!-- Если вообще нет коллекций -->
+              <a
+                th:if="${#lists.isEmpty(userCollections) && currentUserId != null}"
+                href="/profile"
+                class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium rounded-lg transition flex items-center gap-2"
+              >
+                <i class="fas fa-folder-plus"></i> Создать коллекцию
+              </a>
+            </div>
           </div>
 
           <p
@@ -256,7 +279,7 @@
             </select>
 
             <!-- Кнопки управления версиями (только для dev) -->
-            <div th:if="${isDev}" class="flex gap-2">
+            <div th:if="${isDeveloper}" class="flex gap-2">
               <button
                 data-action="open-modal"
                 data-modal="add_game_ver"
@@ -495,7 +518,7 @@
 
     <!-- Модальное окно добавления версии (только для dev) -->
     <div
-      th:if="${isDev}"
+      th:if="${isDeveloper}"
       id="addVersionModal"
       class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
       style="display: none"
@@ -600,7 +623,7 @@
 
     <!-- Модальное окно удаления версии (только для dev) -->
     <div
-      th:if="${isDev}"
+      th:if="${isDeveloper}"
       id="deleteVersionModal"
       class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
       style="display: none"
@@ -1004,6 +1027,38 @@
             });
         }
       });
+
+      document
+        .getElementById("confirmAddBtn")
+        ?.addEventListener("click", async function () {
+          const select = document.getElementById("collectionSelect");
+          const collectionId = select.value;
+          const gameId = this.getAttribute("data-game-id");
+
+          if (!collectionId) return;
+
+          const response = await fetch(
+            `/collections/${collectionId}/add-game/${gameId}`,
+            {
+              method: "POST",
+              headers: {
+                "X-CSRF-TOKEN":
+                  document.querySelector('meta[name="_csrf"]')?.content,
+              },
+            },
+          );
+
+          if (response.ok) {
+            // Удаляем вариант из списка
+            select.options[select.selectedIndex].remove();
+
+            // Если это была последняя коллекция
+            if (select.options.length <= 1) {
+              this.closest(".flex").innerHTML =
+                '<span class="text-green-600 text-sm font-medium"><i class="fas fa-check"></i> Во всех коллекциях</span>';
+            }
+          }
+        });
     </script>
   </section>
 </html>

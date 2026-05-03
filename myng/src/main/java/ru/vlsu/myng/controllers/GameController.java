@@ -13,9 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import ru.vlsu.myng.dto.CollectionDTO;
 import ru.vlsu.myng.dto.GamePageDTO;
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
+import ru.vlsu.myng.services.CollectionService;
 import ru.vlsu.myng.services.GameService;
 import ru.vlsu.myng.services.ReviewService;
 import ru.vlsu.myng.services.UserService;
@@ -36,6 +38,7 @@ public class GameController {
     private final GameService gameService;
     private final UserService userService;
     private final ReviewService reviewService;
+    private final CollectionService collectionService;
 
     @GetMapping("/{id}")
     public String getGamePage(@PathVariable Integer id, Model model, Principal principal) {
@@ -43,17 +46,20 @@ public class GameController {
             GamePageDTO game = gameService.getGamePageData(id);
             model.addAttribute("game", game);
 
-            // Получаем текущего пользователя
             User currentUser = null;
             boolean isAuthenticated = false;
+            List<CollectionDTO> userCollections = null;
 
             if (principal != null) {
                 String email = principal.getName();
                 currentUser = userService.findByEmail(email);
                 isAuthenticated = currentUser != null;
+
+                if (isAuthenticated) {
+                    userCollections = collectionService.findAllByUserGameNotIn(currentUser.getId(), game.getId());
+                }
             }
 
-            // Проверяем, является ли текущий пользователь разработчиком игры
             boolean isDeveloper = isAuthenticated &&
                     currentUser != null &&
                     game.getDeveloper() != null &&
@@ -67,9 +73,9 @@ public class GameController {
             }
 
             model.addAttribute("isAuthenticated", isAuthenticated);
+            model.addAttribute("userCollections", userCollections);
             model.addAttribute("isDeveloper", isDeveloper);
             model.addAttribute("hasUserReviewed", hasUserReviewed);
-            model.addAttribute("isDev", currentUser != null && currentUser.getRole() == User.Role.dev);
             model.addAttribute("currentUserId", currentUser != null ? currentUser.getId() : null);
 
             return "game";
