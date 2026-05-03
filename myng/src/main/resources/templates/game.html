@@ -308,15 +308,15 @@
               </span>
             </h3>
 
-            <!-- Кнопка написания отзыва - ТОЛЬКО ОДИН БЛОК -->
+            <!-- Кнопка написания отзыва -->
             <div>
               <!-- Если разработчик - показываем инфо -->
               <div
                 th:if="${isDeveloper}"
                 class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg flex items-center gap-2"
               >
-                <i class="fas fa-info-circle"></i> Разработчик не может
-                оставлять отзывы к своей игре
+                <i class="fas fa-info-circle"></i>
+                Разработчик не может оставлять отзывы к своей игре
               </div>
 
               <!-- Если не разработчик -->
@@ -355,52 +355,14 @@
 
           <!-- Список отзывов -->
           <div class="space-y-4">
-            <article
-              th:each="review : ${game.recentReviews}"
-              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+            <div
+              id="reviewsContainer"
+              th:data-current-user-id="${currentUserId}"
             >
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
-                    th:text="${#strings.substring(review.user.username, 0, 2).toUpperCase()}"
-                  ></div>
-                  <div>
-                    <div
-                      class="font-semibold text-gray-900"
-                      th:text="${review.user.username}"
-                    ></div>
-                    <div
-                      class="text-xs text-gray-500"
-                      th:text="${#temporals.format(review.createdAt, 'dd MMMM yyyy', new java.util.Locale('ru'))}"
-                    ></div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                  <i
-                    th:each="i, iterStat : ${#numbers.sequence(1, 5)}"
-                    th:class="${iterStat.index <= review.rating ? 'fas fa-star' : 'far fa-star'}"
-                  ></i>
-                </div>
-              </div>
-              <p
-                class="text-gray-700 text-sm leading-relaxed"
-                th:text="${review.text}"
-              ></p>
-
               <div
-                th:if="${review.user.id == game.developer.id}"
-                class="mt-2 text-xs text-blue-600 flex items-center gap-1"
-              >
-                <i class="fas fa-code-branch"></i> <span>Разработчик</span>
-              </div>
-
-              <div class="flex items-center gap-3 mt-3 text-xs">
-                <button class="text-gray-500 hover:text-blue-600">
-                  <i class="far fa-flag mr-1"></i> Пожаловаться
-                </button>
-              </div>
-            </article>
+                th:replace="~{fragments/review_items :: reviewList(reviews=${game.recentReviews})}"
+              ></div>
+            </div>
 
             <div
               th:if="${#lists.isEmpty(game.recentReviews)}"
@@ -411,9 +373,12 @@
             </div>
           </div>
 
-          <div th:if="${game.reviewsCount > 10}" class="mt-4 text-center">
+          <div th:if="${game.reviewsCount > 5}" class="mt-6 text-center">
             <button
-              class="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              id="loadMoreBtn"
+              data-page="1"
+              th:data-game-id="${game.id}"
+              class="px-6 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-full text-sm font-medium transition-all"
             >
               Показать еще отзывы <i class="fas fa-chevron-down ml-1"></i>
             </button>
@@ -433,7 +398,8 @@
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
             <i class="fas fa-pen text-blue-500"></i>
-            Написать отзыв об игре "<span th:text="${game.name}"></span>"
+            Написать отзыв об игре
+            <span th:text="${game.name}"></span>
           </h3>
           <button
             class="text-gray-400 hover:text-gray-600"
@@ -480,6 +446,7 @@
                 type="hidden"
                 id="reviewRating"
                 name="rating"
+                minlength="1"
                 value="0"
                 required
               />
@@ -496,6 +463,8 @@
                 id="reviewText"
                 name="text"
                 rows="4"
+                minlength="10"
+                maxlength="1000"
                 required
                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
                 placeholder="Поделитесь впечатлениями об игре..."
@@ -872,6 +841,125 @@
           }
         });
       }
+
+      // 1. Выносим всё общее в глобальную область видимости скрипта
+      let storageKey = "user_reports_map";
+      let currentUserId = null;
+
+      // Функция для получения списка жалоб
+      function getReportedIds() {
+        const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        return data[currentUserId] || [];
+      }
+
+      // Функция для сохранения новой жалобы
+      function saveReport(reviewId) {
+        const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        if (!data[currentUserId]) data[currentUserId] = [];
+        if (!data[currentUserId].includes(reviewId)) {
+          data[currentUserId].push(reviewId);
+        }
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      }
+
+      // Функция перевода кнопки в состояние "Отправлено"
+      function setReportedState(btn) {
+        btn.disabled = true;
+        btn.classList.remove("hover:text-blue-600", "text-gray-500");
+        btn.classList.add("text-blue-600", "cursor-default");
+        btn.querySelector("span").textContent = "Жалоба отправлена";
+        btn.querySelector("i").classList.replace("far", "fas");
+      }
+
+      // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КНОПОК
+      function initReportButtons() {
+        if (!currentUserId) return; // Если не авторизован, ничего не делаем
+
+        const reportedReviews = getReportedIds();
+
+        document.querySelectorAll(".report-btn").forEach((btn) => {
+          const reviewId = btn.getAttribute("data-review-id");
+
+          // Если уже жаловались
+          if (reportedReviews.includes(reviewId)) {
+            setReportedState(btn);
+          }
+
+          // Вешаем обработчик, если его еще нет
+          if (!btn.dataset.bound) {
+            btn.dataset.bound = "true"; // Помечаем, что обработчик привязан
+            btn.addEventListener("click", async function () {
+              try {
+                const response = await fetch(
+                  `/games/reviews/${reviewId}/report`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "X-CSRF-TOKEN":
+                        document.querySelector('meta[name="_csrf"]')?.content,
+                    },
+                  },
+                );
+
+                if (response.ok) {
+                  saveReport(reviewId);
+                  setReportedState(btn);
+                }
+              } catch (error) {
+                console.error("Ошибка:", error);
+              }
+            });
+          }
+        });
+      }
+
+      // 2. Инициализация при загрузке страницы
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("reviewsContainer");
+        if (container) {
+          currentUserId = container.getAttribute("data-current-user-id");
+          initReportButtons();
+        }
+      });
+
+      // 3. Обработчик "Показать еще"
+      document
+        .getElementById("loadMoreBtn")
+        ?.addEventListener("click", async function () {
+          const btn = this;
+          const page = parseInt(btn.getAttribute("data-page"));
+          const gameId = btn.getAttribute("data-game-id");
+
+          try {
+            const response = await fetch(
+              `/games/${gameId}/reviews/more?page=${page}`,
+            );
+            if (response.ok) {
+              const htmlText = await response.text();
+
+              // Вставляем контент
+              document
+                .getElementById("reviewsContainer")
+                .insertAdjacentHTML("beforeend", htmlText);
+
+              // Теперь вызываем функцию, которая теперь доступна везде!
+              initReportButtons();
+
+              // Логика удаления кнопки и обновления страницы
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(htmlText, "text/html");
+              const newReviewsCount = doc.querySelectorAll("article").length;
+
+              if (newReviewsCount < 5) {
+                btn.parentElement.remove();
+              } else {
+                btn.setAttribute("data-page", page + 1);
+              }
+            }
+          } catch (error) {
+            console.error("Ошибка загрузки отзывов:", error);
+          }
+        });
 
       // Валидация формы перед отправкой
       document

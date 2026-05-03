@@ -42,7 +42,7 @@ public class SecurityConfig {
                                                 .requestMatchers(
                                                                 "/", // главная
                                                                 "/auth/**", // вход/регистрация
-                                                                "/games/*", // просмотр игр
+                                                                "/games/**", // просмотр игр
                                                                 "/catalog", // список игр
                                                                 "/running-game", // игра
                                                                 "/main.css", // стили

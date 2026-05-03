@@ -101,7 +101,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
             "ORDER BY AVG(r.rating) DESC")
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
-    List<Review> findTop10ByGameOrderByCreatedAtDesc(Game game);
+    List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
 
     boolean existsByGameAndUser(Game game, User user);
 }
