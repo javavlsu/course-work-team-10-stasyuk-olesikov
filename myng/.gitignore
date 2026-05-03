@@ -41,5 +41,4 @@ myng/src/main/frontend/node_modules/
 credentials.properties
 application-local.properties
 application-secret.properties
-
-storage/
+../storage/
