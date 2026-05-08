@@ -1,57 +1,109 @@
-<!-- templates/fragments/games.html -->
 <div th:fragment="gamesFragment(collection, games)"
      id="games-container"
-     class="section-block">
+     class="max-w-5xl mx-auto px-4 py-6">
 
+    <!-- Back button -->
     <button id="back-to-collections"
-            class="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+            class="mb-6 inline-flex items-center gap-2 px-4 py-2
+                   rounded-lg border border-gray-300 bg-white
+                   hover:bg-gray-100 hover:shadow-sm
+                   transition">
         ← Go back
     </button>
 
-    <h3 id="games-title"
-        class="text-xl font-bold mb-4"
-        th:text="${collection.name} + ' Games'">
-        Collection Games
-    </h3>
+    <!-- Title -->
+    <div class="mb-8">
+        <h3 id="games-title"
+            class="text-3xl font-bold text-gray-900"
+            th:text="${collection.name} + ' Games'">
+            Collection Games
+        </h3>
 
-    <ul id="games-list" class="space-y-2">
+        <p class="text-gray-500 mt-1">
+            Browse games in this collection
+        </p>
+    </div>
 
+    <!-- Games grid -->
+    <ul id="games-list"
+        class="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+
+        <!-- Game card -->
         <li th:each="game : ${games}"
-            class="p-4 bg-white shadow rounded">
+            class="group bg-white border border-gray-200
+                   rounded-2xl p-5 shadow-sm
+                   hover:shadow-lg hover:-translate-y-1
+                   transition duration-200">
 
-            <h4 class="text-lg font-semibold"
-                th:text="${game.name}">
-                Game Name
-            </h4>
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-3">
 
-            <p class="text-gray-600"
+                <div>
+                    <a th:href="@{/games/{id}(id=${game.id})}">
+                        <h4 class="text-xl font-semibold text-gray-900
+                                   group-hover:text-blue-600
+                                   transition"
+                            th:text="${game.name}">
+                            Game Name
+                        </h4>
+                    </a>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        <span th:text="${game.genre}">genre</span>
+                    </p>
+                </div>
+
+                <!-- Optional genre badge -->
+                <span class="px-3 py-1 text-xs font-medium
+                             bg-blue-100 text-blue-700
+                             rounded-full"
+                      th:text="${game.genre}">
+                    RPG
+                </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-gray-600 leading-relaxed mb-4 line-clamp-3"
                th:text="${game.descr}">
                 Game description
             </p>
 
-            <p class="text-sm text-gray-500">
-                Genre:
-                <span th:text="${game.genre}">genre</span>
-            </p>
+            <!-- Footer -->
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
 
-            <p class="text-sm text-gray-500">
-                Developer:
-                <span th:text="${game.developer != null ? game.developer.username : 'Unknown'}">
-                    developer
-                </span>
-            </p>
+                <div class="text-sm text-gray-500">
+                    By
+                    <span class="font-medium text-gray-700"
+                          th:text="${game.developer != null ? game.developer.username : 'Unknown'}">
+                        developer
+                    </span>
+                </div>
 
-            <a th:href="@{${game.repo}}"
-               class="text-blue-500 hover:underline"
-               target="_blank">
-                Repository
-            </a>
+                <a th:href="@{${game.repo}}"
+                   class="inline-flex items-center gap-1
+                          text-sm font-medium text-blue-600
+                          hover:text-blue-800 hover:underline"
+                   target="_blank">
+                    Repository →
+                </a>
 
+            </div>
         </li>
 
+        <!-- Empty state -->
         <li th:if="${#lists.isEmpty(games)}"
-            class="text-gray-500">
-            No games found in this collection.
+            class="col-span-full text-center py-12
+                   bg-gray-50 border border-dashed border-gray-300
+                   rounded-2xl text-gray-500">
+
+            <p class="text-lg font-medium mb-1">
+                No games found
+            </p>
+
+            <p class="text-sm">
+                This collection does not contain any games yet.
+            </p>
+
         </li>
 
     </ul>
