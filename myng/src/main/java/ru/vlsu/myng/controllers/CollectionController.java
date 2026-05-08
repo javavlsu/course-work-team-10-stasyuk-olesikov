@@ -95,4 +95,12 @@ public class CollectionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/{collectionId}/remove-game/{gameId}")
+    @ResponseBody
+    public void removeGameFromCollection(@PathVariable Integer collectionId,
+                                         @PathVariable Integer gameId) {
+        System.out.println("Removing gameid " + gameId + " from collectionid" + collectionId);
+        collectionService.removeGameFromCollection(collectionId, gameId);
+    }
 }

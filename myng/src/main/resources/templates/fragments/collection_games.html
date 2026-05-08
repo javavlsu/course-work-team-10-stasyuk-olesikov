@@ -72,13 +72,26 @@
                     </span>
                 </div>
 
-                <a th:href="@{${game.repo}}"
-                   class="inline-flex items-center gap-1
-                          text-sm font-medium text-blue-600
-                          hover:text-blue-800 hover:underline"
-                   target="_blank">
-                    Репозиторий →
-                </a>
+                <div class="flex items-center gap-3">
+
+                    <a th:href="@{${game.repo}}"
+                       class="inline-flex items-center gap-1
+                              text-sm font-medium text-blue-600
+                              hover:text-blue-800 hover:underline"
+                       target="_blank">
+                        Репозиторий →
+                    </a>
+
+                    <button
+                        class="inline-flex items-center gap-1
+                               text-sm font-medium text-red-600
+                               hover:text-red-800 hover:underline"
+                        th:attr="data-game-id=${game.id}, data-collection-id=${collection.id}"
+                        data-action="remove-game-from-collection">
+                        Удалить
+                    </button>
+
+                </div>
 
             </div>
         </li>
@@ -99,4 +112,35 @@
         </li>
 
     </ul>
+
+    <script>
+        async function removeGameFromCollection(btn) {
+            const gameId = btn.dataset.gameId;
+            const collectionId = btn.dataset.collectionId;
+
+            try {
+                const res = await fetch(`/${collectionId}/remove-game/${gameId}`, {
+                    method: "POST"
+                });
+
+                if (res.ok) {
+                    // remove UI card instantly
+                    btn.closest("li").remove();
+
+                    // optional: show empty state refresh
+                    if (document.querySelectorAll("#games-list li.group").length === 0) {
+                        location.reload();
+                    }
+                } else {
+                    alert("Ошибка при удалении");
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert("Ошибка сети");
+            }
+        }
+
+        window.removeGameFromCollection = removeGameFromCollection;
+    </script>
 </div>

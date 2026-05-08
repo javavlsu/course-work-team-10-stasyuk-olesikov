@@ -147,7 +147,7 @@
         >
           <!-- Разработчик -->
           <button
-            class="px-3 py-1.5 bg-white text-gray-700 hover:text-blue-600 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
+            class="px-3 py-1.5 bg-white text-gray-700 hover:text-blue-600 focus:text-gray-700 active:text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
             data-target="games-section"
             sec:authorize="hasRole('DEV')"
           >
@@ -472,6 +472,8 @@
         </template>
 
         <script>
+            // fragment caching is an option for improving performance
+
             document.addEventListener("DOMContentLoaded", () => {
               const userId = [[${user.id}]];
 
@@ -489,10 +491,6 @@
 
               // Utility functions
               const hideAll = () => Object.values(wrappers).forEach(w => w.classList.add("hidden"));
-              const activateTab = (tab) => {
-                tabs.forEach(t => t.classList.remove("bg-blue-600","text-white","border-blue-600"));
-                tab.classList.add("bg-blue-600","text-white","border-blue-600");
-              };
               const load = (url, wrapper) => fetch(url).then(r => r.text()).then(html => wrapper.innerHTML = html);
 
               // Show specific tab
@@ -524,7 +522,6 @@
               // Tab click
               tabs.forEach(tab => {
                 tab.addEventListener("click", () => {
-                  activateTab(tab);
                   showTab(tab.dataset.target);
                 });
               });
@@ -801,6 +798,31 @@
                     });
 
                     showTab("notifications-section");
+                }
+
+                if (action === "remove-game-from-collection") {
+                    const gameId = actionEl.dataset.gameId;
+                    const collectionId = actionEl.dataset.collectionId;
+
+                    try {
+                        const res = await fetch(`/collections/${collectionId}/remove-game/${gameId}`, {
+                            method: "POST"
+                        });
+
+                        if (res.ok) {
+                            actionEl.closest("li").remove();
+
+                            if (document.querySelectorAll("#games-list li.group").length === 0) {
+                                location.reload();
+                            }
+                        } else {
+                            alert("Ошибка при удалении");
+                        }
+
+                    } catch (e) {
+                        console.error(e);
+                        alert("Ошибка сети");
+                    }
                 }
 
                 /* =========================
