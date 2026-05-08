@@ -13,10 +13,7 @@ import ru.vlsu.myng.entities.GameVersion;
 import ru.vlsu.myng.utils.GithubException;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -240,12 +237,10 @@ public class GithubService {
         System.out.println("Game download target directory: " + targetDir);
 
         try {
-            System.out.println("Before create dirs");
             Files.createDirectories(targetDir);
-            System.out.println("After create dirs");
 
             Path zipFile = downloadZip(owner, repo, commit);
-            extractNeededFiles(zipFile, targetDir, version.getFiles());
+            extractNeededFiles(zipFile, targetDir, version.getFiles(), version);
 
             Files.deleteIfExists(zipFile);
 
@@ -299,7 +294,7 @@ public class GithubService {
         return tempFile;
     }
 
-    private void extractNeededFiles(Path zipPath, Path targetDir, String files) throws IOException {
+    private void extractNeededFiles(Path zipPath, Path targetDir, String files, GameVersion version) throws IOException {
         List<String> requested = Arrays.stream(files.split("\\s*,\\s*"))
                 .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
                 .toList();
@@ -314,8 +309,6 @@ public class GithubService {
 
                 // remove root folder
                 String relativePath = fullPath.substring(fullPath.indexOf("/") + 1);
-
-                System.out.println(relativePath);
 
                 if (relativePath.isBlank()) continue;
 
@@ -337,9 +330,34 @@ public class GithubService {
                     Files.createDirectories(normalized);
                 } else {
                     Files.createDirectories(normalized.getParent());
-                    Files.copy(zis, normalized, StandardCopyOption.REPLACE_EXISTING);
+                    if (relativePath.endsWith("index.html")) {
+
+                        String html = new String(zis.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+                        html = injectIntoHead(html, buildPatch(version));
+
+                        Files.writeString(normalized, html, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+                    } else {
+                        Files.copy(zis, normalized, StandardCopyOption.REPLACE_EXISTING);
+                    }
                 }
             }
         }
+    }
+
+    private String injectIntoHead(String html, String injection) {
+        if (html == null) return null;
+
+        if (html.contains("__myng-storage-patch.js")) {
+            return html;
+        }
+
+        return html.replaceFirst("(?i)<head>", "<head>\n" + injection);
+    }
+
+    private String buildPatch(GameVersion version) {
+        return "<script>window.__GAME_ID__=" + version.getGame().getId() + "; window.__GAMEVER_ID__=" + version.getId() + "</script>\n"
+                + "<script src=\"/__myng-storage-patch.js\"></script>";
     }
 }

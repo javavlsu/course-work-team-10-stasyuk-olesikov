@@ -2,25 +2,23 @@
      id="games-container"
      class="max-w-5xl mx-auto px-4 py-6">
 
-    <!-- Back button -->
     <button id="back-to-collections"
             class="mb-6 inline-flex items-center gap-2 px-4 py-2
                    rounded-lg border border-gray-300 bg-white
                    hover:bg-gray-100 hover:shadow-sm
                    transition">
-        ← Go back
+        ← Назад
     </button>
 
-    <!-- Title -->
     <div class="mb-8">
         <h3 id="games-title"
             class="text-3xl font-bold text-gray-900"
-            th:text="${collection.name} + ' Games'">
-            Collection Games
+            th:text="${collection.name}">
+            Игры коллекции
         </h3>
 
         <p class="text-gray-500 mt-1">
-            Browse games in this collection
+            Просмотр игр данной коллекции
         </p>
     </div>
 
@@ -28,14 +26,12 @@
     <ul id="games-list"
         class="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
 
-        <!-- Game card -->
         <li th:each="game : ${games}"
             class="group bg-white border border-gray-200
                    rounded-2xl p-5 shadow-sm
                    hover:shadow-lg hover:-translate-y-1
                    transition duration-200">
 
-            <!-- Header -->
             <div class="flex items-start justify-between mb-3">
 
                 <div>
@@ -44,16 +40,15 @@
                                    group-hover:text-blue-600
                                    transition"
                             th:text="${game.name}">
-                            Game Name
+                            Название игры
                         </h4>
                     </a>
 
                     <p class="text-sm text-gray-500 mt-1">
-                        <span th:text="${game.genre}">genre</span>
+                        <span th:text="${game.genre}">жанр</span>
                     </p>
                 </div>
 
-                <!-- Optional genre badge -->
                 <span class="px-3 py-1 text-xs font-medium
                              bg-blue-100 text-blue-700
                              rounded-full"
@@ -62,17 +57,15 @@
                 </span>
             </div>
 
-            <!-- Description -->
             <p class="text-gray-600 leading-relaxed mb-4 line-clamp-3"
                th:text="${game.descr}">
-                Game description
+                Описание игры
             </p>
 
-            <!-- Footer -->
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
 
                 <div class="text-sm text-gray-500">
-                    By
+                    От
                     <span class="font-medium text-gray-700"
                           th:text="${game.developer != null ? game.developer.username : 'Unknown'}">
                         developer
@@ -84,24 +77,23 @@
                           text-sm font-medium text-blue-600
                           hover:text-blue-800 hover:underline"
                    target="_blank">
-                    Repository →
+                    Репозиторий →
                 </a>
 
             </div>
         </li>
 
-        <!-- Empty state -->
         <li th:if="${#lists.isEmpty(games)}"
             class="col-span-full text-center py-12
                    bg-gray-50 border border-dashed border-gray-300
                    rounded-2xl text-gray-500">
 
             <p class="text-lg font-medium mb-1">
-                No games found
+                Игры не найдены
             </p>
 
             <p class="text-sm">
-                This collection does not contain any games yet.
+                Эта коллекция пока не содержит игр.
             </p>
 
         </li>
