@@ -1,20 +1,13 @@
--- MySQL dump 10.13  Distrib 9.2.0, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: localhost    Database: myngdb
 -- ------------------------------------------------------
--- Server version	9.2.0
-
-CREATE DATABASE IF NOT EXISTS myngdb 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
--- Выбор созданной базы
-USE myngdb;
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -31,7 +24,7 @@ DROP TABLE IF EXISTS `ban`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ban` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `reason` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `start_time` timestamp NOT NULL,
   `end_time` timestamp NOT NULL,
   `fk_mod` int NOT NULL,
@@ -42,17 +35,8 @@ CREATE TABLE `ban` (
   CONSTRAINT `fk_ban_mod` FOREIGN KEY (`fk_mod`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_ban_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_ban_time` CHECK ((`end_time` > `start_time`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ban`
---
-
-LOCK TABLES `ban` WRITE;
-/*!40000 ALTER TABLE `ban` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ban` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `collection`
@@ -63,23 +47,14 @@ DROP TABLE IF EXISTS `collection`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `collection` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `fk_user` int NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`fk_user`),
   KEY `fk_collection_user` (`fk_user`),
   CONSTRAINT `fk_collection_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `collection`
---
-
-LOCK TABLES `collection` WRITE;
-/*!40000 ALTER TABLE `collection` DISABLE KEYS */;
-/*!40000 ALTER TABLE `collection` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `dev_application`
@@ -91,23 +66,14 @@ DROP TABLE IF EXISTS `dev_application`;
 CREATE TABLE `dev_application` (
   `id` int NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `github_username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `text` text COLLATE utf8mb4_unicode_ci,
+  `github_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `fk_user` int NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `fk_user` (`fk_user`),
-  CONSTRAINT `fk_dev_app_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `fk_dev_app_user` (`fk_user`),
+  CONSTRAINT `fk_dev_app_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `dev_application`
---
-
-LOCK TABLES `dev_application` WRITE;
-/*!40000 ALTER TABLE `dev_application` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dev_application` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `game`
@@ -118,27 +84,18 @@ DROP TABLE IF EXISTS `game`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `game` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `descr` text COLLATE utf8mb4_unicode_ci,
-  `repo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `genre` enum('action','adventure','rpg','simulation','strategy','sports','puzzle','horror','platformer','sandbox','visual-novel','roguelike') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descr` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `repo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `genre` enum('action','adventure','rpg','simulation','strategy','sports','puzzle','horror','platformer','sandbox','visual-novel','roguelike') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `fk_dev` int DEFAULT NULL,
+  `image` mediumblob,
   PRIMARY KEY (`id`),
   UNIQUE KEY `repo` (`repo`),
   KEY `fk_game_dev` (`fk_dev`),
   CONSTRAINT `fk_game_dev` FOREIGN KEY (`fk_dev`) REFERENCES `user` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `game`
---
-
-LOCK TABLES `game` WRITE;
-/*!40000 ALTER TABLE `game` DISABLE KEYS */;
-INSERT INTO `game` VALUES (1,'Cyber Knight','A futuristic cyberpunk RPG.','https://github.com/alice/cyber-knight','rpg',1),(2,'Pixel Adventure','Retro-style platformer game.','https://github.com/alice/pixel-adventure','platformer',1),(3,'Mystery Manor','Solve puzzles and explore the haunted mansion.','https://github.com/alice/mystery-manor','puzzle',1);
-/*!40000 ALTER TABLE `game` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `game_collection`
@@ -158,13 +115,25 @@ CREATE TABLE `game_collection` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `game_collection`
+-- Table structure for table `game_stats`
 --
 
-LOCK TABLES `game_collection` WRITE;
-/*!40000 ALTER TABLE `game_collection` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_collection` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `game_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `game_stats` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fk_game` int NOT NULL,
+  `event_type` enum('view','launch') COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Тип события: просмотр или запуск',
+  `event_date` date NOT NULL COMMENT 'Дата события',
+  `count` int NOT NULL DEFAULT '1' COMMENT 'Количество событий за день',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_daily_stat` (`fk_game`,`event_type`,`event_date`),
+  KEY `idx_game_stats_game` (`fk_game`),
+  KEY `idx_game_stats_date` (`event_date`),
+  CONSTRAINT `fk_game_stats_game` FOREIGN KEY (`fk_game`) REFERENCES `game` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `game_tag`
@@ -184,15 +153,6 @@ CREATE TABLE `game_tag` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `game_tag`
---
-
-LOCK TABLES `game_tag` WRITE;
-/*!40000 ALTER TABLE `game_tag` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_tag` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `game_version`
 --
 
@@ -202,25 +162,16 @@ DROP TABLE IF EXISTS `game_version`;
 CREATE TABLE `game_version` (
   `id` int NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `commit_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `changelog` text COLLATE utf8mb4_unicode_ci,
+  `commit_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `changelog` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `fk_game` int NOT NULL,
-  `name` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `archive_file` longblob NOT NULL,
+  `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `files` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fk_game` (`fk_game`,`commit_hash`),
   CONSTRAINT `fk_game_version_game` FOREIGN KEY (`fk_game`) REFERENCES `game` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `game_version`
---
-
-LOCK TABLES `game_version` WRITE;
-/*!40000 ALTER TABLE `game_version` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_version` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `moderation_verdict`
@@ -232,7 +183,7 @@ DROP TABLE IF EXISTS `moderation_verdict`;
 CREATE TABLE `moderation_verdict` (
   `id` int NOT NULL AUTO_INCREMENT,
   `approved` tinyint(1) DEFAULT NULL,
-  `reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `fk_game_version` int DEFAULT NULL,
   `fk_dev_application` int DEFAULT NULL,
   `fk_review` int DEFAULT NULL,
@@ -247,18 +198,8 @@ CREATE TABLE `moderation_verdict` (
   CONSTRAINT `fk_moderation_review` FOREIGN KEY (`fk_review`) REFERENCES `review` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_moderation_verdict_mod` FOREIGN KEY (`fk_mod`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `chk_moderation_one_target` CHECK (((((`fk_game_version` is not null) + (`fk_dev_application` is not null)) + (`fk_review` is not null)) = 1))
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `moderation_verdict`
---
-
-LOCK TABLES `moderation_verdict` WRITE;
-/*!40000 ALTER TABLE `moderation_verdict` DISABLE KEYS */;
-INSERT INTO `moderation_verdict` VALUES (6,1,NULL,NULL,NULL,1,3),(7,1,NULL,NULL,NULL,2,3),(8,1,NULL,NULL,NULL,3,3),(9,0,'Offensive language detected.',NULL,NULL,4,3),(10,0,'Spam or misleading content.',NULL,NULL,5,3);
-/*!40000 ALTER TABLE `moderation_verdict` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `notification`
@@ -270,20 +211,11 @@ DROP TABLE IF EXISTS `notification`;
 CREATE TABLE `notification` (
   `id` int NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `type` enum('system','warning','moderation','news') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `text` text COLLATE utf8mb4_unicode_ci,
+  `type` enum('system','warning','moderation','news') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `notification`
---
-
-LOCK TABLES `notification` WRITE;
-/*!40000 ALTER TABLE `notification` DISABLE KEYS */;
-/*!40000 ALTER TABLE `notification` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `review`
@@ -295,7 +227,7 @@ DROP TABLE IF EXISTS `review`;
 CREATE TABLE `review` (
   `id` int NOT NULL AUTO_INCREMENT,
   `rating` tinyint unsigned NOT NULL,
-  `text` text COLLATE utf8mb4_unicode_ci,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `report_count` smallint unsigned DEFAULT '0',
   `fk_user` int NOT NULL,
@@ -306,18 +238,8 @@ CREATE TABLE `review` (
   CONSTRAINT `fk_review_game` FOREIGN KEY (`fk_game`) REFERENCES `game` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_review_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_review_rating` CHECK ((`rating` between 1 and 5))
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `review`
---
-
-LOCK TABLES `review` WRITE;
-/*!40000 ALTER TABLE `review` DISABLE KEYS */;
-INSERT INTO `review` VALUES (1,5,'Amazing RPG experience, loved the cyberpunk setting!','2026-02-22 16:26:46',0,2,1),(2,4,'Fun platformer with charming graphics.','2026-02-22 16:26:46',0,2,2),(3,3,'Interesting puzzles but a bit too short.','2026-02-22 16:26:46',0,1,3),(4,2,'Not my style, too many bugs.','2026-02-22 16:26:46',0,4,2),(5,1,'Terrible gameplay, crashes constantly.','2026-02-22 16:26:46',0,3,1);
-/*!40000 ALTER TABLE `review` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tag`
@@ -328,21 +250,12 @@ DROP TABLE IF EXISTS `tag`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tag` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   CONSTRAINT `chk_tag_format` CHECK (regexp_like(`name`,_utf8mb4'^[a-z0-9]+(-[a-z0-9]+)*$'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tag`
---
-
-LOCK TABLES `tag` WRITE;
-/*!40000 ALTER TABLE `tag` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tag` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -353,28 +266,19 @@ DROP TABLE IF EXISTS `user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `bio` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `profile_pic` longblob,
   `registered_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `role` enum('user','dev','mod','admin') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
-  `github_username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` enum('user','dev','mod','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `github_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `github_username` (`github_username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'alice','$2a$10$abcdefghijklmnopqrstuv','Indie game developer',NULL,'2026-02-22 16:23:12','dev','aliceGH'),(2,'bob','$2a$10$mnopqrstuvwxyzabcdefghi','Just a regular player',NULL,'2026-02-22 16:23:12','user',NULL),(3,'carol','$2a$10$1234567890abcdefghijklm','Moderator of the platform',NULL,'2026-02-22 16:23:12','mod',NULL),(4,'dave','$2a$10$zxywvutsrqponmlkjihgfedc','Administrator',NULL,'2026-02-22 16:23:12','admin',NULL);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user_notification`
@@ -394,15 +298,6 @@ CREATE TABLE `user_notification` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_notification`
---
-
-LOCK TABLES `user_notification` WRITE;
-/*!40000 ALTER TABLE `user_notification` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_notification` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `warning`
 --
 
@@ -411,7 +306,7 @@ DROP TABLE IF EXISTS `warning`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `warning` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `reason` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `fk_mod` int NOT NULL,
   `fk_user` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -419,17 +314,8 @@ CREATE TABLE `warning` (
   KEY `fk_warning_user` (`fk_user`),
   CONSTRAINT `fk_warning_mod` FOREIGN KEY (`fk_mod`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_warning_user` FOREIGN KEY (`fk_user`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `warning`
---
-
-LOCK TABLES `warning` WRITE;
-/*!40000 ALTER TABLE `warning` DISABLE KEYS */;
-/*!40000 ALTER TABLE `warning` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -440,4 +326,5 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-22 20:42:31
+-- Dump completed on 2026-05-08 19:26:55
+-- темуля стрельбануля
