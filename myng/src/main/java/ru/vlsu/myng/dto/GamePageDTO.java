@@ -22,6 +22,7 @@ public class GamePageDTO {
     private Game.Genre genre;
     private User developer;
     private Set<Tag> tags;
+    private String base64Image;
 
     private Double averageRating;
     private Integer totalViews;

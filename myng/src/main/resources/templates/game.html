@@ -74,29 +74,51 @@
     <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
       <!-- ===== LEFT COLUMN ===== -->
       <div class="flex flex-col gap-6">
-        <!-- Big Cover -->
-        <div class="relative bg-white rounded-xl shadow-lg overflow-hidden">
-          <div
-            id="game-avatar"
-            th:classappend="${game.themeColor}"
-            class="w-full h-[400px] bg-gradient-to-br flex items-center justify-center text-white cursor-pointer"
-          >
-            <i class="fas fa-play text-6xl opacity-50"></i>
-          </div>
+        <!-- Аватарка (иконка, картинка) игры -->
+        <div
+          class="relative bg-white rounded-xl shadow-lg overflow-hidden group"
+        >
+          <a th:href="@{/running_game/{id}(id=${game.id})}">
+            <div
+              th:if="${game.base64Image != null}"
+              id="game-avatar-image"
+              class="w-full h-[400px] relative"
+            >
+              <img
+                th:src="${game.base64Image}"
+                alt="Обложка игры"
+                class="w-full h-full object-cover"
+              />
+            </div>
 
-          <!-- Edit overlay (только для dev) -->
+            <div
+              th:if="${game.base64Image == null}"
+              id="game-avatar"
+              th:classappend="${game.themeColor}"
+              class="w-full h-[400px] bg-gradient-to-br flex items-center justify-center text-white cursor-pointer"
+            >
+              <i class="fas fa-play text-6xl opacity-50"></i>
+            </div>
+          </a>
+
           <div
             th:if="${isDeveloper}"
             id="avatarOverlay"
-            class="absolute inset-0 bg-black/60 hidden items-center justify-center cursor-pointer"
+            class="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center cursor-pointer transition-all duration-200"
           >
             <div class="text-white text-center">
-              <i class="fas fa-plus text-6xl mb-2"></i>
+              <i class="fas fa-camera text-5xl mb-2"></i>
               <div class="text-sm font-medium">Загрузить изображение</div>
             </div>
           </div>
 
-          <input type="file" id="avatarInput" accept="image/*" class="hidden" />
+          <input
+            th:if="${isDeveloper}"
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            class="hidden"
+          />
         </div>
 
         <!-- Meta Block -->
@@ -149,22 +171,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Thumbnails (скриншоты - пока заглушки) -->
-        <div class="bg-white rounded-xl shadow-lg p-5">
-          <h4
-            class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2"
-          >
-            <i class="fas fa-images text-blue-500"></i>
-            Скриншоты
-          </h4>
-          <div class="grid grid-cols-5 gap-2">
-            <div
-              th:each="i, iterStat : ${#numbers.sequence(1, 10)}"
-              class="aspect-[10/7] bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer transition"
-            ></div>
-          </div>
-        </div>
       </div>
 
       <!-- ===== RIGHT COLUMN ===== -->
@@ -177,12 +183,12 @@
 
           <!-- Buttons -->
           <div class="flex flex-wrap gap-3 mb-6">
-            <button
-              onclick="window.location.href = 'running_game.html'"
+            <a
+              th:href="@{/running_game/{id}(id=${game.id})}"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
             >
               <i class="fas fa-play"></i> Играть
-            </button>
+            </a>
 
             <!-- Внутри секции кнопок -->
             <div th:if="${isAuthenticated}" class="flex items-center gap-2">
@@ -222,6 +228,16 @@
                 <i class="fas fa-folder-plus"></i> Создать коллекцию
               </a>
             </div>
+
+            <!-- Кнопка редактирования только для dev -->
+            <button
+              th:if="${isDeveloper}"
+              id="editBtn"
+              class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-edit"></i>
+              <span id="editBtnText">Редактировать</span>
+            </button>
           </div>
 
           <p
@@ -700,7 +716,7 @@
       </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
       // Редактирование игры (только если есть кнопка)
       const editBtn = document.getElementById("editBtn");
       if (editBtn) {
@@ -711,7 +727,9 @@
         const avatarOverlay = document.getElementById("avatarOverlay");
         const avatarInput = document.getElementById("avatarInput");
 
+        const gameId = /*[[${game.id}]]*/ 0;
         let isEditing = false;
+        let selectedFile = null;
 
         editBtn.addEventListener("click", () => {
           isEditing = !isEditing;
@@ -740,7 +758,7 @@
           }
         }
 
-        function disableEditing() {
+        async function disableEditing() {
           editBtnText.textContent = "Редактировать";
           editBtn.classList.remove("bg-green-600");
           editBtn.classList.add("bg-purple-600");
@@ -756,11 +774,35 @@
             avatarOverlay.classList.remove("flex");
           }
 
-          // TODO: Отправить AJAX запрос на сохранение изменений
-          console.log("Saved:", {
-            name: nameEl.textContent.trim(),
-            description: descEl.textContent.trim(),
-          });
+          const formData = new FormData();
+          formData.append("name", nameEl.textContent.trim());
+          formData.append("description", descEl.textContent.trim());
+
+          if (selectedFile) {
+            formData.append("image", selectedFile);
+          }
+
+          try {
+            const response = await fetch(`/games/${gameId}/edit`, {
+              method: "POST",
+              headers: {
+                "X-CSRF-TOKEN":
+                  document.querySelector('meta[name="_csrf"]')?.content,
+              },
+              body: formData,
+            });
+
+            if (response.ok) {
+              console.log("Игра успешно обновлена!");
+              selectedFile = null;
+            } else {
+              const errorMsg = await response.text();
+              alert("Ошибка при сохранении: " + errorMsg);
+            }
+          } catch (error) {
+            console.error("Ошибка сети:", error);
+            alert("Не удалось связаться с сервером.");
+          }
         }
 
         if (avatarOverlay) {
@@ -775,11 +817,20 @@
             const file = avatarInput.files[0];
             if (!file) return;
 
+            selectedFile = file;
+
             const reader = new FileReader();
             reader.onload = function (e) {
-              avatarEl.style.backgroundImage = `url(${e.target.result})`;
-              avatarEl.style.backgroundSize = "cover";
-              avatarEl.style.backgroundPosition = "center";
+              const imgEl = document.querySelector("#game-avatar-image img");
+              if (imgEl) {
+                imgEl.src = e.target.result;
+              } else if (avatarEl) {
+                avatarEl.style.backgroundImage = `url(${e.target.result})`;
+                avatarEl.style.backgroundSize = "cover";
+                avatarEl.style.backgroundPosition = "center";
+                const playIcon = avatarEl.querySelector("i");
+                if (playIcon) playIcon.style.display = "none";
+              }
             };
             reader.readAsDataURL(file);
           });
@@ -849,6 +900,7 @@
       }
 
       // Переключение changelog при выборе версии
+      //ToDo работает некоректно, исправить
       const versionSelect = document.getElementById("versionSelect");
       if (versionSelect && window.gameVersions) {
         versionSelect.addEventListener("change", function () {
@@ -858,14 +910,13 @@
             const changelogContainer =
               document.getElementById("changelogContainer");
             changelogContainer.innerHTML = `
-              <span class="font-medium text-gray-700">${version.name} — ${new Date(version.createdAt).toLocaleDateString("ru-RU")}</span>
-              <p class="text-gray-600 text-xs mt-1">${version.changelog || "Нет описания изменений"}</p>
-            `;
+                  <span class="font-medium text-gray-700">${version.name} — ${new Date(version.createdAt).toLocaleDateString("ru-RU")}</span>
+                  <p class="text-gray-600 text-xs mt-1">${version.changelog || "Нет описания изменений"}</p>
+                `;
           }
         });
       }
 
-      // 1. Выносим всё общее в глобальную область видимости скрипта
       let storageKey = "user_reports_map";
       let currentUserId = null;
 
@@ -896,21 +947,19 @@
 
       // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КНОПОК
       function initReportButtons() {
-        if (!currentUserId) return; // Если не авторизован, ничего не делаем
+        if (!currentUserId) return;
 
         const reportedReviews = getReportedIds();
 
         document.querySelectorAll(".report-btn").forEach((btn) => {
           const reviewId = btn.getAttribute("data-review-id");
 
-          // Если уже жаловались
           if (reportedReviews.includes(reviewId)) {
             setReportedState(btn);
           }
 
-          // Вешаем обработчик, если его еще нет
           if (!btn.dataset.bound) {
-            btn.dataset.bound = "true"; // Помечаем, что обработчик привязан
+            btn.dataset.bound = "true";
             btn.addEventListener("click", async function () {
               try {
                 const response = await fetch(
@@ -936,7 +985,7 @@
         });
       }
 
-      // 2. Инициализация при загрузке страницы
+      // Инициализация при загрузке страницы
       document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("reviewsContainer");
         if (container) {
@@ -945,7 +994,7 @@
         }
       });
 
-      // 3. Обработчик "Показать еще"
+      // Обработчик "Показать еще"
       document
         .getElementById("loadMoreBtn")
         ?.addEventListener("click", async function () {

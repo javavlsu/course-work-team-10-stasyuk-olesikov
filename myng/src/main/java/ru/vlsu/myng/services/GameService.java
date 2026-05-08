@@ -13,9 +13,11 @@ import ru.vlsu.myng.dto.PublishGameRequest;
 import ru.vlsu.myng.entities.*;
 import ru.vlsu.myng.repositories.*;
 import ru.vlsu.myng.dto.CatalogGameDTO;
+import ru.vlsu.myng.dto.GameEditRequestDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
 import ru.vlsu.myng.dto.GamePageDTO;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -144,12 +146,10 @@ public class GameService {
                 .map(version -> version.getCreatedAt())
                 .orElse(null);
 
-        // Собираем теги, автоматически убирая тот, который дублирует жанр
         String genreName = game.getGenre() != null ? game.getGenre().name() : "";
 
         Set<String> tags = game.getTags().stream()
                 .map(Tag::getName)
-                // Исключаем тег, если он совпадает с жанром
                 .filter(tagName -> !tagName.equalsIgnoreCase(genreName))
                 .collect(Collectors.toSet());
 
@@ -204,17 +204,14 @@ public class GameService {
 
     @Transactional(readOnly = true)
     public Page<CatalogGameDTO> getFilteredGames(GameFilterDTO filter, Pageable pageable) {
-        // 1. Получаем все игры с базовыми фильтрами (поиск, жанр)
         List<Game> games = gameRepository.findGamesWithBasicFilters(
                 filter.getSearch(),
                 filter.getGenre());
 
-        // 2. Конвертируем в DTO (чтобы получить рейтинг и теги)
         List<CatalogGameDTO> dtos = games.stream()
                 .map(this::convertToCatalogDto)
                 .collect(Collectors.toList());
 
-        // 3. Фильтрация по тегам (в Java)
         if (filter.getTags() != null && !filter.getTags().isEmpty()) {
             dtos = dtos.stream()
                     .filter(dto -> dto.getTags() != null &&
@@ -222,17 +219,14 @@ public class GameService {
                     .collect(Collectors.toList());
         }
 
-        // 4. Фильтрация по рейтингу (в Java)
         if (filter.getMinRating() != null) {
             dtos = dtos.stream()
                     .filter(dto -> dto.getAverageRating() >= filter.getMinRating())
                     .collect(Collectors.toList());
         }
 
-        // 5. Сортировка (в Java)
         dtos = sortGames(dtos, filter.getSort());
 
-        // 6. Пагинация (в Java)
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
         List<CatalogGameDTO> pagedList = start < end ? dtos.subList(start, end) : Collections.emptyList();
@@ -292,11 +286,8 @@ public class GameService {
 
         // Получаем статистику
         Double avgRating = reviewRepository.getAverageRatingByGame(game);
-
         Integer reviewsCount = reviewRepository.countByGame(game);
-
         Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
-
         Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
 
         // Получаем версии
@@ -340,8 +331,30 @@ public class GameService {
                 .lastUpdateDate(lastUpdateDate)
                 .build();
 
-        System.out.println("=== GameService: DTO created successfully");
+        if (game.getImage() != null) {
+            String base64 = Base64.getEncoder().encodeToString(game.getImage());
+            dto.setBase64Image("data:image/jpeg;base64," + base64);
+        } else {
+            dto.setBase64Image(null);
+        }
         return dto;
+    }
+
+    @Transactional
+    public void updateGame(Integer gameId, GameEditRequestDTO request) throws IOException {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Игра не найдена"));
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            game.setName(request.getName());
+        }
+        game.setDescr(request.getDescription());
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            game.setImage(request.getImage().getBytes());
+        }
+
+        gameRepository.save(game);
     }
 
     public List<MyGame> getGamesForUser(User user) {

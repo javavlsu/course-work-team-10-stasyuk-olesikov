@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ru.vlsu.myng.dto.CollectionDTO;
+import ru.vlsu.myng.dto.GameEditRequestDTO;
 import ru.vlsu.myng.dto.GamePageDTO;
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
@@ -65,7 +66,6 @@ public class GameController {
                     game.getDeveloper() != null &&
                     currentUser.getId().equals(game.getDeveloper().getId());
 
-            // Проверял ли пользователь уже отзыв
             boolean hasUserReviewed = false;
             if (isAuthenticated && currentUser != null) {
                 Game gameEntity = gameService.getGameById(id);
@@ -82,6 +82,31 @@ public class GameController {
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/";
+        }
+    }
+
+    @PostMapping("/{id}/edit")
+    @ResponseBody
+    public ResponseEntity<?> editGame(@PathVariable Integer id,
+            @ModelAttribute GameEditRequestDTO request,
+            Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            User currentUser = userService.findByEmail(principal.getName());
+            Game game = gameService.getGameById(id);
+
+            if (game.getDeveloper() == null || !game.getDeveloper().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Вы не являетесь разработчиком этой игры");
+            }
+
+            gameService.updateGame(id, request);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Не удалось обновить игру: " + e.getMessage());
         }
     }
 

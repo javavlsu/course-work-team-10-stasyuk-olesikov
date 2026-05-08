@@ -36,6 +36,10 @@ public class Game {
     @JoinColumn(name = "fk_dev")
     private User developer;
 
+    @Lob
+    @Column(name = "image", columnDefinition = "MEDIUMBLOB")
+    private byte[] image;
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<GameVersion> versions = new ArrayList<>();
 
@@ -49,7 +53,7 @@ public class Game {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
-    //@ToString.Exclude
+    // @ToString.Exclude
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<GameStats> stats = new ArrayList<>();
 
