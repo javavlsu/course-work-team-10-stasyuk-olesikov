@@ -87,4 +87,18 @@ public class CollectionService {
         collection.getGames().add(game);
         collectionRepository.save(collection);
     }
+
+    @Transactional
+    public void removeGameFromCollection(Integer collectionId, Integer gameId) {
+
+        Collection collection = collectionRepository.findById(collectionId)
+                .orElseThrow(() -> new RuntimeException("Коллекция не найдена"));
+
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Игра не найдена"));
+
+        collection.getGames().removeIf(g -> g.getId().equals(gameId));
+
+        collectionRepository.save(collection);
+    }
 }
