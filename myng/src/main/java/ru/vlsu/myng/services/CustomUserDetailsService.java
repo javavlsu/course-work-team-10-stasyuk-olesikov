@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.vlsu.myng.entities.User;
+import ru.vlsu.myng.repositories.BanRepository;
 import ru.vlsu.myng.repositories.UserRepository;
 
 import java.util.Collections;

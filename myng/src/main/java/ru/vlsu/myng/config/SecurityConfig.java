@@ -2,6 +2,7 @@ package ru.vlsu.myng.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.vlsu.myng.services.CustomUserDetailsService;
 
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
         private final CustomUserDetailsService userDetailsService;
+        private final BanFilter banFilter;
 
         /**
          * Создает бин для шифрования паролей.
@@ -39,6 +41,7 @@ public class SecurityConfig {
                     // ВРЕМЕННО отключаем CSRF (только для разработки!)
                     .headers(headers -> headers.frameOptions(f -> f.sameOrigin()))
                     .csrf(csrf -> csrf.disable())
+                    .addFilterBefore(banFilter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeHttpRequests(authz -> authz
                                     // 1. ПУБЛИЧНЫЕ СТРАНИЦЫ (доступны всем)
                                     .requestMatchers(
@@ -50,7 +53,8 @@ public class SecurityConfig {
                                                     "/main.css", // стили
                                                     "/js/**", // скрипты
                                                     "/images/**", // картинки
-                                                    "/static/gamefiles/**" // файлы игр
+                                                    "/static/gamefiles/**", // файлы игр
+                                                    "/banned" // страница бана
                                     ).permitAll()
 
                                     // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)

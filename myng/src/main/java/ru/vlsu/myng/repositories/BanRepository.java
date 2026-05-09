@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Компонент слоя доступа к данным для работы с сущностью Ban.<br>
@@ -74,4 +75,37 @@ public interface BanRepository extends JpaRepository<Ban, Integer> {
             Integer userId,
             Instant now1,
             Instant now2);
+
+    /**
+     * Возвращает последний активный бан пользователя,
+     * срок действия которого ещё не истёк.
+     *
+     * Под "активным" понимается бан, у которого endTime > now.
+     *
+     * Если у пользователя несколько активных банов,
+     * возвращается бан с наиболее поздним временем окончания
+     * (ORDER BY endTime DESC LIMIT 1).
+     *
+     * @param user пользователь, для которого выполняется поиск бана.
+     *             Не должен быть null.
+     *             Должен быть персистентной сущностью (id != null).
+     *
+     * @param now  момент времени, относительно которого проверяется
+     *             активность бана (обычно Instant.now()).
+     *             Не должен быть null.
+     *
+     * @return Optional с найденным активным баном пользователя.
+     *         Optional.empty(), если активных банов нет.
+     *
+     * @throws IllegalArgumentException
+     *                                  если user или now равны null
+     *
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
+    Optional<Ban> findFirstByUserAndEndTimeAfterOrderByEndTimeDesc(
+            User user,
+            Instant now
+    );
 }
