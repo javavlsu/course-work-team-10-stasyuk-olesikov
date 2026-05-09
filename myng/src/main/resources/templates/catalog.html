@@ -3,14 +3,12 @@
   xmlns:th="http://www.thymeleaf.org"
   th:replace="layout :: layout(~{::section})"
 >
-  <!-- Каталог игр -->
   <section
     id="catalog"
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
     role="region"
     aria-labelledby="catalog-title"
   >
-    <!-- Заголовок -->
     <div class="flex justify-between items-center mb-8">
       <h2
         id="catalog-title"
@@ -23,8 +21,7 @@
       </div>
     </div>
 
-    <!-- Фильтры и поиск -->
-    <form method="get" action="/catalog" class="space-y-4 mb-8">
+    <form method="get" action="/catalog" class="space-y-4 mb-8 relative z-30">
       <div class="flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
           <input
@@ -102,44 +99,76 @@
         </button>
       </div>
 
-      <!-- Фильтр по тегам (чекбоксы) -->
       <div
         th:if="${not #lists.isEmpty(allTags)}"
-        class="bg-gray-50 rounded-lg p-4"
+        class="bg-gray-50 rounded-lg p-4 relative z-40"
+        id="tagsFilterContainer"
       >
-        <div class="flex items-center justify-between mb-3">
-          <label class="text-sm font-medium text-gray-700"
-            >Фильтр по тегам:</label
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Фильтр по тегам:</label
+        >
+
+        <div class="relative w-full sm:w-80 z-50">
+          <button
+            type="button"
+            id="tagDropdownBtn"
+            class="flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <label th:each="tag : ${allTags}" class="inline-flex items-center">
-            <input
-              type="checkbox"
-              name="tags"
-              th:value="${tag.name}"
-              th:checked="${currentTags != null and currentTags.contains(tag.name)}"
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span
-              class="ml-2 text-sm text-gray-700"
-              th:text="${tag.name}"
-            ></span>
-          </label>
+            <span id="dropdownBtnText">Выбрать теги...</span>
+            <i
+              class="fas fa-chevron-down text-gray-400 transition-transform duration-200"
+              id="dropdownArrow"
+            ></i>
+          </button>
+
+          <div
+            id="tagDropdownMenu"
+            class="hidden absolute z-50 left-0 mt-2 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-xl py-1 divide-y divide-gray-100"
+          >
+            <div class="p-2 sticky top-0 bg-white z-10">
+              <input
+                type="text"
+                id="searchTagInput"
+                placeholder="Поиск тега..."
+                class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-blue-500"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="py-1">
+              <label
+                th:each="tag : ${allTags}"
+                class="tag-option flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  name="tags"
+                  th:value="${tag.name}"
+                  th:checked="${currentTags != null and currentTags.contains(tag.name)}"
+                  class="tag-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 transition-all"
+                />
+                <span
+                  class="ml-3 font-medium text-gray-600 th-tag-name"
+                  th:text="${tag.name}"
+                ></span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Отображение активных фильтров -->
       <div
         th:if="${(currentSearch != null and currentSearch != '') or 
            (currentGenre != null) or 
            (currentMinRating != null) or 
            (currentTags != null and not #lists.isEmpty(currentTags))}"
-        class="flex flex-wrap gap-2 pt-2"
+        class="flex flex-wrap gap-2 pt-2 relative z-20"
       >
-        <span class="text-sm text-gray-500">Активные фильтры:</span>
+        <span
+          class="text-xs font-semibold text-gray-500 uppercase tracking-wider"
+          >Активные фильтры:</span
+        >
 
-        <!-- Фильтр поиска -->
         <a
           th:if="${currentSearch != null and currentSearch != ''}"
           th:href="@{/catalog(search='', genre=${currentGenre}, tags=${currentTags}, minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
@@ -149,7 +178,6 @@
           <i class="fas fa-times text-xs"></i>
         </a>
 
-        <!-- Фильтр жанра -->
         <a
           th:if="${currentGenre != null}"
           th:href="@{/catalog(search=${currentSearch}, genre='', tags=${currentTags}, minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
@@ -159,7 +187,6 @@
           <i class="fas fa-times text-xs"></i>
         </a>
 
-        <!-- Фильтр рейтинга -->
         <a
           th:if="${currentMinRating != null}"
           th:href="@{/catalog(search=${currentSearch}, genre=${currentGenre}, tags=${currentTags}, minRating='', sort=${currentSort}, size=${pageSize})}"
@@ -169,17 +196,29 @@
           <i class="fas fa-times text-xs"></i>
         </a>
 
-        <!-- Все выбранные теги -->
-        <a
+        <div
           th:if="${currentTags != null and not #lists.isEmpty(currentTags)}"
-          th:href="@{/catalog(search=${currentSearch}, genre=${currentGenre}, tags='', minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
-          class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200"
+          class="flex flex-wrap gap-2 items-center"
         >
-          Теги: <span th:text="${#strings.setJoin(currentTags, ', ')}"></span>
-          <i class="fas fa-times text-xs"></i>
-        </a>
+          <div
+            th:each="activeTagName : ${currentTags}"
+            th:if="${activeTagName != null and activeTagName != ''}"
+            class="inline-flex items-center"
+          >
+            <a
+              th:with="filteredTags=${#strings.listJoin(currentTags.?[#this != '__${activeTagName}__'], ',')}"
+              th:href="@{/catalog(search=${currentSearch}, genre=${currentGenre}, tags=${filteredTags}, minRating=${currentMinRating}, sort=${currentSort}, size=${pageSize})}"
+              class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-100 transition-all shadow-sm"
+              th:title="'Убрать тег ' + ${activeTagName}"
+            >
+              <span th:text="${activeTagName}"></span>
+              <i
+                class="fas fa-times text-[10px] opacity-75 hover:opacity-100"
+              ></i>
+            </a>
+          </div>
+        </div>
 
-        <!-- Сброс всех фильтров -->
         <a
           th:href="@{/catalog(size=${pageSize})}"
           class="px-2 py-1 text-gray-500 hover:text-gray-700 text-sm"
@@ -189,7 +228,6 @@
       </div>
     </form>
 
-    <!-- Текущая сортировка (над сеткой игр) -->
     <div
       th:if="${currentSort != null}"
       class="flex items-center justify-end gap-2 text-sm text-gray-500 mb-4"
@@ -208,29 +246,33 @@
     </div>
 
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch relative z-10"
     >
       <article
         th:each="game : ${games}"
         class="game-card group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
       >
-        <div
-          class="shrink-0 w-full h-40 bg-gradient-to-br relative transition-transform duration-500 group-hover:scale-105"
-          th:classappend="${game.themeColor}"
-        >
+        <a th:href="@{/games/{id}(id=${game.id})}" class="block relative group">
           <div
-            class="absolute top-4 right-4 bg-white/90 backdrop-blur px-2 py-1 rounded-lg shadow-sm flex items-center gap-1"
+            th:if="${game.base64Image != null}"
+            class="w-full h-[400px] relative"
           >
-            <span class="text-yellow-500 text-xs"
-              ><i class="fas fa-star"></i
-            ></span>
-            <span
-              class="text-sm font-bold text-gray-800"
-              th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}"
-              >4.5</span
-            >
+            <img
+              th:src="${game.base64Image}"
+              alt="Обложка"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
           </div>
-        </div>
+          <div
+            th:if="${game.base64Image == null}"
+            th:classappend="${game.themeColor}"
+            class="w-full h-[400px] bg-gradient-to-br flex items-center justify-center text-white transition-all"
+          >
+            <i
+              class="fas fa-play text-6xl opacity-50 group-hover:scale-110 transition-transform"
+            ></i>
+          </div>
+        </a>
 
         <div class="p-6 flex flex-col flex-1">
           <div class="flex-1">
@@ -289,6 +331,13 @@
           <div class="pt-4 mt-auto border-t border-gray-100">
             <div class="flex items-center justify-between mb-4">
               <div class="flex gap-4 text-gray-500 text-sm">
+                <span class="text-xs text-gray-500">
+                  <i class="fas fa-star text-yellow-400 mr-1"></i>
+                  <span
+                    th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}"
+                    >0.0</span
+                  >
+                </span>
                 <span title="Просмотры">
                   <i class="far fa-eye mr-1"></i>
                   <span th:text="${game.totalViews}">0</span>
@@ -315,7 +364,6 @@
       </article>
     </div>
 
-    <!-- Сообщение, если игр нет -->
     <div
       th:if="${games == null or games.isEmpty()}"
       class="text-center py-12 bg-white rounded-xl shadow-lg"
@@ -327,25 +375,22 @@
       </p>
     </div>
 
-    <!-- Пагинация -->
     <div th:if="${totalPages > 0}" class="flex justify-center mt-12">
       <nav class="flex items-center gap-2">
-        <!-- Кнопка "Назад" -->
         <a
           th:if="${currentPage > 0}"
           th:href="@{/catalog(page=${currentPage - 1}, 
-                         search=${currentSearch}, 
-                         genre=${currentGenre}, 
-                         tags=${currentTags},
-                         minRating=${currentMinRating}, 
-                         sort=${currentSort},
-                         size=${pageSize})}"
+                           search=${currentSearch}, 
+                           genre=${currentGenre}, 
+                           tags=${currentTags},
+                           minRating=${currentMinRating}, 
+                           sort=${currentSort},
+                           size=${pageSize})}"
           class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
         >
           Назад
         </a>
 
-        <!-- Кнопка "Назад" неактивна -->
         <a
           th:if="${currentPage == 0}"
           class="px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
@@ -353,39 +398,36 @@
           Назад
         </a>
 
-        <!-- Номера страниц -->
         <a
           th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
           th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
           th:href="@{/catalog(page=${i}, 
-                         search=${currentSearch}, 
-                         genre=${currentGenre}, 
-                         tags=${currentTags},
-                         minRating=${currentMinRating}, 
-                         sort=${currentSort},
-                         size=${pageSize})}"
+                           search=${currentSearch}, 
+                           genre=${currentGenre}, 
+                           tags=${currentTags},
+                           minRating=${currentMinRating}, 
+                           sort=${currentSort},
+                           size=${pageSize})}"
           th:class="${i == currentPage} ? 'px-4 py-2 bg-blue-600 text-white rounded-lg' : 'px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50'"
           th:text="${i + 1}"
         >
           1
         </a>
 
-        <!-- Кнопка "Вперед" -->
         <a
           th:if="${currentPage < totalPages - 1}"
           th:href="@{/catalog(page=${currentPage + 1}, 
-                         search=${currentSearch}, 
-                         genre=${currentGenre}, 
-                         tags=${currentTags},
-                         minRating=${currentMinRating}, 
-                         sort=${currentSort},
-                         size=${pageSize})}"
+                           search=${currentSearch}, 
+                           genre=${currentGenre}, 
+                           tags=${currentTags},
+                           minRating=${currentMinRating}, 
+                           sort=${currentSort},
+                           size=${pageSize})}"
           class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
         >
           Вперед
         </a>
 
-        <!-- Кнопка "Вперед" неактивна -->
         <a
           th:if="${currentPage >= totalPages - 1}"
           class="px-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
@@ -394,5 +436,85 @@
         </a>
       </nav>
     </div>
+
+    <script th:inline="javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownBtn = document.getElementById("tagDropdownBtn");
+        const dropdownMenu = document.getElementById("tagDropdownMenu");
+        const dropdownArrow = document.getElementById("dropdownArrow");
+        const dropdownBtnText = document.getElementById("dropdownBtnText");
+        const searchInput = document.getElementById("searchTagInput");
+
+        if (!dropdownBtn || !dropdownMenu) return;
+
+        dropdownBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isHidden = dropdownMenu.classList.contains("hidden");
+
+          if (isHidden) {
+            dropdownMenu.classList.remove("hidden");
+            dropdownArrow.classList.add("rotate-180");
+            if (searchInput) searchInput.focus();
+          } else {
+            closeDropdown();
+          }
+        });
+
+        function closeDropdown() {
+          dropdownMenu.classList.add("hidden");
+          dropdownArrow.classList.remove("rotate-180");
+        }
+
+        document.addEventListener("click", (e) => {
+          if (
+            !dropdownMenu.contains(e.target) &&
+            !dropdownBtn.contains(e.target)
+          ) {
+            closeDropdown();
+          }
+        });
+
+        if (searchInput) {
+          searchInput.addEventListener("input", function () {
+            const filter = this.value.toLowerCase().trim();
+            const options = dropdownMenu.querySelectorAll(".tag-option");
+
+            options.forEach((option) => {
+              const tagName = option
+                .querySelector(".th-tag-name")
+                .textContent.toLowerCase();
+              if (tagName.includes(filter)) {
+                option.style.display = "flex";
+              } else {
+                option.style.display = "none";
+              }
+            });
+          });
+        }
+
+        const checkboxes = dropdownMenu.querySelectorAll(".tag-checkbox");
+
+        function syncTagsUI() {
+          const selectedCheckboxes = Array.from(checkboxes).filter(
+            (cb) => cb.checked,
+          );
+          const count = selectedCheckboxes.length;
+
+          if (count > 0) {
+            dropdownBtnText.textContent = `Выбрано тегов: ${count}`;
+            dropdownBtnText.classList.add("text-blue-700");
+          } else {
+            dropdownBtnText.textContent = "Выбрать теги...";
+            dropdownBtnText.classList.remove("text-blue-700");
+          }
+        }
+
+        checkboxes.forEach((cb) => {
+          cb.addEventListener("change", syncTagsUI);
+        });
+
+        syncTagsUI();
+      });
+    </script>
   </section>
 </html>

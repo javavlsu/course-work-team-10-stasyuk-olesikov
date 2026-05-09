@@ -16,6 +16,7 @@ public class CatalogGameDTO {
     private Game.Genre genre;
     private String developerUsername;
     private Set<String> tags;
+    private String base64Image;
     private Double averageRating;
     private Integer reviewsCount;
     private Integer totalViews;

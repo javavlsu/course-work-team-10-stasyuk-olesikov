@@ -153,7 +153,7 @@ public class GameService {
                 .filter(tagName -> !tagName.equalsIgnoreCase(genreName))
                 .collect(Collectors.toSet());
 
-        return CatalogGameDTO.builder()
+        CatalogGameDTO dto = CatalogGameDTO.builder()
                 .id(game.getId())
                 .name(game.getName())
                 .description(game.getDescr())
@@ -167,6 +167,15 @@ public class GameService {
                 .firstReleaseDate(firstReleaseDate)
                 .themeColor(getGenreColor(game.getGenre()))
                 .build();
+
+        if (game.getImage() != null) {
+            String base64 = Base64.getEncoder().encodeToString(game.getImage());
+            dto.setBase64Image("data:image/jpeg;base64," + base64);
+        } else {
+            dto.setBase64Image(null);
+        }
+
+        return dto;
     }
 
     private String getGenreColor(Game.Genre genre) {
@@ -337,6 +346,7 @@ public class GameService {
         } else {
             dto.setBase64Image(null);
         }
+
         return dto;
     }
 
@@ -433,8 +443,7 @@ public class GameService {
         game.setRepo(dto.getRepoLink());
         try {
             game.setImage(dto.getMainPic().getBytes());
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
