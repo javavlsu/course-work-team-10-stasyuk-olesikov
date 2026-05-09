@@ -2,11 +2,14 @@ package ru.vlsu.myng.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.*;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import ru.vlsu.myng.entities.GameVersion;
@@ -169,8 +172,14 @@ public class GithubService {
             }
 
             boolean hasIndexHtml = requestedPaths.stream()
-                    .map(p -> p.replaceAll("/+$", "")) // normalize trailing slashes
-                    .anyMatch(p -> p.endsWith("/index.html") || p.equals("index.html"));
+                    .map(p -> p.replaceAll("/+$", "")) // normalize trailing slash
+                    .anyMatch(requested ->
+                            repoPaths.stream().anyMatch(repoPath ->
+                                    repoPath.equals(requested + "/index.html")
+                                            || repoPath.equals("index.html")
+                                            || repoPath.equals(requested)
+                            )
+                    );
 
             if (!hasIndexHtml) {
                 throw new GithubException(
@@ -266,30 +275,13 @@ public class GithubService {
 
         Path tempFile = Files.createTempFile("repo-", ".zip");
 
-        webClient.get()
+        Flux<DataBuffer> flux = webClient.get()
                 .uri(url)
-                .exchangeToMono(response -> {
-                    System.out.println("Status: " + response.statusCode());
+                .retrieve()
+                .bodyToFlux(DataBuffer.class);
 
-                    if (!response.statusCode().is2xxSuccessful()) {
-                        return response.bodyToMono(String.class)
-                                .doOnNext(body -> System.out.println("Error body: " + body))
-                                .then(Mono.error(new RuntimeException("Request failed")));
-                    }
-
-                    return response.bodyToMono(byte[].class);
-                })
-                .doOnNext(bytes -> {
-                    System.out.println("Received bytes: " + bytes.length);
-                    try {
-                        Files.write(tempFile, bytes);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+        DataBufferUtils.write(flux, tempFile)
                 .block();
-
-        System.out.println("tempFile: " + tempFile.toString());
 
         return tempFile;
     }
