@@ -431,6 +431,13 @@ public class GameService {
         game.setName(dto.getTitle());
         game.setDescr(dto.getDescription());
         game.setRepo(dto.getRepoLink());
+        try {
+            game.setImage(dto.getMainPic().getBytes());
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return;
+        }
 
         game.setGenre(
                 Game.Genre.valueOf(dto.getGenre()));

@@ -7,10 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.vlsu.myng.dto.PublishGameVersionRequest;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.GameVersion;
+import ru.vlsu.myng.entities.ModerationVerdict;
 import ru.vlsu.myng.repositories.GameVersionRepository;
+import ru.vlsu.myng.repositories.ModerationVerdictRepository;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.Instant;
 import java.util.stream.Stream;
 
 @Service
@@ -18,6 +21,9 @@ import java.util.stream.Stream;
 public class GameVersionService {
 
     private final GameVersionRepository gameVersionRepository;
+    private final ModerationVerdictRepository moderationVerdictRepository;
+    private final GameService gameService;
+    private final GithubService githubService;
 
     @Value("${app.storage.path}")
     private String storagePath;
@@ -57,6 +63,29 @@ public class GameVersionService {
     }
 
     public void publishGameVersion(PublishGameVersionRequest dto) {
+        var game = gameService.getGameById(dto.getGameId());
 
+        githubService.validateCommitExists(game.getRepo(), dto.getCommitHash());
+        githubService.validateFilesExistInCommit(game.getRepo(), dto.getCommitHash(), dto.getFiles());
+
+        GameVersion version = new GameVersion();
+        version.setGame(game);
+        version.setCommitHash(dto.getCommitHash());
+        version.setName(dto.getGameVerName());
+        version.setCreatedAt(Instant.now());
+        version.setFiles(dto.getFiles());
+        version.setChangelog(dto.getChangelog());
+
+        gameVersionRepository.save(version);
+
+        ModerationVerdict verdict = new ModerationVerdict();
+        verdict.setGameVersion(version);
+        verdict.setApproved(null);
+        verdict.setReason(null);
+        verdict.setModerator(null);
+
+        moderationVerdictRepository.save(verdict);
+
+        version.setModerationVerdict(verdict);
     }
 }

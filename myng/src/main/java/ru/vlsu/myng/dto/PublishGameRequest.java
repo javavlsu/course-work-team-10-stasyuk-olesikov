@@ -3,6 +3,7 @@ package ru.vlsu.myng.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
+import ru.vlsu.myng.utils.FileNotEmpty;
 import ru.vlsu.myng.utils.MaxFileSize;
 import ru.vlsu.myng.utils.UniqueRepo;
 
@@ -55,7 +56,7 @@ public class PublishGameRequest {
     )
     private String gameVer;
 
-    @NotNull(message = "Изображение обязательно")
+    @FileNotEmpty
     @MaxFileSize(value = 32 * 1024 * 1024, message = "Максимальный размер файла — 32MB")
     private MultipartFile mainPic;
 }
