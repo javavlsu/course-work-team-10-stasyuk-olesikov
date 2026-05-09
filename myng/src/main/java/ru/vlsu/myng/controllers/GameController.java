@@ -13,15 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import ru.vlsu.myng.dto.CollectionDTO;
-import ru.vlsu.myng.dto.GameEditRequestDTO;
-import ru.vlsu.myng.dto.GamePageDTO;
-import ru.vlsu.myng.dto.MyGame;
-import ru.vlsu.myng.dto.PublishGameRequest;
-import ru.vlsu.myng.services.CollectionService;
-import ru.vlsu.myng.services.GameService;
-import ru.vlsu.myng.services.ReviewService;
-import ru.vlsu.myng.services.UserService;
+import ru.vlsu.myng.dto.*;
+import ru.vlsu.myng.services.*;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
@@ -37,6 +30,7 @@ import java.util.Map;
 public class GameController {
 
     private final GameService gameService;
+    private final GameVersionService gameVersionService;
     private final UserService userService;
     private final ReviewService reviewService;
     private final CollectionService collectionService;
@@ -209,6 +203,24 @@ public class GameController {
             @Valid @ModelAttribute PublishGameRequest request) {
 
         gameService.publishGame(request);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Game published successfully"));
+    }
+
+    @PostMapping("/publish/gamever")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> publishGameVersion(
+            @Valid @ModelAttribute PublishGameVersionRequest request) {
+
+        System.out.println(request.getGameId());
+        System.out.println(request.getGameVerName());
+        System.out.println(request.getCommitHash());
+        System.out.println(request.getFiles());
+        System.out.println(request.getChangelog());
+
+        gameVersionService.publishGameVersion(request);
 
         return ResponseEntity.ok(Map.of(
                 "success", true,

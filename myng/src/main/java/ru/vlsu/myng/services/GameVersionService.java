@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.vlsu.myng.dto.PublishGameVersionRequest;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.GameVersion;
 import ru.vlsu.myng.repositories.GameVersionRepository;
@@ -43,7 +44,7 @@ public class GameVersionService {
                     .orElseThrow(() ->
                             new RuntimeException("Entry file not found in " + baseDir));
 
-            // Convert filesystem path → web path
+            // Convert filesystem path to web path
             Path storageRoot = Paths.get(storagePath).toAbsolutePath().normalize();
             Path fullPath = indexFile.toAbsolutePath().normalize();
 
@@ -53,5 +54,9 @@ public class GameVersionService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to resolve entry point for version " + version.getId(), e);
         }
+    }
+
+    public void publishGameVersion(PublishGameVersionRequest dto) {
+
     }
 }
