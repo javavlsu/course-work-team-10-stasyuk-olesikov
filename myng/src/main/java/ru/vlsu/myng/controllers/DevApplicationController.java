@@ -29,6 +29,10 @@ public class DevApplicationController {
             @RequestBody DevApplicationDto dto,
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principalUser
     ) {
+        System.out.println("submitDebApplication: ");
+        System.out.println(dto.getGithubUsername());
+        System.out.println(dto.getText());
+
         // if modverd with approved = null exists return error
         User u = userService.findByEmail(principalUser.getUsername());
         List<DevApplication> applist = devApplicationService.findByUser(u);

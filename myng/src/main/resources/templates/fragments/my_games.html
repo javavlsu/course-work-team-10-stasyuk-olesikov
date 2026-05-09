@@ -22,8 +22,19 @@
         <article th:each="mygame : ${mygames}"
                  class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
 
-            <!-- Optional: keep static gradient or randomize later -->
-            <div class="h-40 bg-gradient-to-br from-emerald-500 to-teal-600"></div>
+            <a th:href="@{/games/{id}(id=${mygame.id})}" class="block">
+                <div th:if="${mygame.image != null}"
+                     class="h-40 overflow-hidden">
+
+                    <img th:src="${mygame.image}"
+                         alt="Game image"
+                         class="w-full h-full object-cover"/>
+                </div>
+
+                <div th:if="${mygame.image == null}"
+                     th:class="'h-40 bg-gradient-to-br ' + ${mygame.bgClass}">
+                </div>
+            </a>
 
             <div class="p-5">
                 <div class="flex justify-between items-start mb-2">
@@ -65,7 +76,7 @@
 
                     <!-- Manage button -->
                     <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                        Управлять
+                        <a th:href="@{/games/{id}(id=${mygame.id})}">Управлять</a>
                         <i class="fas fa-chevron-right ml-1 text-xs"></i>
                     </button>
 

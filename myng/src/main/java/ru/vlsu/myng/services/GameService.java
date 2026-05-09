@@ -399,7 +399,19 @@ public class GameService {
                             .average()
                             .orElse(0.0);
 
-            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating);
+            String imageSrc = null;
+
+            if (game.getImage() != null && game.getImage().length > 0) {
+
+                String base64 = Base64.getEncoder()
+                        .encodeToString(game.getImage());
+
+                imageSrc = "data:image/jpeg;base64," + base64;
+            }
+
+            String bgClass = getGenreColor(game.getGenre());
+
+            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating, imageSrc, bgClass);
         }).collect(Collectors.toList());
     }
 
