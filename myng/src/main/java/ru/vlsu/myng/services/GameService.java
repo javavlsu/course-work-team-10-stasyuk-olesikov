@@ -454,7 +454,12 @@ public class GameService {
         game.setDescr(dto.getDescription());
         game.setRepo(dto.getRepoLink());
         try {
-            game.setImage(dto.getMainPic().getBytes());
+            var file = dto.getMainPic();
+            if (file != null && !file.isEmpty() && file.getSize() > 0) {
+                game.setImage(file.getBytes());
+            } else {
+                game.setImage(null);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;

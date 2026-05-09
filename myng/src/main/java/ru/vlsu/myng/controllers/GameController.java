@@ -201,7 +201,7 @@ public class GameController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> publishGame(
             @Valid @ModelAttribute PublishGameRequest request) {
-
+        
         gameService.publishGame(request);
 
         return ResponseEntity.ok(Map.of(
