@@ -56,7 +56,7 @@ public class PublishGameRequest {
     )
     private String gameVer;
 
-    @FileNotEmpty
+    //@FileNotEmpty
     @MaxFileSize(value = 32 * 1024 * 1024, message = "Максимальный размер файла — 32MB")
     private MultipartFile mainPic;
 }

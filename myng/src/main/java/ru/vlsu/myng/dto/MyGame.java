@@ -15,4 +15,6 @@ public class MyGame {
     private String status; // "Опубликована", "На модерации" или "Отклонена"
     private Integer viewCount;
     private Double rating; // average rating
+    private String image;
+    private String bgClass;
 }

@@ -2,6 +2,8 @@ package ru.vlsu.myng.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,17 +29,24 @@ public class ToModerateController {
     }
 
     @PostMapping("/approve/{moderationVerdictId}")
-    public ResponseEntity<Void> approve(@PathVariable Integer moderationVerdictId) {
-        moderationVerdictService.approve(moderationVerdictId);
+    public ResponseEntity<Void> approve(
+            @PathVariable Integer moderationVerdictId,
+            @AuthenticationPrincipal User user
+    ) {
+
+        moderationVerdictService.approve(moderationVerdictId, user);
+
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reject/{moderationVerdictId}")
     public ResponseEntity<Void> reject(
             @PathVariable Integer moderationVerdictId,
-            @RequestParam String reason
+            @RequestParam String reason,
+            @AuthenticationPrincipal User user
     ) {
-        moderationVerdictService.reject(moderationVerdictId, reason);
+        moderationVerdictService.reject(moderationVerdictId, reason, user);
+
         return ResponseEntity.ok().build();
     }
 }
