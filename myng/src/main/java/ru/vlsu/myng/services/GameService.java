@@ -1,6 +1,8 @@
 package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
@@ -180,7 +183,7 @@ public class GameService {
 
     private String getGenreColor(Game.Genre genre) {
         if (genre == null)
-            return "from-indigo-500 to-purple-600";
+            return "from-blue-500 to-cyan-600";
         switch (genre) {
             case action:
                 return "from-red-500 to-orange-600";
@@ -195,19 +198,19 @@ public class GameService {
             case sports:
                 return "from-green-500 to-blue-600";
             case puzzle:
-                return "from-indigo-500 to-purple-600";
+                return "from-yellow-500 to-red-600";
             case horror:
-                return "from-gray-700 to-gray-900";
+                return "from-red-500 to-gray-600";
             case platformer:
                 return "from-cyan-500 to-blue-600";
             case sandbox:
                 return "from-yellow-500 to-red-600";
             case visual_novel:
-                return "from-pink-500 to-purple-600";
+                return "from-blue-500 to-pink-600";
             case roguelike:
                 return "from-orange-500 to-red-600";
             default:
-                return "from-indigo-500 to-purple-600";
+                return "from-blue-500 to-cyan-600";
         }
     }
 
@@ -340,7 +343,7 @@ public class GameService {
                 .lastUpdateDate(lastUpdateDate)
                 .build();
 
-        if (game.getImage() != null) {
+        if (game.getImage() != null && game.getImage().length > 0) {
             String base64 = Base64.getEncoder().encodeToString(game.getImage());
             dto.setBase64Image("data:image/jpeg;base64," + base64);
         } else {
@@ -411,7 +414,8 @@ public class GameService {
 
             String bgClass = getGenreColor(game.getGenre());
 
-            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating, imageSrc, bgClass);
+            return new MyGame(game.getId(), game.getName(), game.getDescr(), approved, status, views, rating, imageSrc,
+                    bgClass);
         }).collect(Collectors.toList());
     }
 

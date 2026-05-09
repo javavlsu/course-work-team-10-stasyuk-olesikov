@@ -53,6 +53,7 @@ public class SecurityConfig {
                                                     "/main.css", // стили
                                                     "/js/**", // скрипты
                                                     "/images/**", // картинки
+                                                    "/static/gamefiles/**", // файлы игр
                                                     "/banned" // страница бана
                                     ).permitAll()
 

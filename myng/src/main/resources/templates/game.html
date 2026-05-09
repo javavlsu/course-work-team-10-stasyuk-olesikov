@@ -563,114 +563,111 @@
           </button>
         </div>
 
-          <form
-                  id="addVersionForm"
-                  enctype="multipart/form-data"
-          >
-              <div class="space-y-4">
-                  <!-- Версия игры -->
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Версия игры *
-                      </label>
+        <form id="addVersionForm" enctype="multipart/form-data">
+          <div class="space-y-4">
+            <!-- Версия игры -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Версия игры *
+              </label>
 
-                      <input
-                              type="text"
-                              name="gameVerName"
-                              placeholder="Например: 1.4.0"
-                              required
-                              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                      />
+              <input
+                type="text"
+                name="gameVerName"
+                placeholder="Например: 1.4.0"
+                required
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+              />
 
-                      <div
-                              class="error-message text-red-500 text-sm mt-1 hidden"
-                              data-error-for="gameVerName"
-                      ></div>
-                  </div>
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="gameVerName"
+              ></div>
+            </div>
 
-                  <!-- Хеш коммита -->
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Хеш коммита
-                      </label>
+            <!-- Хеш коммита -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Хеш коммита
+              </label>
 
-                      <input
-                              type="text"
-                              name="commitHash"
-                              placeholder="a1b2c3d..."
-                              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono"
-                      />
+              <input
+                type="text"
+                name="commitHash"
+                placeholder="a1b2c3d..."
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono"
+              />
 
-                      <div
-                              class="error-message text-red-500 text-sm mt-1 hidden"
-                              data-error-for="commitHash"
-                      ></div>
-                  </div>
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="commitHash"
+              ></div>
+            </div>
 
-                  <!-- Список файлов -->
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Список файлов
-                      </label>
+            <!-- Список файлов -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Список файлов
+              </label>
 
-                      <textarea
-                              name="files"
-                              rows="4"
-                              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                              placeholder="folder/, folder2/, folder3/index.html"
-                      ></textarea>
+              <textarea
+                name="files"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                placeholder="folder/, folder2/, folder3/index.html"
+              ></textarea>
 
-                      <div
-                              class="error-message text-red-500 text-sm mt-1 hidden"
-                              data-error-for="files"
-                      ></div>
-                  </div>
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="files"
+              ></div>
+            </div>
 
-                  <!-- Список изменений -->
-                  <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Список изменений
-                      </label>
+            <!-- Список изменений -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Список изменений
+              </label>
 
-                      <textarea
-                              name="changelog"
-                              rows="4"
-                              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                              placeholder="• Добавлено...&#10;• Исправлено...&#10;• Улучшено..."
-                      ></textarea>
+              <textarea
+                name="changelog"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                placeholder="• Добавлено...&#10;• Исправлено...&#10;• Улучшено..."
+              ></textarea>
 
-                      <div
-                              class="error-message text-red-500 text-sm mt-1 hidden"
-                              data-error-for="changelog"
-                      ></div>
-                  </div>
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="changelog"
+              ></div>
+            </div>
 
-                  <!-- Общая ошибка -->
-                  <div
-                          class="general-error hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
-                  ></div>
+            <!-- Общая ошибка -->
+            <div
+              class="general-error hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
+            ></div>
 
-                  <!-- Кнопки -->
-                  <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                      <button
-                              type="button"
-                              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
-                              onclick="closeModal('addVersionModal')"
-                      >
-                          Отмена
-                      </button>
+            <!-- Кнопки -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+                onclick="closeModal('addVersionModal')"
+              >
+                Отмена
+              </button>
 
-                      <button
-                              type="submit"
-                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                              th:data-game-id="${game.id}"
-                      >
-                          <i class="fas fa-plus"></i>
-                          Добавить версию
-                      </button>
-                  </div>
-              </div>
-          </form>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                th:data-game-id="${game.id}"
+              >
+                <i class="fas fa-plus"></i>
+                Добавить версию
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1165,109 +1162,130 @@
           }
         });
 
-        /* boilerplate for form validation */
+      /* boilerplate for form validation */
 
-        const addVersionForm = document.getElementById("addVersionForm");
+      const addVersionForm = document.getElementById("addVersionForm");
 
-        const clearAllErrors = (form) => {
-            form.querySelectorAll('.error-message').forEach(el => {
-                el.textContent = '';
-                el.classList.add('hidden');
-            });
-
-            // Remove error styling from inputs
-            form.querySelectorAll('.error-input').forEach(el => {
-                el.classList.remove('error-input', 'border-red-500');
-            });
-
-            // Hide general error
-            const generalError = form.querySelector('.general-error');
-            if (generalError) {
-                generalError.classList.add('hidden');
-            }
-        };
-
-        const displayErrors = (form, errors) => {
-            for (const [fieldName, errorMessage] of Object.entries(errors)) {
-                const errorElement = form.querySelector(`[data-error-for="${fieldName}"]`);
-                const inputElement = form.querySelector(`[name="${fieldName}"]`);
-
-                if (errorElement) {
-                    errorElement.textContent = errorMessage;
-                    errorElement.classList.remove('hidden');
-                }
-
-                if (inputElement) {
-                    inputElement.classList.add('error-input', 'border-red-500');
-                }
-            }
-
-            // Scroll to first error
-            const firstError = form.querySelector('.error-message:not(.hidden)');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        };
-
-        const showGeneralMessage = (form, type, message) => {
-            const generalError = form.querySelector('.general-error');
-            if (generalError) {
-                generalError.textContent = message;
-                generalError.classList.remove('hidden');
-
-                if (type === 'success') {
-                    generalError.classList.remove('bg-red-50', 'border-red-200', 'text-red-600');
-                    generalError.classList.add('bg-green-50', 'border-green-200', 'text-green-600');
-                } else {
-                    generalError.classList.remove('bg-green-50', 'border-green-200', 'text-green-600');
-                    generalError.classList.add('bg-red-50', 'border-red-200', 'text-red-600');
-                }
-            }
-        };
-
-        addVersionForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            // Real-time validation - clear errors as user types
-            addVersionForm.querySelectorAll('input, textarea, select').forEach(input => {
-                input.addEventListener('input', () => {
-                    const errorElement = addVersionForm.querySelector(`[data-error-for="${input.name}"]`);
-                    if (errorElement) {
-                        errorElement.classList.add('hidden');
-                    }
-                    input.classList.remove('error-input', 'border-red-500');
-                });
-            });
-
-            clearAllErrors(addVersionForm);
-
-            const formData = new FormData(addVersionForm);
-            const submitButton = addVersionForm.querySelector(`[type="submit"]`);
-
-            formData.append("gameId", submitButton.getAttribute("data-game-id"));
-
-            const response = await fetch(`/games/publish/gamever`, {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-            console.log(data);
-
-            if (!data.success) {
-
-                showGeneralMessage(addVersionForm, 'error', data.message);
-
-                if (data.errors) {
-                    displayErrors(addVersionForm, data.errors);
-                }
-
-                return;
-            }
-
-            alert("Версия успешно добавлена");
-            closeModal('addVersionModal')
+      const clearAllErrors = (form) => {
+        form.querySelectorAll(".error-message").forEach((el) => {
+          el.textContent = "";
+          el.classList.add("hidden");
         });
+
+        // Remove error styling from inputs
+        form.querySelectorAll(".error-input").forEach((el) => {
+          el.classList.remove("error-input", "border-red-500");
+        });
+
+        // Hide general error
+        const generalError = form.querySelector(".general-error");
+        if (generalError) {
+          generalError.classList.add("hidden");
+        }
+      };
+
+      const displayErrors = (form, errors) => {
+        for (const [fieldName, errorMessage] of Object.entries(errors)) {
+          const errorElement = form.querySelector(
+            `[data-error-for="${fieldName}"]`,
+          );
+          const inputElement = form.querySelector(`[name="${fieldName}"]`);
+
+          if (errorElement) {
+            errorElement.textContent = errorMessage;
+            errorElement.classList.remove("hidden");
+          }
+
+          if (inputElement) {
+            inputElement.classList.add("error-input", "border-red-500");
+          }
+        }
+
+        // Scroll to first error
+        const firstError = form.querySelector(".error-message:not(.hidden)");
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      };
+
+      const showGeneralMessage = (form, type, message) => {
+        const generalError = form.querySelector(".general-error");
+        if (generalError) {
+          generalError.textContent = message;
+          generalError.classList.remove("hidden");
+
+          if (type === "success") {
+            generalError.classList.remove(
+              "bg-red-50",
+              "border-red-200",
+              "text-red-600",
+            );
+            generalError.classList.add(
+              "bg-green-50",
+              "border-green-200",
+              "text-green-600",
+            );
+          } else {
+            generalError.classList.remove(
+              "bg-green-50",
+              "border-green-200",
+              "text-green-600",
+            );
+            generalError.classList.add(
+              "bg-red-50",
+              "border-red-200",
+              "text-red-600",
+            );
+          }
+        }
+      };
+
+      addVersionForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Real-time validation - clear errors as user types
+        addVersionForm
+          .querySelectorAll("input, textarea, select")
+          .forEach((input) => {
+            input.addEventListener("input", () => {
+              const errorElement = addVersionForm.querySelector(
+                `[data-error-for="${input.name}"]`,
+              );
+              if (errorElement) {
+                errorElement.classList.add("hidden");
+              }
+              input.classList.remove("error-input", "border-red-500");
+            });
+          });
+
+        clearAllErrors(addVersionForm);
+
+        const formData = new FormData(addVersionForm);
+        const submitButton = addVersionForm.querySelector(`[type="submit"]`);
+
+        formData.append("gameId", submitButton.getAttribute("data-game-id"));
+
+        const response = await fetch(`/games/publish/gamever`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (!data.success) {
+          showGeneralMessage(addVersionForm, "error", data.message);
+
+          if (data.errors) {
+            displayErrors(addVersionForm, data.errors);
+          }
+
+          return;
+        }
+
+        alert("Версия успешно добавлена");
+        closeModal("addVersionModal");
+      });
     </script>
   </section>
 </html>
