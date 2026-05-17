@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -114,27 +115,11 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     
         d.username,
     
-        COALESCE(AVG(r.rating), 0),
-    
-        COUNT(DISTINCT r.id),
-    
-        COALESCE(SUM(
-            CASE
-                WHEN gs.eventType = 'view'
-                THEN gs.count
-                ELSE 0
-            END
-        ), 0),
-    
-        COALESCE(SUM(
-            CASE
-                WHEN gs.eventType = 'launch'
-                THEN gs.count
-                ELSE 0
-            END
-        ), 0),
-    
-        MIN(gv.createdAt),
+        g.averageRating,
+        g.reviewCount,
+        g.totalViews,
+        g.totalLaunches,
+        g.firstReleaseDate,
     
         g.image
     )
@@ -142,10 +127,6 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     FROM Game g
     
     LEFT JOIN g.developer d
-    LEFT JOIN g.reviews r
-    LEFT JOIN g.stats gs
-    LEFT JOIN g.versions gv
-    LEFT JOIN g.tags t
     
     WHERE
     (
@@ -164,22 +145,18 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     
     AND
     (
-        :tags IS NULL
-        OR t.name IN :tags
+        :minRating IS NULL
+        OR g.averageRating >= :minRating
     )
     
-    GROUP BY
-        g.id,
-        g.name,
-        g.descr,
-        g.genre,
-        d.username,
-        g.image
-    
-    HAVING
+    AND
     (
-        :minRating IS NULL
-        OR AVG(r.rating) >= :minRating
+        :tags IS NULL
+        OR EXISTS (
+            SELECT 1
+            FROM g.tags t
+            WHERE t.name IN :tags
+        )
     )
     """)
     Page<CatalogGameDTO> findCatalogGames(

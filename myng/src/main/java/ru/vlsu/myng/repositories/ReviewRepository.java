@@ -4,7 +4,6 @@ import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -104,4 +103,11 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
     List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
 
     boolean existsByGameAndUser(Game game, User user);
+
+    /*
+     * Получает игру по id отзыва
+     *
+     *
+     * */
+    Optional<Game> findGameById(Integer id);
 }

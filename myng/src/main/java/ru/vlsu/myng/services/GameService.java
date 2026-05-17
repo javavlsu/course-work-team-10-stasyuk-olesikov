@@ -260,39 +260,31 @@ public class GameService {
             case "oldest" ->
                     JpaSort.unsafe(
                             Sort.Direction.ASC,
-                            "MIN(gv.createdAt)"
+                            "g.firstReleaseDate"
                     );
 
             case "rating_high" ->
                     JpaSort.unsafe(
                             Sort.Direction.DESC,
-                            "AVG(r.rating)"
+                            "g.averageRating"
                     );
 
             case "rating_low" ->
                     JpaSort.unsafe(
                             Sort.Direction.ASC,
-                            "AVG(r.rating)"
+                            "g.averageRating"
                     );
 
             case "popular" ->
                     JpaSort.unsafe(
                             Sort.Direction.DESC,
-                            """
-                            COALESCE(SUM(
-                                CASE
-                                    WHEN gs.eventType = 'launch'
-                                    THEN gs.count
-                                    ELSE 0
-                                END
-                            ), 0)
-                            """
+                            "g.totalLaunches"
                     );
 
             default ->
                     JpaSort.unsafe(
                             Sort.Direction.DESC,
-                            "MIN(gv.createdAt)"
+                            "g.firstReleaseDate"
                     );
         };
     }
@@ -304,6 +296,8 @@ public class GameService {
     public GamePageDTO getGamePageData(Integer gameId) {
 
         Game game = getGameById(gameId);
+        
+        game.setTotalViews(game.getTotalViews() + 1);
 
         // Получаем статистику
         Double avgRating = reviewRepository.getAverageRatingByGame(game);
@@ -492,6 +486,8 @@ public class GameService {
                 .collect(Collectors.toSet());
 
         game.setTags(tags);
+        
+        game.setFirstReleaseDate(Instant.now());
 
         gameRepository.save(game);
 
@@ -499,7 +495,7 @@ public class GameService {
         version.setGame(game);
         version.setCommitHash(dto.getCommitHash());
         version.setName(dto.getGameVer());
-        version.setCreatedAt(Instant.now());
+        version.setCreatedAt(game.getFirstReleaseDate());
         version.setFiles(dto.getFiles());
 
         gameVersionRepository.save(version);
@@ -513,5 +509,31 @@ public class GameService {
         moderationVerdictRepository.save(verdict);
 
         version.setModerationVerdict(verdict);
+    }
+    
+    @Transactional
+    public void incrementGameTotalLaunches(Game game) {
+        game.setTotalLaunches(game.getTotalLaunches() + 1);
+        gameRepository.save(game);
+    }
+
+    @Transactional
+    public void incrementGameTotalLaunches(Integer gameId) {
+        var game = getGameById(gameId);
+        game.setTotalLaunches(game.getTotalLaunches() + 1);
+        gameRepository.save(game);
+    }
+
+    @Transactional
+    public void incrementGameTotalViews(Game game) {
+        game.setTotalViews(game.getTotalViews() + 1);
+        gameRepository.save(game);
+    }
+
+    @Transactional
+    public void incrementGameTotalViews(Integer gameId) {
+        var game = getGameById(gameId);
+        game.setTotalViews(game.getTotalViews() + 1);
+        gameRepository.save(game);
     }
 }

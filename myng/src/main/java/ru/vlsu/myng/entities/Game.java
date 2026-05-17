@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.util.*;
 
 @Getter
@@ -40,6 +41,24 @@ public class Game {
     @Column(name = "image", columnDefinition = "MEDIUMBLOB")
     private byte[] image;
 
+    @Column(nullable = false)
+    private Double averageRating = 0.0;
+
+    @Column(nullable = false)
+    private Integer ratingSum = 0;
+
+    @Column(nullable = false)
+    private Integer reviewCount = 0;
+
+    @Column(nullable = false)
+    private Integer totalViews = 0;
+
+    @Column(nullable = false)
+    private Integer totalLaunches = 0;
+
+    @Column
+    private Instant firstReleaseDate;
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<GameVersion> versions = new ArrayList<>();
 
@@ -61,12 +80,5 @@ public class Game {
         action, adventure, rpg, simulation, strategy,
         sports, puzzle, horror, platformer,
         sandbox, visual_novel, roguelike
-    }
-
-    public double getAverageRating() {
-        return reviews.stream()
-                .mapToDouble(Review::getRating)
-                .average()
-                .orElse(0.0);
     }
 }

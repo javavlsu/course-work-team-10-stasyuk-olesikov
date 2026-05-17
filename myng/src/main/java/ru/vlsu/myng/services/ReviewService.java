@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
+import ru.vlsu.myng.repositories.GameRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
 import ru.vlsu.myng.repositories.UserRepository;
 
@@ -23,6 +24,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final GameRepository gameRepository;
 
     public void updateReview(Integer reviewId, ReviewUpdate dto) {
         Review review = reviewRepository.findById(reviewId).orElseThrow();
@@ -61,11 +63,49 @@ public class ReviewService {
         return reviewRepository.existsByUserAndGame(user, game);
     }
 
+    @Transactional
     public Review save(Review review) {
+        var game = reviewRepository.findGameById(review.getId());
+        var current = reviewRepository.findById(review.getId());
+        if (current.isPresent() && game.isPresent()) {
+            var g = game.get();
+            g.setRatingSum(
+                    g.getRatingSum() + review.getRating()
+            );
+
+            g.setReviewCount(
+                    g.getReviewCount() + 1
+            );
+
+            g.setAverageRating(
+                    (double) g.getRatingSum()
+                            / g.getReviewCount()
+            );
+        }
         return reviewRepository.save(review);
     }
 
+    @Transactional
     public void delete(Integer id) {
+        var game = reviewRepository.findGameById(id);
+        var review = reviewRepository.findById(id);
+        if (game.isPresent() && review.isPresent()) {
+            var g  = game.get();
+            g.setRatingSum(
+                    g.getRatingSum() - review.get().getRating()
+            );
+
+            g.setReviewCount(
+                    g.getReviewCount() - 1
+            );
+
+            g.setAverageRating(
+                    g.getReviewCount() == 0
+                            ? 0.0
+                            : (double) g.getRatingSum()
+                            / g.getReviewCount()
+            );
+        }
         reviewRepository.deleteById(id);
     }
 
@@ -89,6 +129,19 @@ public class ReviewService {
         review.setText(text.trim());
         review.setCreatedAt(Instant.now());
         review.setReportCount(0);
+
+        game.setRatingSum(
+                game.getRatingSum() + review.getRating()
+        );
+
+        game.setReviewCount(
+                game.getReviewCount() + 1
+        );
+
+        game.setAverageRating(
+                (double) game.getRatingSum()
+                        / game.getReviewCount()
+        );
 
         return reviewRepository.save(review);
     }

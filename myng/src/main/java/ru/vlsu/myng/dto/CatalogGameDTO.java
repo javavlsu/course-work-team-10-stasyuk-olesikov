@@ -34,9 +34,9 @@ public class CatalogGameDTO {
             Game.Genre genre,
             String developerUsername,
             Double averageRating,
-            Long reviewsCount,
-            Long totalViews,
-            Long totalLaunches,
+            Integer reviewsCount,
+            Integer totalViews,
+            Integer totalLaunches,
             Instant firstReleaseDate,
             byte[] image
     ) {
@@ -46,17 +46,13 @@ public class CatalogGameDTO {
         this.genre = genre;
         this.developerUsername = developerUsername;
 
-        this.averageRating =
-                averageRating != null ? averageRating : 0.0;
+        this.averageRating = averageRating;
 
-        this.reviewsCount =
-                reviewsCount != null ? reviewsCount.intValue() : 0;
+        this.reviewsCount = reviewsCount;
 
-        this.totalViews =
-                totalViews != null ? totalViews.intValue() : 0;
+        this.totalViews = totalViews;
 
-        this.totalLaunches =
-                totalLaunches != null ? totalLaunches.intValue() : 0;
+        this.totalLaunches = totalLaunches;
 
         this.firstReleaseDate = firstReleaseDate;
 

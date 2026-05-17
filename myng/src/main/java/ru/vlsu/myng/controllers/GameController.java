@@ -40,7 +40,9 @@ public class GameController {
         try {
             GamePageDTO game = gameService.getGamePageData(id);
             model.addAttribute("game", game);
-
+            
+            gameService.incrementGameTotalViews(id); // adds 2 and not 1 for some reason 18.05.26 immernochnichts
+            
             User currentUser = null;
             boolean isAuthenticated = false;
             List<CollectionDTO> userCollections = null;
