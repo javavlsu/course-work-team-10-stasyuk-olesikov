@@ -27,6 +27,9 @@ public class GameVersionService {
 
     @Value("${app.storage.path}")
     private String storagePath;
+    
+    @Value("${server.port}")
+    private String port;
 
     @Transactional(readOnly = true)
     public GameVersion getGameVersionById(Integer id) {
@@ -56,7 +59,7 @@ public class GameVersionService {
 
             Path relative = storageRoot.relativize(fullPath);
 
-            return "http://localhost:8080/static/" + relative.toString().replace("\\", "/");
+            return "http://localhost:" + port + "/static/" + relative.toString().replace("\\", "/");
         } catch (IOException e) {
             throw new RuntimeException("Failed to resolve entry point for version " + version.getId(), e);
         }

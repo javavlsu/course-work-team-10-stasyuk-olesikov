@@ -3,12 +3,10 @@ package ru.vlsu.myng.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import ru.vlsu.myng.dto.MyGame;
 import ru.vlsu.myng.dto.PublishGameRequest;
@@ -39,6 +37,7 @@ public class GameService {
     private final GithubService githubService;
     private final UserService userService;
     private final TagService tagService;
+    private final TagRepository tagRepository;
 
     public List<Game> getDeveloperGames(Integer userId) {
         User developer = userRepository.findById(userId)
@@ -215,77 +214,87 @@ public class GameService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CatalogGameDTO> getFilteredGames(GameFilterDTO filter, Pageable pageable) {
-        List<Game> games = gameRepository.findGamesWithBasicFilters(
-                filter.getSearch(),
-                filter.getGenre());
+    public Page<CatalogGameDTO> getFilteredGames(
+            GameFilterDTO filter,
+            Pageable pageable
+    ) {
 
-        List<CatalogGameDTO> dtos = games.stream()
-                .map(this::convertToCatalogDto)
-                .collect(Collectors.toList());
+        Sort sort = buildAggregateSort(filter.getSort());
 
-        if (filter.getTags() != null && !filter.getTags().isEmpty()) {
-            dtos = dtos.stream()
-                    .filter(dto -> dto.getTags() != null &&
-                            dto.getTags().stream().anyMatch(filter.getTags()::contains))
-                    .collect(Collectors.toList());
-        }
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        
+        Page<CatalogGameDTO> page =
+                gameRepository.findCatalogGames(
+                        filter.getSearch(),
+                        filter.getGenre(),
+                        filter.getTags(),
+                        filter.getMinRating(),
+                        sortedPageable
+                );
 
-        if (filter.getMinRating() != null) {
-            dtos = dtos.stream()
-                    .filter(dto -> dto.getAverageRating() >= filter.getMinRating())
-                    .collect(Collectors.toList());
-        }
+        page.getContent().forEach(dto -> {
 
-        dtos = sortGames(dtos, filter.getSort());
+            dto.setThemeColor(
+                    getGenreColor(dto.getGenre())
+            );
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), dtos.size());
-        List<CatalogGameDTO> pagedList = start < end ? dtos.subList(start, end) : Collections.emptyList();
-
-        return new PageImpl<>(pagedList, pageable, dtos.size());
+            dto.setTags(
+                    tagRepository.findTagNamesByGameId(dto.getId())
+            );
+        });
+        
+        return page;
     }
 
-    private List<CatalogGameDTO> sortGames(List<CatalogGameDTO> games, String sort) {
-        if (sort == null)
-            return games;
+    private Sort buildAggregateSort(String sort) {
 
-        switch (sort) {
-            case "newest":
-                return games.stream()
-                        .sorted((a, b) -> {
-                            if (a.getFirstReleaseDate() == null)
-                                return 1;
-                            if (b.getFirstReleaseDate() == null)
-                                return -1;
-                            return b.getFirstReleaseDate().compareTo(a.getFirstReleaseDate());
-                        })
-                        .collect(Collectors.toList());
-            case "oldest":
-                return games.stream()
-                        .sorted((a, b) -> {
-                            if (a.getFirstReleaseDate() == null)
-                                return 1;
-                            if (b.getFirstReleaseDate() == null)
-                                return -1;
-                            return a.getFirstReleaseDate().compareTo(b.getFirstReleaseDate());
-                        })
-                        .collect(Collectors.toList());
-            case "rating_high":
-                return games.stream()
-                        .sorted((a, b) -> b.getAverageRating().compareTo(a.getAverageRating()))
-                        .collect(Collectors.toList());
-            case "rating_low":
-                return games.stream()
-                        .sorted((a, b) -> a.getAverageRating().compareTo(b.getAverageRating()))
-                        .collect(Collectors.toList());
-            case "popular":
-                return games.stream()
-                        .sorted((a, b) -> b.getTotalLaunches().compareTo(a.getTotalLaunches()))
-                        .collect(Collectors.toList());
-            default:
-                return games;
-        }
+        if (sort == null)
+            sort = "newest";
+
+        return switch (sort) {
+
+            case "oldest" ->
+                    JpaSort.unsafe(
+                            Sort.Direction.ASC,
+                            "MIN(gv.createdAt)"
+                    );
+
+            case "rating_high" ->
+                    JpaSort.unsafe(
+                            Sort.Direction.DESC,
+                            "AVG(r.rating)"
+                    );
+
+            case "rating_low" ->
+                    JpaSort.unsafe(
+                            Sort.Direction.ASC,
+                            "AVG(r.rating)"
+                    );
+
+            case "popular" ->
+                    JpaSort.unsafe(
+                            Sort.Direction.DESC,
+                            """
+                            COALESCE(SUM(
+                                CASE
+                                    WHEN gs.eventType = 'launch'
+                                    THEN gs.count
+                                    ELSE 0
+                                END
+                            ), 0)
+                            """
+                    );
+
+            default ->
+                    JpaSort.unsafe(
+                            Sort.Direction.DESC,
+                            "MIN(gv.createdAt)"
+                    );
+        };
     }
 
     /**

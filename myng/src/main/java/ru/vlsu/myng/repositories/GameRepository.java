@@ -1,5 +1,6 @@
 package ru.vlsu.myng.repositories;
 
+import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.User;
 
@@ -102,6 +103,93 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
         List<Game> findGamesWithBasicFilters(@Param("search") String search,
                         @Param("genre") Game.Genre genre);
 
+
+    @Query("""
+    SELECT new ru.vlsu.myng.dto.CatalogGameDTO(
+    
+        g.id,
+        g.name,
+        g.descr,
+        g.genre,
+    
+        d.username,
+    
+        COALESCE(AVG(r.rating), 0),
+    
+        COUNT(DISTINCT r.id),
+    
+        COALESCE(SUM(
+            CASE
+                WHEN gs.eventType = 'view'
+                THEN gs.count
+                ELSE 0
+            END
+        ), 0),
+    
+        COALESCE(SUM(
+            CASE
+                WHEN gs.eventType = 'launch'
+                THEN gs.count
+                ELSE 0
+            END
+        ), 0),
+    
+        MIN(gv.createdAt),
+    
+        g.image
+    )
+    
+    FROM Game g
+    
+    LEFT JOIN g.developer d
+    LEFT JOIN g.reviews r
+    LEFT JOIN g.stats gs
+    LEFT JOIN g.versions gv
+    LEFT JOIN g.tags t
+    
+    WHERE
+    (
+        :search IS NULL
+        OR :search = ''
+        OR LOWER(g.name) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(g.descr) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(d.username) LIKE LOWER(CONCAT('%', :search, '%'))
+    )
+    
+    AND
+    (
+        :genre IS NULL
+        OR g.genre = :genre
+    )
+    
+    AND
+    (
+        :tags IS NULL
+        OR t.name IN :tags
+    )
+    
+    GROUP BY
+        g.id,
+        g.name,
+        g.descr,
+        g.genre,
+        d.username,
+        g.image
+    
+    HAVING
+    (
+        :minRating IS NULL
+        OR AVG(r.rating) >= :minRating
+    )
+    """)
+    Page<CatalogGameDTO> findCatalogGames(
+            @Param("search") String search,
+            @Param("genre") Game.Genre genre,
+            @Param("tags") Set<String> tags,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+    
         /**
          * Получаем игры отсортированные по колличеству запусков
          * 

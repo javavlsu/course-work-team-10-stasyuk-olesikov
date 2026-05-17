@@ -1,10 +1,14 @@
 package ru.vlsu.myng.repositories;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.vlsu.myng.entities.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Компонент слоя доступа к данным для работы с сущностью Tag.<br>
@@ -50,4 +54,26 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
 
     // Получить все теги, отсортированные по имени
     List<Tag> findAllByOrderByNameAsc();
+
+
+    @Query("""
+    SELECT t.name
+    FROM Game g
+    JOIN g.tags t
+    WHERE g.id = :gameId
+    """)
+    Set<String> findTagNamesByGameId(
+            @Param("gameId") Integer gameId
+    );
+
+    @Query("""
+    SELECT t.name
+    FROM Tag t
+    WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
+    ORDER BY t.name ASC
+    """)
+    List<String> searchTags(
+            @Param("query") String query,
+            Pageable pageable
+    );
 }

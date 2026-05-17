@@ -9,12 +9,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vlsu.myng.dto.CatalogGameDTO;
 import ru.vlsu.myng.dto.GameFilterDTO;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.services.GameService;
 import ru.vlsu.myng.repositories.TagRepository;
 
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -43,7 +45,7 @@ public class CatalogController {
         filter.setSort(sort);
 
         Pageable pageable = PageRequest.of(page, size);
-
+        
         Page<CatalogGameDTO> gamesPage = gameService.getFilteredGames(filter, pageable);
 
         model.addAttribute("pageSize", size);
@@ -57,8 +59,15 @@ public class CatalogController {
         model.addAttribute("currentMinRating", minRating);
         model.addAttribute("currentSort", sort);
         model.addAttribute("genres", Game.Genre.values());
-        model.addAttribute("allTags", tagRepository.findAllByOrderByNameAsc());
-
+        
         return "catalog";
+    }
+
+    @GetMapping("/catalog/tags/search")
+    @ResponseBody
+    public List<String> searchTags(
+            @RequestParam String query
+    ) {
+        return tagRepository.searchTags(query, PageRequest.of(0, 20));
     }
 }

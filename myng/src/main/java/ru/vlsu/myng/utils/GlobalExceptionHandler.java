@@ -51,6 +51,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);
         response.put("message", ex.getMessage());
+        ex.printStackTrace();
 
         return ResponseEntity.status(500).body(response);
     }

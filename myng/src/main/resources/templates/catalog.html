@@ -99,63 +99,79 @@
         </button>
       </div>
 
-      <div
-        th:if="${not #lists.isEmpty(allTags)}"
-        class="bg-gray-50 rounded-lg p-4 relative z-40"
-        id="tagsFilterContainer"
-      >
-        <label class="block text-sm font-medium text-gray-700 mb-2"
-          >Фильтр по тегам:</label
+        <div
+                class="bg-gray-50 rounded-lg p-4 relative z-40"
+                id="tagsFilterContainer"
         >
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Фильтр по тегам:
+            </label>
 
-        <div class="relative w-full sm:w-80 z-50">
-          <button
-            type="button"
-            id="tagDropdownBtn"
-            class="flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <span id="dropdownBtnText">Выбрать теги...</span>
-            <i
-              class="fas fa-chevron-down text-gray-400 transition-transform duration-200"
-              id="dropdownArrow"
-            ></i>
-          </button>
+            <div class="relative w-full sm:w-80 z-50">
 
-          <div
-            id="tagDropdownMenu"
-            class="hidden absolute z-50 left-0 mt-2 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-xl py-1 divide-y divide-gray-100"
-          >
-            <div class="p-2 sticky top-0 bg-white z-10">
-              <input
-                type="text"
-                id="searchTagInput"
-                placeholder="Поиск тега..."
-                class="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-blue-500"
-                autocomplete="off"
-              />
+                <!-- DROPDOWN BUTTON -->
+                <button
+                        type="button"
+                        id="tagDropdownBtn"
+                        class="flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <span id="dropdownBtnText">
+                    Выбрать теги...
+                  </span>
+
+                    <i
+                            class="fas fa-chevron-down text-gray-400 transition-transform duration-200"
+                            id="dropdownArrow"
+                    ></i>
+                </button>
+
+                <!-- DROPDOWN -->
+                <div
+                        id="tagDropdownMenu"
+                        class="hidden absolute z-50 left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden"
+                >
+
+                    <!-- SEARCH -->
+                    <div class="p-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+                        <input
+                                type="text"
+                                id="searchTagInput"
+                                placeholder="Поиск тега..."
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                autocomplete="off"
+                        />
+                    </div>
+
+                    <!-- RESULTS -->
+                    <div
+                            id="tagResults"
+                            class="max-h-60 overflow-y-auto py-1 divide-y divide-gray-100"
+                    >
+
+                        <!-- INITIAL EMPTY STATE -->
+                        <div class="px-4 py-3 text-sm text-gray-400">
+                            Начните вводить название тега...
+                        </div>
+
+                    </div>
+                </div>
             </div>
 
-            <div class="py-1">
-              <label
-                th:each="tag : ${allTags}"
-                class="tag-option flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors"
-              >
+            <!-- PRESERVE SELECTED TAGS -->
+            <div
+                    id="selectedTagsContainer"
+                    class="hidden"
+            >
+
                 <input
-                  type="checkbox"
-                  name="tags"
-                  th:value="${tag.name}"
-                  th:checked="${currentTags != null and currentTags.contains(tag.name)}"
-                  class="tag-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 transition-all"
+                        th:each="tag : ${currentTags}"
+                        type="hidden"
+                        name="tags"
+                        th:value="${tag}"
                 />
-                <span
-                  class="ml-3 font-medium text-gray-600 th-tag-name"
-                  th:text="${tag.name}"
-                ></span>
-              </label>
+
             </div>
-          </div>
         </div>
-      </div>
 
       <div
         th:if="${(currentSearch != null and currentSearch != '') or 
@@ -438,82 +454,227 @@
     </div>
 
     <script th:inline="javascript">
-      document.addEventListener("DOMContentLoaded", () => {
-        const dropdownBtn = document.getElementById("tagDropdownBtn");
-        const dropdownMenu = document.getElementById("tagDropdownMenu");
-        const dropdownArrow = document.getElementById("dropdownArrow");
-        const dropdownBtnText = document.getElementById("dropdownBtnText");
-        const searchInput = document.getElementById("searchTagInput");
-
-        if (!dropdownBtn || !dropdownMenu) return;
-
-        dropdownBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const isHidden = dropdownMenu.classList.contains("hidden");
-
-          if (isHidden) {
-            dropdownMenu.classList.remove("hidden");
-            dropdownArrow.classList.add("rotate-180");
-            if (searchInput) searchInput.focus();
-          } else {
-            closeDropdown();
-          }
-        });
-
-        function closeDropdown() {
-          dropdownMenu.classList.add("hidden");
-          dropdownArrow.classList.remove("rotate-180");
-        }
-
-        document.addEventListener("click", (e) => {
-          if (
-            !dropdownMenu.contains(e.target) &&
-            !dropdownBtn.contains(e.target)
-          ) {
-            closeDropdown();
-          }
-        });
-
-        if (searchInput) {
-          searchInput.addEventListener("input", function () {
-            const filter = this.value.toLowerCase().trim();
-            const options = dropdownMenu.querySelectorAll(".tag-option");
-
-            options.forEach((option) => {
-              const tagName = option
-                .querySelector(".th-tag-name")
-                .textContent.toLowerCase();
-              if (tagName.includes(filter)) {
-                option.style.display = "flex";
+        document.addEventListener("DOMContentLoaded", () => {
+      
+          const dropdownBtn =
+              document.getElementById("tagDropdownBtn");
+      
+          const dropdownMenu =
+              document.getElementById("tagDropdownMenu");
+      
+          const dropdownArrow =
+              document.getElementById("dropdownArrow");
+      
+          const dropdownBtnText =
+              document.getElementById("dropdownBtnText");
+      
+          const searchInput =
+              document.getElementById("searchTagInput");
+      
+          const resultsContainer =
+              document.getElementById("tagResults");
+      
+          if (!dropdownBtn || !dropdownMenu) return;
+      
+          // =========================================
+          // DROPDOWN OPEN/CLOSE
+          // =========================================
+      
+          dropdownBtn.addEventListener("click", (e) => {
+      
+              e.stopPropagation();
+      
+              const isHidden =
+                  dropdownMenu.classList.contains("hidden");
+      
+              if (isHidden) {
+      
+                  dropdownMenu.classList.remove("hidden");
+      
+                  dropdownArrow.classList.add("rotate-180");
+      
+                  if (searchInput)
+                      searchInput.focus();
+      
               } else {
-                option.style.display = "none";
+      
+                  closeDropdown();
               }
-            });
           });
-        }
-
-        const checkboxes = dropdownMenu.querySelectorAll(".tag-checkbox");
-
-        function syncTagsUI() {
-          const selectedCheckboxes = Array.from(checkboxes).filter(
-            (cb) => cb.checked,
-          );
-          const count = selectedCheckboxes.length;
-
-          if (count > 0) {
-            dropdownBtnText.textContent = `Выбрано тегов: ${count}`;
-            dropdownBtnText.classList.add("text-blue-700");
-          } else {
-            dropdownBtnText.textContent = "Выбрать теги...";
-            dropdownBtnText.classList.remove("text-blue-700");
+      
+          function closeDropdown() {
+      
+              dropdownMenu.classList.add("hidden");
+      
+              dropdownArrow.classList.remove("rotate-180");
           }
-        }
-
-        checkboxes.forEach((cb) => {
-          cb.addEventListener("change", syncTagsUI);
-        });
-
-        syncTagsUI();
+      
+          document.addEventListener("click", (e) => {
+      
+              if (
+                  !dropdownMenu.contains(e.target) &&
+                  !dropdownBtn.contains(e.target)
+              ) {
+                  closeDropdown();
+              }
+          });
+      
+          // =========================================
+          // TAG SEARCH
+          // =========================================
+      
+          let debounceTimer;
+      
+          if (searchInput) {
+      
+              searchInput.addEventListener("input", function () {
+      
+                  const query = this.value.trim();
+      
+                  clearTimeout(debounceTimer);
+      
+                  debounceTimer = setTimeout(async () => {
+      
+                      if (query.length < 2) {
+      
+                          resultsContainer.innerHTML = "";
+      
+                          return;
+                      }
+      
+                      try {
+      
+                          const response = await fetch(
+                              `/catalog/tags/search?query=${encodeURIComponent(query)}`
+                          );
+      
+                          if (!response.ok) {
+                              throw new Error("Failed to load tags");
+                          }
+      
+                          const tags = await response.json();
+      
+                          renderTags(tags);
+      
+                      } catch (err) {
+      
+                          console.error(err);
+      
+                          resultsContainer.innerHTML = `
+                              <div class="px-4 py-2 text-sm text-red-500">
+                                  Ошибка загрузки тегов
+                              </div>
+                          `;
+                      }
+      
+                  }, 300); // debounce
+              });
+          }
+      
+          // =========================================
+          // RENDER TAGS
+          // =========================================
+      
+          function renderTags(tags) {
+      
+              resultsContainer.innerHTML = "";
+      
+              if (!tags || tags.length === 0) {
+      
+                  resultsContainer.innerHTML = `
+                      <div class="px-4 py-2 text-sm text-gray-500">
+                          Ничего не найдено
+                      </div>
+                  `;
+      
+                  return;
+              }
+      
+              tags.forEach(tag => {
+      
+                  const label =
+                      document.createElement("label");
+      
+                  label.className =
+                      "tag-option flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 transition-colors";
+      
+                  const checkbox =
+                      document.createElement("input");
+      
+                  checkbox.type = "checkbox";
+      
+                  checkbox.name = "tags";
+      
+                  checkbox.value = tag;
+      
+                  checkbox.className =
+                      "tag-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 transition-all";
+      
+                  // preserve checked state
+                  if (selectedTags.has(tag)) {
+                      checkbox.checked = true;
+                  }
+      
+                  checkbox.addEventListener(
+                      "change",
+                      syncTagsUI
+                  );
+      
+                  const span =
+                      document.createElement("span");
+      
+                  span.className =
+                      "ml-3 font-medium text-gray-600";
+      
+                  span.textContent = tag;
+      
+                  label.appendChild(checkbox);
+      
+                  label.appendChild(span);
+      
+                  resultsContainer.appendChild(label);
+              });
+          }
+      
+          // =========================================
+          // SELECTED TAG STATE
+          // =========================================
+      
+          const selectedTags = new Set();
+      
+          function syncTagsUI() {
+      
+              selectedTags.clear();
+      
+              document
+                  .querySelectorAll(".tag-checkbox:checked")
+                  .forEach(cb => {
+                      selectedTags.add(cb.value);
+                  });
+      
+              const count = selectedTags.size;
+      
+              if (count > 0) {
+      
+                  dropdownBtnText.textContent =
+                      `Выбрано тегов: ${count}`;
+      
+                  dropdownBtnText.classList.add(
+                      "text-blue-700"
+                  );
+      
+              } else {
+      
+                  dropdownBtnText.textContent =
+                      "Выбрать теги...";
+      
+                  dropdownBtnText.classList.remove(
+                      "text-blue-700"
+                  );
+              }
+          }
+      
+          syncTagsUI();
       });
     </script>
   </section>

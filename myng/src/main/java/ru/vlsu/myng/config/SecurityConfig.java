@@ -54,7 +54,8 @@ public class SecurityConfig {
                                                     "/js/**", // скрипты
                                                     "/images/**", // картинки
                                                     "/static/gamefiles/**", // файлы игр
-                                                    "/banned" // страница бана
+                                                    "/banned", // страница бана
+                                                    "/catalog/tags/**" // теги каталога
                                     ).permitAll()
 
                                     // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)
