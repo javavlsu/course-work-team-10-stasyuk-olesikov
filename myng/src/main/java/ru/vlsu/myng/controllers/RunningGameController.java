@@ -22,9 +22,7 @@ public class RunningGameController {
         GameVersion version = gameVersionService.getGameVersionById(versionId);
         String entryPoint = gameVersionService.resolveEntryPoint(version);
 
-        System.out.println("before increment launches: " + version.getGame().getTotalLaunches());
         gameService.incrementGameTotalLaunches(version.getGame());
-        System.out.println("after increment launches: " + version.getGame().getTotalLaunches());
         
         System.out.println("GameVersion entry point: " + entryPoint);
 

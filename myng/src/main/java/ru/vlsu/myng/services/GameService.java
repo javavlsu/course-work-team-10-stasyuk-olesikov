@@ -94,7 +94,7 @@ public class GameService {
         // Если за месяц никто не ставил оценки, берем просто лучшую игру по рейтингу за
         // все время
         if (games.isEmpty()) {
-            List<Game> allTimeBest = reviewRepository.findTopRatedGamesSince(Instant.EPOCH, PageRequest.of(0, 1));
+            List<Game> allTimeBest = reviewRepository.findTopRatedGames(PageRequest.of(0, 1));
             return allTimeBest.isEmpty() ? null : convertToCatalogDto(allTimeBest.get(0));
         }
 
@@ -106,10 +106,15 @@ public class GameService {
      */
     @Transactional(readOnly = true)
     public List<CatalogGameDTO> getPopularGames(int limit) {
-        List<Game> games = gameRepository.findTopGamesByLaunches(PageRequest.of(0, limit));
-        return games.stream()
-                .map(this::convertToCatalogDto)
-                .collect(Collectors.toList());
+        GameFilterDTO filter = new GameFilterDTO();
+        filter.setSearch(null);
+        filter.setTags(null);
+        filter.setGenre(null);
+        filter.setMinRating(null);
+        filter.setSort("popular");
+        
+        var catalogGames = getFilteredGames(filter, PageRequest.of(0, limit));
+        return catalogGames.getContent();
     }
 
     /**
@@ -138,15 +143,11 @@ public class GameService {
      * Конвертирует Game в CatalogGameDTO с дополнительными данными
      */
     private CatalogGameDTO convertToCatalogDto(Game game) {
-        Double avgRating = reviewRepository.getAverageRatingByGame(game);
-        Integer reviewsCount = reviewRepository.countByGame(game);
-
-        Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
-        Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
-
-        Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)
-                .map(version -> version.getCreatedAt())
-                .orElse(null);
+        Double avgRating = game.getAverageRating();
+        Integer reviewsCount = game.getReviewCount();
+        Integer totalViews = game.getTotalViews();
+        Integer totalLaunches = game.getTotalLaunches();
+        Instant firstReleaseDate = game.getFirstReleaseDate();
 
         String genreName = game.getGenre() != null ? game.getGenre().name() : "";
 
@@ -296,15 +297,16 @@ public class GameService {
     public GamePageDTO getGamePageData(Integer gameId) {
 
         Game game = getGameById(gameId);
-        
-        game.setTotalViews(game.getTotalViews() + 1);
 
         // Получаем статистику
-        Double avgRating = reviewRepository.getAverageRatingByGame(game);
-        Integer reviewsCount = reviewRepository.countByGame(game);
-        Integer totalViews = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.view);
-        Integer totalLaunches = gameStatsRepository.getTotalStatsByGameAndType(game, GameStats.EventType.launch);
+        Double avgRating = game.getAverageRating();
+        Integer reviewsCount = game.getReviewCount();
+        Integer totalViews = game.getTotalViews();
+        Integer totalLaunches = game.getTotalLaunches();
 
+        // Дата первого релиза
+        Instant firstReleaseDate = game.getFirstReleaseDate();
+        
         // Получаем версии
         List<GameVersion> versions = game.getVersions().stream()
                 .sorted((v1, v2) -> v2.getCreatedAt().compareTo(v1.getCreatedAt()))
@@ -315,12 +317,7 @@ public class GameService {
         List<Review> recentReviews = reviewRepository.findByGameOrderByCreatedAtDesc(
                 game,
                 PageRequest.of(0, 5));
-
-        // Дата первого релиза
-        Instant firstReleaseDate = gameVersionRepository.findFirstByGameOrderByCreatedAtAsc(game)
-                .map(GameVersion::getCreatedAt)
-                .orElse(null);
-
+        
         // Дата последнего обновления
         Instant lastUpdateDate = latestVersion != null ? latestVersion.getCreatedAt() : null;
 

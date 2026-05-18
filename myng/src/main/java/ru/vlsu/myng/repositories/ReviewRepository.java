@@ -100,6 +100,9 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
             "ORDER BY AVG(r.rating) DESC")
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
+    @Query("SELECT g FROM Game g ORDER BY g.averageRating DESC")
+    List<Game> findTopRatedGames(PageRequest pageable);
+
     List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
 
     boolean existsByGameAndUser(Game game, User user);
@@ -109,5 +112,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      *
      *
      * */
-    Optional<Game> findGameById(Integer id);
+    @Query("""
+        SELECT r.game FROM Review r WHERE r.game.id = :id
+    """)
+    Optional<Game> findGameById(@Param("id") Integer id);
 }

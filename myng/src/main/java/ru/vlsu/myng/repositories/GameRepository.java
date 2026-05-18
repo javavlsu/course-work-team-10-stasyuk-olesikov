@@ -173,7 +173,6 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
          * @param pageable
          * @return
          */
-        @Query("SELECT g FROM Game g JOIN g.stats s WHERE s.eventType = 'launch' " +
-                        "GROUP BY g ORDER BY SUM(s.count) DESC")
+        @Query("SELECT g FROM Game g ORDER BY g.totalLaunches DESC")
         List<Game> findTopGamesByLaunches(Pageable pageable);
 }
