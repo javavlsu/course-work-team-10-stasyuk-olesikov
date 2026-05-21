@@ -95,12 +95,34 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      * недавно.
      *
      */
-    @Query("SELECT r.game FROM Review r WHERE r.createdAt > :since " +
-            "GROUP BY r.game " +
-            "ORDER BY AVG(r.rating) DESC")
+    @Query("""
+    SELECT r.game
+    FROM Review r
+    WHERE r.createdAt > :since
+    AND EXISTS (
+        SELECT 1
+        FROM GameVersion gv
+        WHERE gv.game = r.game
+        AND gv.moderationVerdict IS NOT NULL
+        AND gv.moderationVerdict.approved = true
+    )
+    GROUP BY r.game
+    ORDER BY AVG(r.rating) DESC
+    """)
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
-    @Query("SELECT g FROM Game g ORDER BY g.averageRating DESC")
+    @Query("""
+    SELECT g
+    FROM Game g
+    WHERE EXISTS (
+        SELECT 1
+        FROM GameVersion gv
+        WHERE gv.game = g
+        AND gv.moderationVerdict IS NOT NULL
+        AND gv.moderationVerdict.approved = true
+    )
+    ORDER BY g.averageRating DESC
+    """)
     List<Game> findTopRatedGames(PageRequest pageable);
 
     List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
