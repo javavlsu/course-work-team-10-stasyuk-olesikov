@@ -73,14 +73,15 @@ public class GameService {
     }
 
     /**
-     * Новинка (самая последняя добавленная версия в системе)
+     * Новинка (самая последняя добавленная версия в системе, имеющая хотя бы одну подтвержденную версию)
      */
     @Transactional(readOnly = true)
     public CatalogGameDTO getNewestGame() {
-        GameVersion latestVersion = gameVersionRepository.findFirstByOrderByCreatedAtDesc();
-        if (latestVersion == null)
+        var latestVersion = gameVersionRepository.findLatestApproved(PageRequest.of(0, 1))
+                .stream().findFirst();
+        if (latestVersion.isEmpty())
             return null;
-        return convertToCatalogDto(latestVersion.getGame());
+        return convertToCatalogDto(latestVersion.get().getGame());
     }
 
     /**
@@ -309,7 +310,13 @@ public class GameService {
         
         // Получаем версии
         List<GameVersion> versions = game.getVersions().stream()
-                .sorted((v1, v2) -> v2.getCreatedAt().compareTo(v1.getCreatedAt()))
+                .filter(version ->
+                        version.getModerationVerdict() != null &&
+                                Boolean.TRUE.equals(
+                                        version.getModerationVerdict().getApproved()
+                                )
+                )
+                .sorted(Comparator.comparing(GameVersion::getCreatedAt).reversed())
                 .collect(Collectors.toList());
 
         GameVersion latestVersion = versions.isEmpty() ? null : versions.get(0);

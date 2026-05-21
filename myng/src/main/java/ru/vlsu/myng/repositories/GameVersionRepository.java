@@ -1,5 +1,7 @@
 package ru.vlsu.myng.repositories;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import ru.vlsu.myng.entities.GameVersion;
 import ru.vlsu.myng.entities.Game;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,9 +58,16 @@ public interface GameVersionRepository extends JpaRepository<GameVersion, Intege
     Optional<GameVersion> findFirstByGameOrderByCreatedAtAsc(Game game);
 
     /**
-     * Находим самую последнюю версию среди всех игр
+     * Находим самую последнюю версию среди всех игр, которая имеет хотя бы одну подтвежденную версию
      *
      * @return
      */
-    GameVersion findFirstByOrderByCreatedAtDesc();
+    @Query("""
+    SELECT gv
+    FROM GameVersion gv
+    WHERE gv.moderationVerdict IS NOT NULL
+    AND gv.moderationVerdict.approved = true
+    ORDER BY gv.createdAt DESC
+    """)
+    List<GameVersion> findLatestApproved(Pageable pageable);
 }

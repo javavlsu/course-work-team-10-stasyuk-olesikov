@@ -129,6 +129,16 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
     LEFT JOIN g.developer d
     
     WHERE
+    
+    EXISTS (
+        SELECT 1
+        FROM GameVersion gv
+        WHERE gv.game = g
+        AND gv.moderationVerdict IS NOT NULL
+        AND gv.moderationVerdict.approved = true
+    )
+    
+    AND
     (
         :search IS NULL
         OR :search = ''
@@ -173,6 +183,17 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
          * @param pageable
          * @return
          */
-        @Query("SELECT g FROM Game g ORDER BY g.totalLaunches DESC")
+        @Query("""
+        SELECT g
+        FROM Game g
+        WHERE EXISTS (
+            SELECT 1
+            FROM GameVersion gv
+            WHERE gv.game = g
+            AND gv.moderationVerdict IS NOT NULL
+            AND gv.moderationVerdict.approved = true
+        )
+        ORDER BY g.totalLaunches DESC
+        """)
         List<Game> findTopGamesByLaunches(Pageable pageable);
 }
