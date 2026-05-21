@@ -1,5 +1,9 @@
 package ru.vlsu.myng.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import ru.vlsu.myng.dto.ModerationItem;
 import ru.vlsu.myng.entities.ModerationVerdict;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.entities.GameVersion;
@@ -107,4 +111,62 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByDevApplicationIsNotNullAndApprovedIsNull();
+
+    @Query("""
+    SELECT new ru.vlsu.myng.dto.ModerationItem(
+
+        mv.id,
+
+        COALESCE(gv.id, da.id, r.id),
+
+        CASE
+            WHEN gv IS NOT NULL THEN 'GAME_VERSION'
+            WHEN da IS NOT NULL THEN 'DEV_APPLICATION'
+            WHEN r IS NOT NULL THEN 'REVIEW'
+        END,
+
+        CASE
+            WHEN gv IS NOT NULL THEN gv.game.id
+            WHEN r IS NOT NULL THEN r.game.id
+            ELSE NULL
+        END,
+
+        u.username,
+        da.githubUsername,
+        da.text,
+
+        gv.commitHash,
+        gv.changelog,
+        g.repo,
+
+        CAST(r.rating as integer),
+        r.text,
+        r.reportCount,
+
+        COALESCE(
+            gv.createdAt,
+            da.createdAt,
+            r.createdAt
+        ),
+
+        mod.username,
+        mv.approved,
+        mv.reason
+    )
+
+    FROM ModerationVerdict mv
+
+    LEFT JOIN mv.gameVersion gv
+    LEFT JOIN gv.game g
+
+    LEFT JOIN mv.devApplication da
+    LEFT JOIN da.user u
+
+    LEFT JOIN mv.review r
+
+    LEFT JOIN mv.moderator mod
+
+    ORDER BY mv.id DESC
+    """)
+    Page<ModerationItem> getModerationItems(Pageable pageable);
 }

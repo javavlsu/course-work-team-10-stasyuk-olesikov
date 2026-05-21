@@ -1,6 +1,9 @@
 package ru.vlsu.myng.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 import ru.vlsu.myng.dto.ModerationItem;
 import ru.vlsu.myng.entities.ModerationVerdict;
@@ -24,6 +27,10 @@ public class ModerationLogService {
                 .sorted(Comparator.comparing(ModerationItem::getCreatedAt).reversed())
                 .collect(Collectors.toList());
     }
+    
+    public Page<ModerationItem> getModerationItems(Pageable pageable) {
+        return verdictRepository.getModerationItems(pageable);
+    }
 
     private ModerationItem toModerationItem(ModerationVerdict verdict) {
         ModerationItem dto = new ModerationItem();
@@ -38,9 +45,9 @@ public class ModerationLogService {
         // --- GAME VERSION ---
         if (verdict.getGameVersion() != null) {
             var version = verdict.getGameVersion();
-            dto.setId(version.getId().longValue());
+            dto.setId(version.getId());
             dto.setType("GAME_VERSION");
-            dto.setGameId(version.getGame().getId().longValue());
+            dto.setGameId(version.getGame().getId());
             dto.setCommitHash(version.getCommitHash());
             dto.setChangelog(version.getChangelog());
             dto.setRepoUrl(version.getGame().getRepo());
@@ -49,7 +56,7 @@ public class ModerationLogService {
         // --- DEV APPLICATION ---
         else if (verdict.getDevApplication() != null) {
             var app = verdict.getDevApplication();
-            dto.setId(app.getId().longValue());
+            dto.setId(app.getId());
             dto.setType("DEV_APPLICATION");
             dto.setUsername(app.getUser().getUsername());
             dto.setGithubLogin(app.getGithubUsername());
@@ -59,9 +66,9 @@ public class ModerationLogService {
         // --- REVIEW ---
         else if (verdict.getReview() != null) {
             var review = verdict.getReview();
-            dto.setId(review.getId().longValue());
+            dto.setId(review.getId());
             dto.setType("REVIEW");
-            dto.setGameId(review.getGame().getId().longValue());
+            dto.setGameId(review.getGame().getId());
             dto.setRating(review.getRating() != null ? review.getRating().intValue() : null);
             dto.setReviewText(review.getText());
             dto.setReportCount(review.getReportCount());

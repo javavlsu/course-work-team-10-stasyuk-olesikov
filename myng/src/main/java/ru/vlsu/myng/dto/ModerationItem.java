@@ -1,5 +1,6 @@
 package ru.vlsu.myng.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,19 +8,19 @@ import java.time.Instant;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class ModerationItem {
 
     private Integer moderationVerdictId;
 
-    private Long id;
+    private Integer id;
     private String type;         // GAME_VERSION, DEV_APPLICATION, REVIEW
-    private Long gameId;         // Для GameVersion и Review
+    private Integer gameId;         // Для GameVersion и Review
 
     // --- Для DEV_APPLICATION ---
     private String username;
     private String githubLogin;
     private String description;
-    private String githubUrl;
 
     // --- Для GAME_VERSION ---
     private String commitHash;
@@ -35,4 +36,6 @@ public class ModerationItem {
     private String moderatorUsername;
     private Boolean approved;
     private String reason;
+    
+    public ModerationItem() {}
 }

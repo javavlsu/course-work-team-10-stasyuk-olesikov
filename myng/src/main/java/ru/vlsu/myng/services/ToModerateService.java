@@ -23,9 +23,9 @@ public class ToModerateService {
                     var version = v.getGameVersion();
                     ModerationItem item = new ModerationItem();
                     item.setModerationVerdictId(v.getId());
-                    item.setId(version.getId().longValue());
+                    item.setId(version.getId());
                     item.setType("GAME_VERSION");
-                    item.setGameId(version.getGame().getId().longValue());
+                    item.setGameId(version.getGame().getId());
                     item.setCommitHash(version.getCommitHash());
                     item.setChangelog(version.getChangelog());
                     item.setRepoUrl(version.getGame().getRepo());
@@ -39,7 +39,7 @@ public class ToModerateService {
                     var app = v.getDevApplication();
                     ModerationItem item = new ModerationItem();
                     item.setModerationVerdictId(v.getId());
-                    item.setId(app.getId().longValue());
+                    item.setId(app.getId());
                     item.setType("DEV_APPLICATION");
                     item.setUsername(app.getUser().getUsername());
                     item.setGithubLogin(app.getGithubUsername());
@@ -54,9 +54,9 @@ public class ToModerateService {
                     var review = v.getReview();
                     ModerationItem item = new ModerationItem();
                     item.setModerationVerdictId(v.getId());
-                    item.setId(review.getId().longValue());
+                    item.setId(review.getId());
                     item.setType("REVIEW");
-                    item.setGameId(review.getGame().getId().longValue());
+                    item.setGameId(review.getGame().getId());
                     item.setRating(review.getRating() != null ? review.getRating().intValue() : null);
                     item.setReviewText(review.getText());
                     item.setReportCount(review.getReportCount());
