@@ -282,51 +282,142 @@
           </table>
         </div>
 
-        <!-- Пагинация и итоги -->
-        <div
-          class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
-        >
-          <div class="text-sm text-gray-500">
-            Показано <span class="font-medium">1-4</span> из
-            <span class="font-medium">156</span> записей
+          <!-- Пагинация -->
+          <div
+                  class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
+          >
+
+              <div class="flex flex-row items-center gap-4">
+                  <!-- INFO -->
+                  <div class="text-sm text-gray-500">
+                      Показано
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + 1}">
+                    </span>
+
+                      -
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + moderationItems.size()}">
+                    </span>
+
+                      из
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.totalElements}">
+                    </span>
+
+                      записей
+                  </div>
+
+                  <form method="get"
+                        th:action="@{/moderation-log}"
+                        class="flex items-center gap-2">
+
+                      <!-- keep current page -->
+                      <input type="hidden"
+                             name="page"
+                             th:value="${moderationPage.number}" />
+
+                      <select
+                              name="size"
+
+                              onchange="this.form.submit()"
+
+                              class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+
+                          <option value="10"
+                                  th:selected="${moderationPage.size == 10}">
+                              10 на странице
+                          </option>
+
+                          <option value="25"
+                                  th:selected="${moderationPage.size == 25}">
+                              25 на странице
+                          </option>
+
+                          <option value="50"
+                                  th:selected="${moderationPage.size == 50}">
+                              50 на странице
+                          </option>
+
+                          <option value="75"
+                                  th:selected="${moderationPage.size == 75}">
+                              75 на странице
+                          </option>
+
+                          <option value="100"
+                                  th:selected="${moderationPage.size == 100}">
+                              100 на странице
+                          </option>
+
+                      </select>
+                  </form>
+              </div>
+
+              <!-- BUTTONS -->
+              <div class="flex items-center gap-2">
+
+                  <!-- PREVIOUS -->
+                  <a th:if="${moderationPage.hasPrevious()}"
+                     th:href="@{/moderation-log(page=${moderationPage.number - 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-left"></i>
+                  </a>
+
+                    <span th:unless="${moderationPage.hasPrevious()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+            
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+
+                  <!-- PAGE NUMBERS -->
+                  <th:block
+                          th:with="
+                            start=${T(java.lang.Math).max(0, moderationPage.number - 2)},
+                            end=${T(java.lang.Math).min(moderationPage.totalPages - 1, moderationPage.number + 2)}
+                        "
+                  >
+
+                      <th:block th:each="i : ${#numbers.sequence(start, end)}">
+
+                          <a th:href="@{/moderation-log(
+                                page=${i},
+                                size=${moderationPage.size}
+                            )}"
+
+                             th:text="${i + 1}"
+
+                             class="px-3 py-1.5 border text-sm font-medium rounded-lg transition-colors"
+
+                             th:classappend="${
+                                    i == moderationPage.number
+                                    ? ' bg-blue-600 text-white border-blue-600 '
+                                    : ' bg-white border-gray-300 text-gray-600 hover:bg-gray-50 '
+                               }">
+                          </a>
+
+                      </th:block>
+
+                  </th:block>
+
+                  <!-- NEXT -->
+                  <a th:if="${moderationPage.hasNext()}"
+                     th:href="@{/moderation-log(page=${moderationPage.number + 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-right"></i>
+                  </a>
+
+                    <span th:unless="${moderationPage.hasNext()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+
+              </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-              disabled
-            >
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button
-              class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              1
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              2
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              3
-            </button>
-            <span class="text-gray-400">...</span>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              12
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <style>
         body {
