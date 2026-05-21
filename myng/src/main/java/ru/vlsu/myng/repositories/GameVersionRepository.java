@@ -61,4 +61,6 @@ public interface GameVersionRepository extends JpaRepository<GameVersion, Intege
      * @return
      */
     GameVersion findFirstByOrderByCreatedAtDesc();
+
+    List<GameVersion> findByGameIdOrderByCreatedAtAsc(Integer gameId);
 }

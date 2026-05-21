@@ -739,10 +739,10 @@
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg"
+                th:data-game-id="${game.id}"
               >
-                <i class="fas fa-trash-alt"></i>
-                Удалить <!-- При удалении версии игры должно обновляться поле firstReleaseDate у Game. 18.05.26 immernochnichts -->
+                <i class="fas fa-trash-alt"></i> Удалить
               </button>
             </div>
           </div>
@@ -1285,6 +1285,43 @@
 
         alert("Версия успешно добавлена");
         closeModal("addVersionModal");
+      });
+
+      //Удаление версии игры
+      const deleteVersionForm = document.getElementById("deleteVersionForm");
+
+      deleteVersionForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const submitButton = deleteVersionForm.querySelector(`[type="submit"]`);
+        const gameId = submitButton.getAttribute("data-game-id");
+        const versionId =
+          deleteVersionForm.querySelector(`[name="versionId"]`).value;
+
+        if (!versionId) {
+          alert("Выберите версию для удаления");
+          return;
+        }
+
+        // Создаем FormData или обычный URL-запрос. Сделаем через URL-запросы, так как параметров мало
+        const response = await fetch(`/games/${gameId}/versions/${versionId}`, {
+          method: "DELETE",
+          headers: {
+            // Если у вас настроена Spring Security CSRF защита, добавьте токен (как в game.html для коллекций):
+            "X-CSRF-TOKEN":
+              document.querySelector('meta[name="_csrf"]')?.content,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Версия успешно удалена");
+          closeModal("deleteVersionModal");
+          location.reload(); // Перезагружаем страницу для обновления списка версий
+        } else {
+          alert("Ошибка при удалении: " + data.message);
+        }
       });
     </script>
   </section>
