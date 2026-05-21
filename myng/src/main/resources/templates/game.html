@@ -459,7 +459,7 @@
         <form
           id="reviewForm"
           method="post"
-          th:action="@{/games/{id}/reviews(id=${game.id})}"
+          th:action="@{/reviews/{id}(id=${game.id})}"
         >
           <div class="space-y-4">
             <!-- Рейтинг звездами -->
@@ -998,7 +998,7 @@
         btn.querySelector("i").classList.replace("far", "fas");
       }
 
-      // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КНОПОК
+      // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КНОПОК жалоб
       function initReportButtons() {
         if (!currentUserId) return;
 
@@ -1016,7 +1016,7 @@
             btn.addEventListener("click", async function () {
               try {
                 const response = await fetch(
-                  `/games/reviews/${reviewId}/report`,
+                  `/reviews/${reviewId}/report`,
                   {
                     method: "POST",
                     headers: {
@@ -1057,20 +1057,17 @@
 
           try {
             const response = await fetch(
-              `/games/${gameId}/reviews/more?page=${page}`,
+              `/reviews/more/game/${gameId}?page=${page}`,
             );
             if (response.ok) {
               const htmlText = await response.text();
 
-              // Вставляем контент
               document
                 .getElementById("reviewsContainer")
                 .insertAdjacentHTML("beforeend", htmlText);
 
-              // Теперь вызываем функцию, которая теперь доступна везде!
               initReportButtons();
 
-              // Логика удаления кнопки и обновления страницы
               const parser = new DOMParser();
               const doc = parser.parseFromString(htmlText, "text/html");
               const newReviewsCount = doc.querySelectorAll("article").length;
