@@ -70,17 +70,14 @@ public class ReviewService {
         if (current.isPresent() && game.isPresent()) {
             var g = game.get();
             g.setRatingSum(
-                    g.getRatingSum() + review.getRating()
-            );
+                    g.getRatingSum() + review.getRating());
 
             g.setReviewCount(
-                    g.getReviewCount() + 1
-            );
+                    g.getReviewCount() + 1);
 
             g.setAverageRating(
                     (double) g.getRatingSum()
-                            / g.getReviewCount()
-            );
+                            / g.getReviewCount());
         }
         return reviewRepository.save(review);
     }
@@ -90,21 +87,18 @@ public class ReviewService {
         var game = reviewRepository.findGameById(id);
         var review = reviewRepository.findById(id);
         if (game.isPresent() && review.isPresent()) {
-            var g  = game.get();
+            var g = game.get();
             g.setRatingSum(
-                    g.getRatingSum() - review.get().getRating()
-            );
+                    g.getRatingSum() - review.get().getRating());
 
             g.setReviewCount(
-                    g.getReviewCount() - 1
-            );
+                    g.getReviewCount() - 1);
 
             g.setAverageRating(
                     g.getReviewCount() == 0
                             ? 0.0
                             : (double) g.getRatingSum()
-                            / g.getReviewCount()
-            );
+                                    / g.getReviewCount());
         }
         reviewRepository.deleteById(id);
     }
@@ -131,17 +125,14 @@ public class ReviewService {
         review.setReportCount(0);
 
         game.setRatingSum(
-                game.getRatingSum() + review.getRating()
-        );
+                game.getRatingSum() + review.getRating());
 
         game.setReviewCount(
-                game.getReviewCount() + 1
-        );
+                game.getReviewCount() + 1);
 
         game.setAverageRating(
                 (double) game.getRatingSum()
-                        / game.getReviewCount()
-        );
+                        / game.getReviewCount());
 
         return reviewRepository.save(review);
     }
@@ -153,6 +144,10 @@ public class ReviewService {
     public void incrementReportCount(Integer id) {
         Review review = getReviewById(id);
         review.setReportCount(review.getReportCount() + 1);
+        if (review.getReportCount() >= 10) {
+            //TODO сделать отображение отзывов с колличеством
+            //репортов 10 и более отображаемыми в качестве сущности для модерации
+        }
     }
 
     /**
@@ -160,6 +155,9 @@ public class ReviewService {
      */
     @Transactional(readOnly = true)
     public List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable) {
-        return reviewRepository.findByGameOrderByCreatedAtDesc(game, pageable);
+        return reviewRepository.findRecentReviews(
+                game.getId(),
+                9,
+                pageable);
     }
 }

@@ -96,33 +96,33 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      *
      */
     @Query("""
-    SELECT r.game
-    FROM Review r
-    WHERE r.createdAt > :since
-    AND EXISTS (
-        SELECT 1
-        FROM GameVersion gv
-        WHERE gv.game = r.game
-        AND gv.moderationVerdict IS NOT NULL
-        AND gv.moderationVerdict.approved = true
-    )
-    GROUP BY r.game
-    ORDER BY AVG(r.rating) DESC
-    """)
+            SELECT r.game
+            FROM Review r
+            WHERE r.createdAt > :since
+            AND EXISTS (
+                SELECT 1
+                FROM GameVersion gv
+                WHERE gv.game = r.game
+                AND gv.moderationVerdict IS NOT NULL
+                AND gv.moderationVerdict.approved = true
+            )
+            GROUP BY r.game
+            ORDER BY AVG(r.rating) DESC
+            """)
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
     @Query("""
-    SELECT g
-    FROM Game g
-    WHERE EXISTS (
-        SELECT 1
-        FROM GameVersion gv
-        WHERE gv.game = g
-        AND gv.moderationVerdict IS NOT NULL
-        AND gv.moderationVerdict.approved = true
-    )
-    ORDER BY g.averageRating DESC
-    """)
+            SELECT g
+            FROM Game g
+            WHERE EXISTS (
+                SELECT 1
+                FROM GameVersion gv
+                WHERE gv.game = g
+                AND gv.moderationVerdict IS NOT NULL
+                AND gv.moderationVerdict.approved = true
+            )
+            ORDER BY g.averageRating DESC
+            """)
     List<Game> findTopRatedGames(PageRequest pageable);
 
     List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
@@ -133,9 +133,20 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      * Получает игру по id отзыва
      *
      *
-     * */
+     */
     @Query("""
-        SELECT r.game FROM Review r WHERE r.game.id = :id
-    """)
+                SELECT r.game FROM Review r WHERE r.game.id = :id
+            """)
     Optional<Game> findGameById(@Param("id") Integer id);
+
+    @Query("""
+            SELECT r FROM Review r
+            WHERE r.game.id = :gameId
+              AND r.reportCount <= :maxReports
+            ORDER BY r.createdAt DESC
+            """)
+    List<Review> findRecentReviews(
+            @Param("gameId") Integer gameId,
+            @Param("maxReports") int maxReports,
+            PageRequest pageable);
 }

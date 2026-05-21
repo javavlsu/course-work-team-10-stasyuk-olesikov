@@ -144,7 +144,7 @@ public class GameController {
                 "message", "Game published successfully"));
     }
 
-    @DeleteMapping("/{gameId}/versions/{versionId}")
+    @PostMapping("/{gameId}/versions/{versionId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteGameVersion(
             @PathVariable Integer gameId,
