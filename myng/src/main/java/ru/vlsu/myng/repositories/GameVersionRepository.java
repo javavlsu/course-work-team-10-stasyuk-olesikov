@@ -58,16 +58,21 @@ public interface GameVersionRepository extends JpaRepository<GameVersion, Intege
     Optional<GameVersion> findFirstByGameOrderByCreatedAtAsc(Game game);
 
     /**
-     * Находим самую последнюю версию среди всех игр, которая имеет хотя бы одну подтвежденную версию
+     * Находим самую последнюю версию среди всех игр, которая имеет хотя бы одну
+     * подтвежденную версию
      *
      * @return
      */
+    GameVersion findFirstByOrderByCreatedAtDesc();
+
+    List<GameVersion> findByGameIdOrderByCreatedAtAsc(Integer gameId);
+
     @Query("""
-    SELECT gv
-    FROM GameVersion gv
-    WHERE gv.moderationVerdict IS NOT NULL
-    AND gv.moderationVerdict.approved = true
-    ORDER BY gv.createdAt DESC
-    """)
+            SELECT gv
+            FROM GameVersion gv
+            WHERE gv.moderationVerdict IS NOT NULL
+            AND gv.moderationVerdict.approved = true
+            ORDER BY gv.createdAt DESC
+            """)
     List<GameVersion> findLatestApproved(Pageable pageable);
 }

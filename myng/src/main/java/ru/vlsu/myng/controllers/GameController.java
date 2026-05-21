@@ -40,9 +40,9 @@ public class GameController {
         try {
             GamePageDTO game = gameService.getGamePageData(id);
             model.addAttribute("game", game);
-            
+
             gameService.incrementGameTotalViews(id);
-            
+
             User currentUser = null;
             boolean isAuthenticated = false;
             List<CollectionDTO> userCollections = null;
@@ -203,7 +203,7 @@ public class GameController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> publishGame(
             @Valid @ModelAttribute PublishGameRequest request) {
-        
+
         gameService.publishGame(request);
 
         return ResponseEntity.ok(Map.of(
@@ -227,5 +227,23 @@ public class GameController {
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Game published successfully"));
+    }
+
+    @DeleteMapping("/{gameId}/versions/{versionId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteGameVersion(
+            @PathVariable Integer gameId,
+            @PathVariable Integer versionId) {
+
+        try {
+            gameVersionService.deleteGameVersion(gameId, versionId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Версия успешно удалена"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
     }
 }
