@@ -11,6 +11,7 @@ import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.DevApplication;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -166,7 +167,77 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
 
     LEFT JOIN mv.moderator mod
 
-    ORDER BY mv.id DESC
+    WHERE
+
+    (
+        :search IS NULL
+        OR :search = ''
+
+        OR LOWER(mod.username) LIKE LOWER(CONCAT('%', :search, '%'))
+
+        OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%'))
+
+        OR LOWER(gv.commitHash) LIKE LOWER(CONCAT('%', :search, '%'))
+        
+        OR LOWER(mv.reason) LIKE LOWER(CONCAT('%', :search, '%'))
+
+        OR CAST(COALESCE(gv.id, da.id, r.id) as string)
+            LIKE CONCAT('%', :search, '%')
+    )
+
+    AND
+    (
+        :type IS NULL
+        OR :type = ''
+
+        OR (
+            :type = 'GAME_VERSION'
+            AND gv IS NOT NULL
+        )
+
+        OR (
+            :type = 'DEV_APPLICATION'
+            AND da IS NOT NULL
+        )
+
+        OR (
+            :type = 'REVIEW'
+            AND r IS NOT NULL
+        )
+    )
+
+    AND
+    (
+        :status IS NULL
+        OR :status = ''
+
+        OR (
+            :status = 'approved'
+            AND mv.approved = true
+        )
+
+        OR (
+            :status = 'rejected'
+            AND mv.approved = false
+        )
+    )
+
+    AND
+    (
+        :createdAfter IS NULL
+    
+        OR COALESCE(
+            gv.createdAt,
+            da.createdAt,
+            r.createdAt
+        ) >= :createdAfter
+    )
     """)
-    Page<ModerationItem> getModerationItems(Pageable pageable);
+    Page<ModerationItem> getModerationItems(
+            String search,
+            String type,
+            String status,
+            Instant createdAfter,
+            Pageable pageable
+    );
 }

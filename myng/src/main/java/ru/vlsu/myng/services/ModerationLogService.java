@@ -9,6 +9,8 @@ import ru.vlsu.myng.dto.ModerationItem;
 import ru.vlsu.myng.entities.ModerationVerdict;
 import ru.vlsu.myng.repositories.ModerationVerdictRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,9 +29,31 @@ public class ModerationLogService {
                 .sorted(Comparator.comparing(ModerationItem::getCreatedAt).reversed())
                 .collect(Collectors.toList());
     }
-    
-    public Page<ModerationItem> getModerationItems(Pageable pageable) {
-        return verdictRepository.getModerationItems(pageable);
+
+    public Page<ModerationItem> getModerationItems(
+            String search,
+            String type,
+            String status,
+            String period,
+            Pageable pageable ) {
+
+        Instant createdAfter = switch (
+                period == null ? "" : period
+                ) {
+
+            case "today" ->
+                    Instant.now().minus(1, ChronoUnit.DAYS);
+
+            case "week" ->
+                    Instant.now().minus(7, ChronoUnit.DAYS);
+
+            case "month" ->
+                    Instant.now().minus(30, ChronoUnit.DAYS);
+
+            default -> null;
+        };
+        
+        return verdictRepository.getModerationItems(search, type, status, createdAfter, pageable);
     }
 
     private ModerationItem toModerationItem(ModerationVerdict verdict) {

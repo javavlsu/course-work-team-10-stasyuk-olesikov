@@ -21,81 +21,200 @@
 
       <!-- Основной контент - лог модерации -->
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <!-- Фильтры и поиск -->
-        <div class="p-6 border-b border-gray-200">
-          <div class="flex flex-col lg:flex-row gap-4">
-            <!-- Поиск -->
-            <div class="flex-1">
-              <div class="relative">
-                <i
-                  class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                ></i>
-                <input
-                  type="text"
-                  placeholder="Поиск по ID, сущности, модератору..."
-                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                />
+          <!-- ФИЛЬТРЫ -->
+          <form method="get"
+                th:action="@{/moderation-log}"
+                class="p-6 border-b border-gray-200">
+
+              <!-- keep page size -->
+              <input type="hidden"
+                     name="size"
+                     th:value="${moderationPage.size}" />
+              
+              <div class="flex flex-col lg:flex-column gap-4">
+
+                  <!-- SEARCH -->
+                  <div class="flex-1">
+                      <div class="relative">
+
+                          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+                          <input
+                                  type="text"
+                                  name="search"
+
+                                  th:value="${param.search}"
+
+                                  placeholder="Поиск по ID сущности, username пользователя, username модератора, причине..."
+
+                                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                          />
+                      </div>
+                  </div>
+                  
+                  <div class="flex flex-col lg:flex-row gap-4">
+                      <!-- TYPE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="type"
+    
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+    
+                              <option value="">Все типы</option>
+    
+                              <option value="GAME_VERSION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'GAME_VERSION'}">
+                                  Версии игр
+                              </option>
+    
+                              <option value="DEV_APPLICATION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'DEV_APPLICATION'}">
+                                  Заявки
+                              </option>
+    
+                              <option value="REVIEW"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'REVIEW'}">
+                                  Отзывы
+                              </option>
+                          </select>
+                      </div>
+    
+                      <!-- RESULT -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="status"
+    
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+    
+                              <option value="">Все результаты</option>
+    
+                              <option value="approved"
+                                      th:selected="${param.status != null and !#lists.isEmpty(param.status) and param.status[0] == 'approved'}">
+                                  Одобрено
+                              </option>
+    
+                              <option value="rejected"
+                                      th:selected="${param.status != null and !#lists.isEmpty(param.status) and param.status[0] == 'rejected'}">
+                                  Отклонено
+                              </option>
+                          </select>
+                      </div>
+    
+                      <!-- DATE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="period"
+    
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+    
+                              <option value="">За всё время</option>
+    
+                              <option value="today"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'today'}">
+                                  Сегодня
+                              </option>
+    
+                              <option value="week"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'week'}">
+                                  Неделя
+                              </option>
+    
+                              <option value="month"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'month'}">
+                                  Месяц
+                              </option>
+                          </select>
+                      </div>
+    
+                      <!-- SORT -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="sort"
+    
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+    
+                              <option value="newest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'newest'}">
+                                  Сначала новые
+                              </option>
+    
+                              <option value="oldest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'oldest'}">
+                                  Сначала старые
+                              </option>
+                          </select>
+                      </div>
+    
+                      <!-- APPLY -->
+                      <div>
+                          <button
+                                  type="submit"
+    
+                                  class="w-full lg:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+    
+                              <i class="fas fa-filter mr-2"></i>
+                              Применить
+                          </button>
+                      </div>
+    
+                  </div>
               </div>
-            </div>
 
-            <!-- Фильтр по типу -->
-            <div class="lg:w-48">
-              <select
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
-              >
-                <option value="all">Все типы</option>
-                <option value="game_version">Версии игр</option>
-                <option value="dev_application">Заявки</option>
-                <option value="review">Отзывы</option>
-              </select>
-            </div>
+              <!-- ACTIVE FILTERS -->
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
 
-            <!-- Фильтр по результату -->
-            <div class="lg:w-48">
-              <select
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
-              >
-                <option value="all">Все результаты</option>
-                <option value="approved">Одобрено</option>
-                <option value="rejected">Отклонено</option>
-                <option value="deleted">Удалено</option>
-              </select>
-            </div>
+                  <!-- LABEL -->
+                  <span class="text-sm text-gray-500 mr-2 py-1.5">
+                        Активные фильтры:
+                    </span>
 
-            <!-- Фильтр по дате -->
-            <div class="lg:w-48">
-              <select
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
-              >
-                <option value="all">За всё время</option>
-                <option value="today">Сегодня</option>
-                <option value="week">Неделя</option>
-                <option value="month">Месяц</option>
-              </select>
-            </div>
-          </div>
+                  <!-- TYPE -->
+                  <span th:if="${param.type != null and !#strings.isEmpty(param.type[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg">
 
-          <!-- Активные фильтры -->
-          <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
-            <span class="text-sm text-gray-500 mr-2 py-1.5"
-              >Активные фильтры:</span
-            >
-            <span
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
-            >
-              Тип: Версии игр
-              <button class="hover:text-blue-900">
-                <i class="fas fa-times"></i>
-              </button>
-            </span>
-            <button
-              class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm"
-            >
-              <i class="fas fa-undo mr-1"></i>
-              Сбросить все
-            </button>
-          </div>
-        </div>
+                        Тип:
+                        <span class="text-blue-700"
+                              th:text="${param.type[0]}"></span>
+                    </span>
+
+                  <!-- STATUS -->
+                  <span th:if="${param.status != null and !#strings.isEmpty(param.status[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 text-sm rounded-lg">
+                    
+                        Статус:
+                        <span class="text-green-700"
+                              th:text="${param.status[0]}"></span>
+                    </span>
+
+                  <!-- PERIOD -->
+                  <span th:if="${param.period != null and !#strings.isEmpty(param.period[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-lg">
+                    
+                        Период:
+                        <span class="text-purple-700"
+                              th:text="${param.period[0]}"></span>
+                    </span>
+
+                  <!-- SORT -->
+                  <span th:if="${param.sort != null and !#strings.isEmpty(param.sort[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 text-sm rounded-lg">
+                    
+                        Сортировка:
+                        <span class="text-red-700"
+                              th:text="${param.sort[0]}"></span>
+                    </span>
+
+                  <!-- RESET -->
+                  <a th:href="@{/moderation-log(size=${moderationPage.size})}"
+                     class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm">
+
+                      <i class="fas fa-undo mr-1"></i>
+                      Сбросить все
+                  </a>
+
+              </div>
+
+          </form>
 
         <!-- Таблица лога -->
         <div class="log-table-container overflow-x-auto">
@@ -194,21 +313,23 @@
                                     </span>
 
                               </div>
-
-                              <!-- Доп. информация -->
+                              
                               <div class="text-xs text-gray-500">
+                                  
+                                  <a th:if="${item.type == 'GAME_VERSION'}"
+                                     th:href="${item.repoUrl + '/tree/' + item.commitHash}">
+                                      Перейти в репозиторий
+                                  </a>
 
-                                <span th:if="${item.type == 'GAME_VERSION'}"
-                                      th:text="${item.commitHash}">
-                                </span>
+                                  <a th:if="${item.type == 'DEV_APPLICATION'}"
+                                     th:href="@{/mod-item/dev-apps/{id}(id=${item.id})}">
+                                      Просмотреть заявку
+                                  </a>
 
-                              <span th:if="${item.type == 'DEV_APPLICATION'}"
-                                    th:text="'Пользователь: ' + ${item.username}">
-                              </span>
-
-                                <span th:if="${item.type == 'REVIEW'}"
-                                                    th:text="'Игра ID: ' + ${item.gameId}">
-                                </span>
+                                  <a th:if="${item.type == 'REVIEW'}"
+                                     th:href="@{/mod-item/reviews/{id}(id=${item.id})}">
+                                      Просмотреть отзыв
+                                  </a>
 
                               </div>
                           </div>
@@ -233,7 +354,7 @@
                     </span>
                   </td>
 
-                  <!-- RESULT (пример логики) -->
+                  <!-- RESULT -->
                   <td class="px-6 py-4">
                       <!-- На модерации -->
                       <span th:if="${item.approved == null}"
