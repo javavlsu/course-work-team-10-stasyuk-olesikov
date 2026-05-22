@@ -19,16 +19,16 @@ import java.util.Optional;
  * <br>
  * Обеспечивает операции сохранения, удаления и поиска решений модерации.<br>
  * Используется в следующих сценариях:<br>
- *  - модератор выносит решение по заявкам разработчиков;<br>
- *  - модератор выносит решение по версиям игр;<br>
- *  - модератор выносит решение по жалобам на отзывы;<br>
- *  - получение списка решений модерации по трем типам сущностей для аналитики или отображения в UI.<br>
- *  - получение списков трёх видов сущностей, не прошедших модерацию
+ * - модератор выносит решение по заявкам разработчиков;<br>
+ * - модератор выносит решение по версиям игр;<br>
+ * - модератор выносит решение по жалобам на отзывы;<br>
+ * - получение списка решений модерации по трем типам сущностей для аналитики
+ * или отображения в UI.<br>
+ * - получение списков трёх видов сущностей, не прошедших модерацию
  * <br>
  * Наследует стандартные CRUD-операции из JpaRepository.
  */
-public interface ModerationVerdictRepository extends JpaRepository<ModerationVerdict, Integer>
-{
+public interface ModerationVerdictRepository extends JpaRepository<ModerationVerdict, Integer> {
 
     /**
      * Возвращает список всех решений модерации, вынесенных указанным модератором.
@@ -38,7 +38,7 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @return список решений модерации. Никогда не возвращает null.
      *         Может быть пустым, если модератор ещё не вынес ни одного решения.
      *
-     * @throws IllegalArgumentException если moderator равен null
+     * @throws IllegalArgumentException                    если moderator равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByModerator(User moderator);
@@ -51,7 +51,7 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @return список решений модерации. Никогда не возвращает null.
      *         Может быть пустым, если по версии ещё нет решений.
      *
-     * @throws IllegalArgumentException если version равна null
+     * @throws IllegalArgumentException                    если version равна null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByGameVersion(GameVersion version);
@@ -64,7 +64,7 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @return список решений модерации. Никогда не возвращает null.
      *         Может быть пустым, если по отзыву ещё нет решений.
      *
-     * @throws IllegalArgumentException если review равен null
+     * @throws IllegalArgumentException                    если review равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByReview(Review review);
@@ -77,13 +77,15 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * @return Optional с решением модерации.
      *         Optional.empty() если решение по заявке ещё не вынесено.
      *
-     * @throws IllegalArgumentException если application равна null
+     * @throws IllegalArgumentException                    если application равна
+     *                                                     null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     Optional<ModerationVerdict> findByDevApplication(DevApplication application);
 
     /**
-     * Возвращает список всех версий игр, по которым ещё не вынесено решение модерации.
+     * Возвращает список всех версий игр, по которым ещё не вынесено решение
+     * модерации.
      *
      * @return список решений модерации по версиям игр с флагом approved = false.
      *         Никогда не возвращает null, может быть пустым, если таких версий нет.
@@ -96,77 +98,82 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      * Возвращает список всех отзывов, по которым ещё не вынесено решение модерации.
      *
      * @return список решений модерации по отзывам с флагом approved = false.
-     *         Никогда не возвращает null, может быть пустым, если таких отзывов нет.
+     *         Никогда не возвращает null, может быть пустым, если таких отзывов
+     *         нет.
      *
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByReviewIsNotNullAndApprovedIsNull();
 
     /**
-     * Возвращает список всех заявок разработчиков, по которым ещё не вынесено решение модерации.
+     * Возвращает список всех заявок разработчиков, по которым ещё не вынесено
+     * решение модерации.
      *
-     * @return список решений модерации по заявкам разработчиков с флагом approved = false.
+     * @return список решений модерации по заявкам разработчиков с флагом approved =
+     *         false.
      *         Никогда не возвращает null, может быть пустым, если таких заявок нет.
      *
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     List<ModerationVerdict> findByDevApplicationIsNotNullAndApprovedIsNull();
 
+    boolean existsByReview(Review review);
+
     @Query("""
-    SELECT new ru.vlsu.myng.dto.ModerationItem(
+            SELECT new ru.vlsu.myng.dto.ModerationItem(
 
-        mv.id,
+                mv.id,
 
-        COALESCE(gv.id, da.id, r.id),
+                COALESCE(gv.id, da.id, r.id),
 
-        CASE
-            WHEN gv IS NOT NULL THEN 'GAME_VERSION'
-            WHEN da IS NOT NULL THEN 'DEV_APPLICATION'
-            WHEN r IS NOT NULL THEN 'REVIEW'
-        END,
+                CASE
+                    WHEN gv IS NOT NULL THEN 'GAME_VERSION'
+                    WHEN da IS NOT NULL THEN 'DEV_APPLICATION'
+                    WHEN r IS NOT NULL THEN 'REVIEW'
+                END,
 
-        CASE
-            WHEN gv IS NOT NULL THEN gv.game.id
-            WHEN r IS NOT NULL THEN r.game.id
-            ELSE NULL
-        END,
+                CASE
+                    WHEN gv IS NOT NULL THEN gv.game.id
+                    WHEN r IS NOT NULL THEN r.game.id
+                    ELSE NULL
+                END,
 
-        u.username,
-        da.githubUsername,
-        da.text,
+                u.username,
+                da.githubUsername,
+                da.text,
 
-        gv.commitHash,
-        gv.changelog,
-        g.repo,
+                gv.commitHash,
+                gv.changelog,
+                g.repo,
 
-        CAST(r.rating as integer),
-        r.text,
-        r.reportCount,
+                CAST(r.rating as integer),
+                r.text,
+                r.reportCount,
 
-        COALESCE(
-            gv.createdAt,
-            da.createdAt,
-            r.createdAt
-        ),
+                COALESCE(
+                    gv.createdAt,
+                    da.createdAt,
+                    r.createdAt
+                ),
 
-        mod.username,
-        mv.approved,
-        mv.reason
-    )
+                mod.username,
+                mv.approved,
+                mv.reason
+            )
 
-    FROM ModerationVerdict mv
+            FROM ModerationVerdict mv
 
-    LEFT JOIN mv.gameVersion gv
-    LEFT JOIN gv.game g
+            LEFT JOIN mv.gameVersion gv
+            LEFT JOIN gv.game g
 
-    LEFT JOIN mv.devApplication da
-    LEFT JOIN da.user u
+            LEFT JOIN mv.devApplication da
+            LEFT JOIN da.user u
 
-    LEFT JOIN mv.review r
+            LEFT JOIN mv.review r
 
-    LEFT JOIN mv.moderator mod
+            LEFT JOIN mv.moderator mod
 
-    ORDER BY mv.id DESC
-    """)
+            ORDER BY mv.id DESC
+            """)
     Page<ModerationItem> getModerationItems(Pageable pageable);
 }

@@ -7,10 +7,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
 import ru.vlsu.myng.entities.Game;
+import ru.vlsu.myng.entities.ModerationVerdict;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.repositories.GameRepository;
+import ru.vlsu.myng.repositories.ModerationVerdictRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
 import ru.vlsu.myng.repositories.UserRepository;
 
@@ -25,6 +28,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+    private final ModerationVerdictRepository verdictRepository;
 
     public void updateReview(Integer reviewId, ReviewUpdate dto) {
         Review review = reviewRepository.findById(reviewId).orElseThrow();
@@ -142,11 +146,35 @@ public class ReviewService {
      */
     @Transactional()
     public void incrementReportCount(Integer id) {
-        Review review = getReviewById(id);
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Отзыв не найден с id: " + id));
+
         review.setReportCount(review.getReportCount() + 1);
+        reviewRepository.save(review);
+
+        // это десятый отзыв
         if (review.getReportCount() >= 10) {
-            //TODO сделать отображение отзывов с колличеством
-            //репортов 10 и более отображаемыми в качестве сущности для модерации
+
+            // есть ли сущность_подл_модерации для этого отзыва
+            boolean verdictExists = verdictRepository.existsByReview(review);
+
+            // сущности нет, поэтому создаем мод_вердикт,
+            // а отзыв скрыт т.к. больше чем 9 репортов
+            if (!verdictExists) {
+                ModerationVerdict verdict = new ModerationVerdict();
+                verdict.setReview(review);
+                verdict.setApproved(null);
+
+                verdictRepository.save(verdict);
+                // сущность есть, значит модер уже когда то
+                // оставил этот отзыв обнулив ему репорт count, но
+                // дебилы пользователи опять репортают на него
+                // (например, чел оставил отзыв с 1 звездой на крутую игру, но ничего плохого не
+                // написал, все его хейтят, но удалить отзыв нельзя)
+            } else {
+                // тогда тупо возращаем отзыв обратно на страницу обнуляя его счетчик
+                review.setReportCount(0);
+            }
         }
     }
 

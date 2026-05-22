@@ -22,6 +22,7 @@ public class DevApplication {
 
     private Instant createdAt;
 
+    @Column(name = "github_username")
     private String githubUsername;
 
     @Column(columnDefinition = "TEXT")
