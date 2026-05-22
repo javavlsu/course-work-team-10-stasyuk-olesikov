@@ -40,4 +40,43 @@ public class ModerationItem {
 
     public ModerationItem() {
     }
+
+    // for getModerationItems projection query
+    public ModerationItem(
+            Integer moderationVerdictId,
+            Integer id,
+            String type,
+            Integer gameId,
+            String username,
+            String githubLogin,
+            String description,
+            String commitHash,
+            String changelog,
+            String repoUrl,
+            Integer rating,
+            String reviewText,
+            Integer reportCount,
+            Instant createdAt,
+            String moderatorUsername,
+            Boolean approved,
+            String reason
+    ) {
+        this.moderationVerdictId = moderationVerdictId;
+        this.id = id;
+        this.type = type;
+        this.gameId = gameId;
+        this.username = username;
+        this.githubLogin = githubLogin;
+        this.description = description;
+        this.commitHash = commitHash;
+        this.changelog = changelog;
+        this.repoUrl = repoUrl;
+        this.rating = rating;
+        this.reviewText = reviewText;
+        this.reportCount = reportCount;
+        this.createdAt = createdAt;
+        this.moderatorUsername = moderatorUsername;
+        this.approved = approved;
+        this.reason = reason;
+    }
 }
