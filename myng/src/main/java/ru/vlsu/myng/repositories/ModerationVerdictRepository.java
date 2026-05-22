@@ -113,6 +113,8 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      */
     List<ModerationVerdict> findByDevApplicationIsNotNullAndApprovedIsNull();
 
+    boolean existsByReview(Review review);
+
     @Query("""
     SELECT new ru.vlsu.myng.dto.ModerationItem(
 

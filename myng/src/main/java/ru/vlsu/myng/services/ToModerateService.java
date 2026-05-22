@@ -43,6 +43,7 @@ public class ToModerateService {
                     item.setType("DEV_APPLICATION");
                     item.setUsername(app.getUser().getUsername());
                     item.setGithubLogin(app.getGithubUsername());
+                    item.setGithubUrl("https://github.com/" + app.getGithubUsername());
                     item.setDescription(app.getText());
                     item.setCreatedAt(app.getCreatedAt());
                     items.add(item);

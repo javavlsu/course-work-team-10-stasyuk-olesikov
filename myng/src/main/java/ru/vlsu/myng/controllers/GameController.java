@@ -106,91 +106,6 @@ public class GameController {
         }
     }
 
-    @PostMapping("/{id}/reviews")
-    public String addReview(@PathVariable Integer id,
-            @RequestParam Byte rating,
-            @RequestParam String text,
-            @RequestParam(required = false) String gameId,
-            RedirectAttributes redirectAttributes) {
-        try {
-            User currentUser = userService.getCurrentUser();
-            Game game = gameService.getGameById(id);
-
-            // Проверки
-            if (currentUser == null) {
-                redirectAttributes.addFlashAttribute("error", "Необходимо авторизоваться");
-                return "redirect:/auth";
-            }
-
-            if (game.getDeveloper().getId().equals(currentUser.getId())) {
-                redirectAttributes.addFlashAttribute("error", "Разработчик не может оставлять отзывы к своей игре");
-                return "redirect:/games/" + id;
-            }
-
-            if (reviewService.hasUserReviewedGame(game, currentUser)) {
-                redirectAttributes.addFlashAttribute("error", "Вы уже оставили отзыв к этой игре");
-                return "redirect:/games/" + id;
-            }
-
-            if (rating < 1 || rating > 5) {
-                redirectAttributes.addFlashAttribute("error", "Некорректная оценка");
-                return "redirect:/games/" + id;
-            }
-
-            if (text == null || text.trim().length() < 10) {
-                redirectAttributes.addFlashAttribute("error", "Текст отзыва должен содержать минимум 10 символов");
-                return "redirect:/games/" + id;
-            }
-
-            reviewService.createReview(game, currentUser, rating, text);
-            redirectAttributes.addFlashAttribute("success", "Отзыв успешно добавлен!");
-
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка при добавлении отзыва: " + e.getMessage());
-        }
-
-        return "redirect:/games/" + id;
-    }
-
-    @PostMapping("/reviews/{reviewId}/report")
-    @ResponseBody
-    public ResponseEntity<?> reportReview(@PathVariable Integer reviewId, Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Нужна авторизация");
-        }
-
-        User currentUser = userService.findByEmail(principal.getName());
-        Review review = reviewService.getReviewById(reviewId);
-
-        if (review.getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.badRequest().body("Нельзя жаловаться на свой отзыв");
-        }
-
-        reviewService.incrementReportCount(reviewId);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{id}/reviews/more")
-    public String getMoreReviews(@PathVariable Integer id,
-            @RequestParam(defaultValue = "1") int page,
-            Model model,
-            Principal principal) {
-        Game game = gameService.getGameById(id);
-        List<Review> moreReviews = reviewService.findByGameOrderByCreatedAtDesc(
-                game,
-                PageRequest.of(page, 5));
-
-        // Передаем ID пользователя, чтобы кнопка "Пожаловаться" работала корректно
-        User currentUser = (principal != null) ? userService.findByEmail(principal.getName()) : null;
-        model.addAttribute("currentUserId", currentUser != null ? currentUser.getId() : null);
-        model.addAttribute("isAuthenticated", principal != null);
-        model.addAttribute("reviews", moreReviews);
-
-        // Возвращаем только фрагмент списка
-        return "fragments/review_items :: reviewList";
-    }
-
     @GetMapping("/developer/{userId}")
     public String getDeveloperGames(@PathVariable Integer userId, Model model) {
         var user = userService.findById(userId);
@@ -229,7 +144,7 @@ public class GameController {
                 "message", "Game published successfully"));
     }
 
-    @DeleteMapping("/{gameId}/versions/{versionId}")
+    @PostMapping("/{gameId}/versions/{versionId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> deleteGameVersion(
             @PathVariable Integer gameId,

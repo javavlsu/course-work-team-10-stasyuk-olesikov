@@ -31,8 +31,7 @@ public class ToModerateController {
     @PostMapping("/approve/{moderationVerdictId}")
     public ResponseEntity<Void> approve(
             @PathVariable Integer moderationVerdictId,
-            @AuthenticationPrincipal User user
-    ) {
+            @AuthenticationPrincipal User user) {
 
         moderationVerdictService.approve(moderationVerdictId, user);
 
@@ -43,8 +42,7 @@ public class ToModerateController {
     public ResponseEntity<Void> reject(
             @PathVariable Integer moderationVerdictId,
             @RequestParam String reason,
-            @AuthenticationPrincipal User user
-    ) {
+            @AuthenticationPrincipal User user) {
         moderationVerdictService.reject(moderationVerdictId, reason, user);
 
         return ResponseEntity.ok().build();

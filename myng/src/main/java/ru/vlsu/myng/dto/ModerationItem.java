@@ -14,11 +14,12 @@ public class ModerationItem {
     private Integer moderationVerdictId;
 
     private Integer id;
-    private String type;         // GAME_VERSION, DEV_APPLICATION, REVIEW
-    private Integer gameId;         // Для GameVersion и Review
+    private String type; // GAME_VERSION, DEV_APPLICATION, REVIEW
+    private Integer gameId; // Для GameVersion и Review
 
     // --- Для DEV_APPLICATION ---
     private String username;
+    private String githubUrl;
     private String githubLogin;
     private String description;
 
@@ -36,6 +37,7 @@ public class ModerationItem {
     private String moderatorUsername;
     private Boolean approved;
     private String reason;
-    
-    public ModerationItem() {}
+
+    public ModerationItem() {
+    }
 }

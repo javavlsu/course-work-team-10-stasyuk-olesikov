@@ -73,7 +73,8 @@ public class GameService {
     }
 
     /**
-     * Новинка (самая последняя добавленная версия в системе, имеющая хотя бы одну подтвержденную версию)
+     * Новинка (самая последняя добавленная версия в системе, имеющая хотя бы одну
+     * подтвержденную версию)
      */
     @Transactional(readOnly = true)
     public CatalogGameDTO getNewestGame() {
@@ -113,7 +114,7 @@ public class GameService {
         filter.setGenre(null);
         filter.setMinRating(null);
         filter.setSort("popular");
-        
+
         var catalogGames = getFilteredGames(filter, PageRequest.of(0, limit));
         return catalogGames.getContent();
     }
@@ -218,37 +219,31 @@ public class GameService {
     @Transactional(readOnly = true)
     public Page<CatalogGameDTO> getFilteredGames(
             GameFilterDTO filter,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
 
         Sort sort = buildAggregateSort(filter.getSort());
 
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                sort
-        );
-        
-        Page<CatalogGameDTO> page =
-                gameRepository.findCatalogGames(
-                        filter.getSearch(),
-                        filter.getGenre(),
-                        filter.getTags(),
-                        filter.getMinRating(),
-                        sortedPageable
-                );
+                sort);
+
+        Page<CatalogGameDTO> page = gameRepository.findCatalogGames(
+                filter.getSearch(),
+                filter.getGenre(),
+                filter.getTags(),
+                filter.getMinRating(),
+                sortedPageable);
 
         page.getContent().forEach(dto -> {
 
             dto.setThemeColor(
-                    getGenreColor(dto.getGenre())
-            );
+                    getGenreColor(dto.getGenre()));
 
             dto.setTags(
-                    tagRepository.findTagNamesByGameId(dto.getId())
-            );
+                    tagRepository.findTagNamesByGameId(dto.getId()));
         });
-        
+
         return page;
     }
 
@@ -260,34 +255,29 @@ public class GameService {
         return switch (sort) {
 
             case "oldest" ->
-                    JpaSort.unsafe(
-                            Sort.Direction.ASC,
-                            "g.firstReleaseDate"
-                    );
+                JpaSort.unsafe(
+                        Sort.Direction.ASC,
+                        "g.firstReleaseDate");
 
             case "rating_high" ->
-                    JpaSort.unsafe(
-                            Sort.Direction.DESC,
-                            "g.averageRating"
-                    );
+                JpaSort.unsafe(
+                        Sort.Direction.DESC,
+                        "g.averageRating");
 
             case "rating_low" ->
-                    JpaSort.unsafe(
-                            Sort.Direction.ASC,
-                            "g.averageRating"
-                    );
+                JpaSort.unsafe(
+                        Sort.Direction.ASC,
+                        "g.averageRating");
 
             case "popular" ->
-                    JpaSort.unsafe(
-                            Sort.Direction.DESC,
-                            "g.totalLaunches"
-                    );
+                JpaSort.unsafe(
+                        Sort.Direction.DESC,
+                        "g.totalLaunches");
 
             default ->
-                    JpaSort.unsafe(
-                            Sort.Direction.DESC,
-                            "g.firstReleaseDate"
-                    );
+                JpaSort.unsafe(
+                        Sort.Direction.DESC,
+                        "g.firstReleaseDate");
         };
     }
 
@@ -307,24 +297,22 @@ public class GameService {
 
         // Дата первого релиза
         Instant firstReleaseDate = game.getFirstReleaseDate();
-        
+
         // Получаем версии
         List<GameVersion> versions = game.getVersions().stream()
-                .filter(version ->
-                        version.getModerationVerdict() != null &&
-                                Boolean.TRUE.equals(
-                                        version.getModerationVerdict().getApproved()
-                                )
-                )
+                .filter(version -> version.getModerationVerdict() != null &&
+                        Boolean.TRUE.equals(
+                                version.getModerationVerdict().getApproved()))
                 .sorted(Comparator.comparing(GameVersion::getCreatedAt).reversed())
                 .collect(Collectors.toList());
 
         GameVersion latestVersion = versions.isEmpty() ? null : versions.get(0);
 
-        List<Review> recentReviews = reviewRepository.findByGameOrderByCreatedAtDesc(
-                game,
+        List<Review> recentReviews = reviewRepository.findRecentReviews(
+                game.getId(),
+                9,
                 PageRequest.of(0, 5));
-        
+
         // Дата последнего обновления
         Instant lastUpdateDate = latestVersion != null ? latestVersion.getCreatedAt() : null;
 
@@ -490,7 +478,7 @@ public class GameService {
                 .collect(Collectors.toSet());
 
         game.setTags(tags);
-        
+
         game.setFirstReleaseDate(Instant.now());
 
         gameRepository.save(game);
@@ -514,7 +502,7 @@ public class GameService {
 
         version.setModerationVerdict(verdict);
     }
-    
+
     @Transactional
     public void incrementGameTotalLaunches(Game game) {
         game.setTotalLaunches(game.getTotalLaunches() + 1);
