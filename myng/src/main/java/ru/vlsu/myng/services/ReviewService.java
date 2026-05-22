@@ -10,14 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import ru.vlsu.myng.entities.Game;
 import ru.vlsu.myng.entities.ModerationVerdict;
+import ru.vlsu.myng.entities.Notification;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
 import ru.vlsu.myng.repositories.GameRepository;
 import ru.vlsu.myng.repositories.ModerationVerdictRepository;
+import ru.vlsu.myng.repositories.NotificationRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
 import ru.vlsu.myng.repositories.UserRepository;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +31,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+    private final NotificationRepository notificationRepository;
     private final ModerationVerdictRepository verdictRepository;
 
     public void updateReview(Integer reviewId, ReviewUpdate dto) {
@@ -152,7 +156,6 @@ public class ReviewService {
         review.setReportCount(review.getReportCount() + 1);
         reviewRepository.save(review);
 
-        // это десятый отзыв
         if (review.getReportCount() >= 10) {
 
             // есть ли сущность_подл_модерации для этого отзыва
@@ -166,16 +169,40 @@ public class ReviewService {
                 verdict.setApproved(null);
 
                 verdictRepository.save(verdict);
-                // сущность есть, значит модер уже когда то
-                // оставил этот отзыв обнулив ему репорт count, но
-                // дебилы пользователи опять репортают на него
-                // (например, чел оставил отзыв с 1 звездой на крутую игру, но ничего плохого не
-                // написал, все его хейтят, но удалить отзыв нельзя)
+
+                User reviewAuthor = review.getUser();
+                String gameName = review.getGame().getName();
+
+                String notificationText = String.format(
+                        "Ваш отзыв на игру \"%s\" скрыт из-за большого количества жалоб (10+). " +
+                                "Пожалуйста, ознакомьтесь с правилами платформы.",
+                        gameName);
+
+                createWarningNotification(reviewAuthor, notificationText);
+
             } else {
-                // тогда тупо возращаем отзыв обратно на страницу обнуляя его счетчик
+                // тогда тупо возвращаем отзыв обратно на страницу обнуляя его счетчик
                 review.setReportCount(0);
             }
         }
+    }
+
+    /**
+     * Создает уведомление-предупреждение для пользователя.
+     *
+     * @param user получатель уведомления
+     * @param text текст предупреждения
+     */
+    private void createWarningNotification(User user, String text) {
+        Notification notification = new Notification();
+        notification.setCreatedAt(Instant.now());
+        notification.setType(Notification.Type.warning);
+        notification.setText(text);
+
+        notification.setUsers(new HashSet<>());
+        notification.getUsers().add(user);
+
+        notificationRepository.save(notification);
     }
 
     /**
