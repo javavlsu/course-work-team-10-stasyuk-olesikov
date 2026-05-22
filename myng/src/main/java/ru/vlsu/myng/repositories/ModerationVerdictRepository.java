@@ -222,6 +222,11 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
             :status = 'rejected'
             AND mv.approved = false
         )
+        
+        OR (
+            :status = 'pending'
+            AND mv.approved IS NULL
+        )
     )
 
     AND

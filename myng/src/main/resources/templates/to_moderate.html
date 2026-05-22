@@ -15,7 +15,7 @@
               class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
             >
               <i class="fas fa-clipboard-list text-blue-500"></i>
-              Сущности, требующие модерации
+              Ожидает модерации
             </h1>
             <p class="text-gray-600 flex items-center gap-2">
               <i class="fas fa-shield-alt text-blue-500"></i>
@@ -28,67 +28,179 @@
 
       <!-- Основной контент - таблица модерации -->
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <!-- Фильтры и поиск -->
-        <div class="p-6 border-b border-gray-200">
-          <div class="flex flex-col lg:flex-row gap-4">
-            <!-- Поиск -->
-            <div class="flex-1">
-              <div class="relative">
-                <i
-                  class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                ></i>
-                <input
-                  type="text"
-                  id="search"
-                  placeholder="Поиск по ID, типу, информации..."
-                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                />
+          <!-- ФИЛЬТРЫ -->
+          <form method="get"
+                th:action="@{/to-moderate}"
+                class="p-6 border-b border-gray-200">
+
+              <!-- keep page size -->
+              <input type="hidden"
+                     name="size"
+                     th:value="${moderationPage.size}" />
+
+              <div class="flex flex-col lg:flex-column gap-4">
+
+                  <!-- SEARCH -->
+                  <div class="flex-1">
+                      <div class="relative">
+
+                          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+                          <input
+                                  type="text"
+                                  name="search"
+
+                                  th:value="${param.search}"
+
+                                  placeholder="Поиск по ID сущности, username пользователя, username модератора, причине..."
+
+                                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                          />
+                      </div>
+                  </div>
+
+                  <div class="flex flex-col lg:flex-row gap-4">
+                      <!-- TYPE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="type"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="">Все типы</option>
+
+                              <option value="GAME_VERSION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'GAME_VERSION'}">
+                                  Версии игр
+                              </option>
+
+                              <option value="DEV_APPLICATION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'DEV_APPLICATION'}">
+                                  Заявки
+                              </option>
+
+                              <option value="REVIEW"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'REVIEW'}">
+                                  Отзывы
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- DATE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="period"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="">За всё время</option>
+
+                              <option value="today"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'today'}">
+                                  Сегодня
+                              </option>
+
+                              <option value="week"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'week'}">
+                                  Неделя
+                              </option>
+
+                              <option value="month"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'month'}">
+                                  Месяц
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- SORT -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="sort"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="newest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'newest'}">
+                                  Сначала новые
+                              </option>
+
+                              <option value="oldest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'oldest'}">
+                                  Сначала старые
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- APPLY -->
+                      <div>
+                          <button
+                                  type="submit"
+
+                                  class="w-full lg:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+
+                              <i class="fas fa-filter mr-2"></i>
+                              Применить
+                          </button>
+                      </div>
+
+                  </div>
               </div>
-            </div>
 
-            <!-- Фильтр по типу сущности -->
-            <div class="lg:w-48">
-              <select
-                id="type-filter"
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
-              >
-                <option value="">Все типы</option>
-                <option value="game_version">Версии игр</option>
-                <option value="dev_application">Заявки разработчиков</option>
-                <option value="review">Отзывы</option>
-              </select>
-            </div>
+              <!-- ACTIVE FILTERS -->
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
 
-            <!-- Кнопка фильтра -->
-            <button
-              class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              <i class="fas fa-filter"></i>
-              Применить
-            </button>
-          </div>
+                  <!-- LABEL -->
+                  <span class="text-sm text-gray-500 mr-2 py-1.5">
+                        Активные фильтры:
+                    </span>
 
-          <!-- Активные фильтры -->
-          <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
-            <span class="text-sm text-gray-500 mr-2 py-1.5"
-              >Активные фильтры:</span
-            >
-            <span
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
-            >
-              Тип: Версии игр
-              <button class="hover:text-blue-900">
-                <i class="fas fa-times"></i>
-              </button>
-            </span>
-            <button
-              class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm"
-            >
-              <i class="fas fa-undo mr-1"></i>
-              Сбросить все
-            </button>
-          </div>
-        </div>
+                  <!-- TYPE -->
+                  <span th:if="${param.type != null and !#strings.isEmpty(param.type[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg">
+
+                        Тип:
+                        <span class="text-blue-700"
+                              th:text="${param.type[0]}"></span>
+                    </span>
+
+                  <!-- STATUS -->
+                  <span th:if="${param.status != null and !#strings.isEmpty(param.status[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 text-sm rounded-lg">
+                    
+                        Статус:
+                        <span class="text-green-700"
+                              th:text="${param.status[0]}"></span>
+                    </span>
+
+                  <!-- PERIOD -->
+                  <span th:if="${param.period != null and !#strings.isEmpty(param.period[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-lg">
+                    
+                        Период:
+                        <span class="text-purple-700"
+                              th:text="${param.period[0]}"></span>
+                    </span>
+
+                  <!-- SORT -->
+                  <span th:if="${param.sort != null and !#strings.isEmpty(param.sort[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 text-sm rounded-lg">
+                    
+                        Сортировка:
+                        <span class="text-red-700"
+                              th:text="${param.sort[0]}"></span>
+                    </span>
+
+                  <!-- RESET -->
+                  <a th:href="@{/to-moderate(size=${moderationPage.size})}"
+                     class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm">
+
+                      <i class="fas fa-undo mr-1"></i>
+                      Сбросить все
+                  </a>
+
+              </div>
+
+          </form>
 
         <!-- Таблица модерации -->
         <div class="moderation-table-container overflow-x-auto">
@@ -130,7 +242,7 @@
 
             <tbody class="divide-y divide-gray-200">
               <tr
-                th:each="item : ${items}"
+                th:each="item : ${moderationItems}"
                 th:attr="data-id=${item.moderationVerdictId}"
                 class="moderation-item hover:bg-blue-50/30 transition-colors"
               >
@@ -218,9 +330,8 @@
                 <!-- EXTRA -->
                 <td class="px-6 py-4">
                   <div th:if="${item.type == 'GAME_VERSION'}">
-                    <span th:text="${item.changelog}"></span>
                     <a
-                      th:href="${item.repoUrl}"
+                      th:href="${item.repoUrl + '/tree/' + item.commitHash}"
                       target="_blank"
                       class="text-blue-600 text-xs"
                     >
@@ -229,18 +340,22 @@
                   </div>
 
                   <div th:if="${item.type == 'DEV_APPLICATION'}">
-                    <span th:text="${item.description}"></span>
-                    <a
-                      th:href="${item.githubUrl}"
-                      target="_blank"
-                      class="text-purple-600 text-xs"
-                    >
-                      GitHub
-                    </a>
+
+                      <a th:if="${item.type == 'DEV_APPLICATION'}"
+                         th:href="@{/mod-item/dev-apps/{id}(id=${item.id})}"
+                         target="_blank"
+                         class="text-purple-600 text-xs">
+                          Просмотреть заявку
+                      </a>
                   </div>
 
                   <div th:if="${item.type == 'REVIEW'}">
-                    <span th:text="${item.reviewText}"></span>
+                          <a th:if="${item.type == 'REVIEW'}"
+                             th:href="@{/mod-item/reviews/{id}(id=${item.id})}"
+                             target="_blank"
+                             class="text-yellow-600 text-xs">
+                              Просмотреть отзыв
+                          </a>
                     <span
                       class="text-red-600 text-xs"
                       th:text="'report_count: ' + ${item.reportCount}"
@@ -300,60 +415,143 @@
           </table>
         </div>
 
-        <!-- Пагинация и итоги -->
-        <div
-          class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
-        >
-          <div class="flex items-center gap-4">
-            <div class="text-sm text-gray-500">
-              Показано <span class="font-medium">1-4</span> из
-              <span class="font-medium">24</span> сущностей
-            </div>
-            <select
-              class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"
-            >
-              <option>10 на странице</option>
-              <option>25 на странице</option>
-              <option>50 на странице</option>
-            </select>
+          <!-- Пагинация -->
+          <div
+                  class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
+          >
+
+              <div class="flex flex-row items-center gap-4">
+                  <!-- INFO -->
+                  <div class="text-sm text-gray-500">
+                      Показано
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + 1}">
+                    </span>
+
+                      -
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + moderationItems.size()}">
+                    </span>
+
+                      из
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.totalElements}">
+                    </span>
+
+                      записей
+                  </div>
+
+                  <form method="get"
+                        th:action="@{/to-moderate}"
+                        class="flex items-center gap-2">
+
+                      <!-- keep current page -->
+                      <input type="hidden"
+                             name="page"
+                             th:value="${moderationPage.number}" />
+
+                      <select
+                              name="size"
+
+                              onchange="this.form.submit()"
+
+                              class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+
+                          <option value="10"
+                                  th:selected="${moderationPage.size == 10}">
+                              10 на странице
+                          </option>
+
+                          <option value="25"
+                                  th:selected="${moderationPage.size == 25}">
+                              25 на странице
+                          </option>
+
+                          <option value="50"
+                                  th:selected="${moderationPage.size == 50}">
+                              50 на странице
+                          </option>
+
+                          <option value="75"
+                                  th:selected="${moderationPage.size == 75}">
+                              75 на странице
+                          </option>
+
+                          <option value="100"
+                                  th:selected="${moderationPage.size == 100}">
+                              100 на странице
+                          </option>
+
+                      </select>
+                  </form>
+              </div>
+
+              <!-- BUTTONS -->
+              <div class="flex items-center gap-2">
+
+                  <!-- PREVIOUS -->
+                  <a th:if="${moderationPage.hasPrevious()}"
+                     th:href="@{/to-moderate(page=${moderationPage.number - 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-left"></i>
+                  </a>
+
+                  <span th:unless="${moderationPage.hasPrevious()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+            
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+
+                  <!-- PAGE NUMBERS -->
+                  <th:block
+                          th:with="
+                            start=${T(java.lang.Math).max(0, moderationPage.number - 2)},
+                            end=${T(java.lang.Math).min(moderationPage.totalPages - 1, moderationPage.number + 2)}
+                        "
+                  >
+
+                      <th:block th:each="i : ${#numbers.sequence(start, end)}">
+
+                          <a th:href="@{/to-moderate(
+                                page=${i},
+                                size=${moderationPage.size}
+                            )}"
+
+                             th:text="${i + 1}"
+
+                             class="px-3 py-1.5 border text-sm font-medium rounded-lg transition-colors"
+
+                             th:classappend="${
+                                    i == moderationPage.number
+                                    ? ' bg-blue-600 text-white border-blue-600 '
+                                    : ' bg-white border-gray-300 text-gray-600 hover:bg-gray-50 '
+                               }">
+                          </a>
+
+                      </th:block>
+
+                  </th:block>
+
+                  <!-- NEXT -->
+                  <a th:if="${moderationPage.hasNext()}"
+                     th:href="@{/to-moderate(page=${moderationPage.number + 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-right"></i>
+                  </a>
+
+                  <span th:unless="${moderationPage.hasNext()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+
+              </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-              disabled
-            >
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button
-              class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              1
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              2
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              3
-            </button>
-            <span class="text-gray-400">...</span>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              5
-            </button>
-            <button
-              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <i class="fas fa-chevron-right"></i>
-            </button>
           </div>
-        </div>
-      </div>
-    </div>
 
     <div
       id="modal-overlay"
