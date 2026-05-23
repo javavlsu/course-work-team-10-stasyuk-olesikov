@@ -56,7 +56,9 @@ public class SecurityConfig {
                                                                 "/images/**", // картинки
                                                                 "/static/gamefiles/**", // файлы игр
                                                                 "/banned", // страница бана
-                                                                "/catalog/tags/**" // теги каталога
+                                                                "/catalog/tags/**", // теги каталога
+                                                                "/favicon.ico", // чтобы убать ошибку на всех страницах
+                                                                "/.well-known/**" // при открытом f12 вылетае ошибка...
                                                 ).permitAll()
 
                                                 // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)

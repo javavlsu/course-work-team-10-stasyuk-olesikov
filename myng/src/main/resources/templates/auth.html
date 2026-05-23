@@ -57,7 +57,7 @@
               </div>
               <p class="text-gray-500 text-sm mb-8 flex items-center gap-2">
                 <i class="fas fa-info-circle text-blue-500"></i>
-                Вход по логину/паролю или через GitHub
+                Вход по логину/почте и паролю
               </p>
               <form th:action="@{/auth/login}" method="post" class="space-y-6">
                 <!-- Логин (email или username) -->
@@ -93,21 +93,6 @@
                   />
                 </div>
 
-                <!-- Запомнить меня -->
-                <div class="flex items-center justify-between">
-                  <label class="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      name="remember-me"
-                      class="rounded text-blue-600"
-                    />
-                    <span class="text-sm text-gray-600">Запомнить меня</span>
-                  </label>
-                  <a href="#" class="text-sm text-blue-600 hover:underline"
-                    >Забыли пароль?</a
-                  >
-                </div>
-
                 <!-- Кнопка входа -->
                 <div class="space-y-3 pt-4">
                   <button
@@ -116,24 +101,6 @@
                   >
                     <i class="fas fa-sign-in-alt"></i>
                     Войти
-                  </button>
-
-                  <!-- GitHub вход пока оставим как заглушку -->
-                  <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                      <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                      <span class="px-3 bg-white text-gray-500">или</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <i class="fab fa-github"></i>
-                    Войти через GitHub
                   </button>
                 </div>
               </form>
