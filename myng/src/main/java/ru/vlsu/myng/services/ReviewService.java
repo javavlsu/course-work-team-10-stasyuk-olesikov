@@ -13,7 +13,6 @@ import ru.vlsu.myng.entities.ModerationVerdict;
 import ru.vlsu.myng.entities.Notification;
 import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
-import ru.vlsu.myng.repositories.GameRepository;
 import ru.vlsu.myng.repositories.ModerationVerdictRepository;
 import ru.vlsu.myng.repositories.NotificationRepository;
 import ru.vlsu.myng.repositories.ReviewRepository;
@@ -30,7 +29,6 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-    private final GameRepository gameRepository;
     private final NotificationRepository notificationRepository;
     private final ModerationVerdictRepository verdictRepository;
 
@@ -43,9 +41,6 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    /**
-     * Получить отзыв по ID
-     */
     @Transactional(readOnly = true)
     public Review getReviewById(Integer id) {
         return reviewRepository.findById(id)
@@ -111,17 +106,11 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
-    /**
-     * Проверяет, оставлял ли пользователь отзыв на эту игру
-     */
     @Transactional(readOnly = true)
     public boolean hasUserReviewedGame(Game game, User user) {
         return reviewRepository.existsByGameAndUser(game, user);
     }
 
-    /**
-     * Создает новый отзыв
-     */
     @Transactional
     public Review createReview(Game game, User user, Byte rating, String text) {
         Review review = new Review();
@@ -145,9 +134,6 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    /**
-     * Увеличить жалобы на отзыв
-     */
     @Transactional()
     public void incrementReportCount(Integer id) {
         Review review = reviewRepository.findById(id)
@@ -158,11 +144,8 @@ public class ReviewService {
 
         if (review.getReportCount() >= 10) {
 
-            // есть ли сущность_подл_модерации для этого отзыва
             boolean verdictExists = verdictRepository.existsByReview(review);
 
-            // сущности нет, поэтому создаем мод_вердикт,
-            // а отзыв скрыт т.к. больше чем 9 репортов
             if (!verdictExists) {
                 ModerationVerdict verdict = new ModerationVerdict();
                 verdict.setReview(review);
@@ -181,18 +164,11 @@ public class ReviewService {
                 createWarningNotification(reviewAuthor, notificationText);
 
             } else {
-                // тогда тупо возвращаем отзыв обратно на страницу обнуляя его счетчик
                 review.setReportCount(0);
             }
         }
     }
 
-    /**
-     * Создает уведомление-предупреждение для пользователя.
-     *
-     * @param user получатель уведомления
-     * @param text текст предупреждения
-     */
     private void createWarningNotification(User user, String text) {
         Notification notification = new Notification();
         notification.setCreatedAt(Instant.now());
@@ -205,9 +181,6 @@ public class ReviewService {
         notificationRepository.save(notification);
     }
 
-    /**
-     * Получить отзывы по игре
-     */
     @Transactional(readOnly = true)
     public List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable) {
         return reviewRepository.findRecentReviews(

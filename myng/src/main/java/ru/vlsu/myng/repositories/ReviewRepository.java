@@ -131,8 +131,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
 
     /*
      * Получает игру по id отзыва
-     *
-     *
      */
     @Query("""
                 SELECT r.game FROM Review r WHERE r.game.id = :id
