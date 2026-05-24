@@ -37,7 +37,7 @@ public class User {
     @Column(length = 255)
     private String bio;
 
-    @Column(nullable = false, columnDefinition = "LONGBLOB")
+    @Column(nullable = true, columnDefinition = "LONGBLOB")
     private byte[] profilePic;
 
     @Column(name = "registered_at")

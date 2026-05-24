@@ -288,17 +288,14 @@ public class GameService {
     public GamePageDTO getGamePageData(Integer gameId) {
 
         Game game = getGameById(gameId);
-
-        // Получаем статистику
+        
         Double avgRating = game.getAverageRating();
         Integer reviewsCount = game.getReviewCount();
         Integer totalViews = game.getTotalViews();
         Integer totalLaunches = game.getTotalLaunches();
 
-        // Дата первого релиза
         Instant firstReleaseDate = game.getFirstReleaseDate();
 
-        // Получаем версии
         List<GameVersion> versions = game.getVersions().stream()
                 .filter(version -> version.getModerationVerdict() != null &&
                         Boolean.TRUE.equals(
@@ -313,10 +310,8 @@ public class GameService {
                 9,
                 PageRequest.of(0, 5));
 
-        // Дата последнего обновления
         Instant lastUpdateDate = latestVersion != null ? latestVersion.getCreatedAt() : null;
 
-        // Цвет темы
         String themeColor = getGenreColor(game.getGenre());
 
         GamePageDTO dto = GamePageDTO.builder()
