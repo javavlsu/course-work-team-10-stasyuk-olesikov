@@ -49,38 +49,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@Testcontainers
 @ActiveProfiles("test")
 @Transactional
-class GameServiceTest {
-
-    @Container
-    static MySQLContainer<?> mysql =
-            new MySQLContainer<>("mysql:9.2.0")
-                    .withDatabaseName("testdb")
-                    .withUsername("test")
-                    .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(
-            DynamicPropertyRegistry registry) {
-
-        registry.add(
-                "spring.datasource.url",
-                mysql::getJdbcUrl);
-
-        registry.add(
-                "spring.datasource.username",
-                mysql::getUsername);
-
-        registry.add(
-                "spring.datasource.password",
-                mysql::getPassword);
-
-        registry.add(
-                "spring.datasource.driver-class-name",
-                mysql::getDriverClassName);
-    }
+class GameServiceTest extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {
