@@ -48,11 +48,6 @@ class GithubServiceTest {
 
     @Test
     void should_DownloadZip_ExtractFiles_AndInjectScriptsIntoHtml() throws Exception {
-//        WebClient testWebClient = WebClient.builder()
-//                .baseUrl(wireMockServer.baseUrl())
-//                .build();
-//        ReflectionTestUtils.setField(githubService, "webClient", testWebClient);
-        
         ReflectionTestUtils.setField(githubService, "storagePath", tempStorageDir.toString());
         
         Game game = new Game();
