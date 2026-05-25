@@ -140,6 +140,13 @@
             <version>1.21.3</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.wiremock.integrations</groupId>
+            <artifactId>wiremock-spring-boot-standalone</artifactId>
+            <version>4.0.8</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 <build>

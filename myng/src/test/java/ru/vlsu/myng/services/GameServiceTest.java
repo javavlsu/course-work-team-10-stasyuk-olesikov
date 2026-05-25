@@ -40,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -212,36 +214,39 @@ class GameServiceTest extends BaseIntegrationTest {
         actionTag = tagRepository.save(actionTag);
 
         Game game = new Game();
-
         game.setName("DOOM");
         game.setDescr("FPS");
-
         game.setGenre(Game.Genre.action);
-
         game.setAverageRating(4.8);
-
         game.setTotalLaunches(500);
-
         game.setFirstReleaseDate(Instant.now());
-
         game.setTags(Set.of(actionTag));
-
         game.setDeveloper(developer);
-        
         game.setRepo("https://github.com/test/game");
 
         gameRepository.save(game);
 
-        GameFilterDTO filter = new GameFilterDTO();
-
-        filter.setSearch("DOOM");
-
-        filter.setGenre(Game.Genre.action);
-
-        filter.setTags(Set.of("action"));
-
-        filter.setMinRating(4.0);
+        GameVersion gv = new GameVersion();
+        gv.setChangelog("Fixed bugs");
+        gv.setFiles("index.html, script.js, style.css");
+        gv.setName("v1.2");
+        gv.setCommitHash("cafebabe");
+        gv.setGame(game);
         
+        gameVersionRepository.save(gv);
+        
+        ModerationVerdict gameVerdict = new ModerationVerdict();
+        gameVerdict.setModerator(null);
+        gameVerdict.setGameVersion(gv);
+        gameVerdict.setApproved(true);
+        
+        moderationVerdictRepository.save(gameVerdict);
+        
+        GameFilterDTO filter = new GameFilterDTO();
+        filter.setSearch("DOOM");
+        filter.setGenre(Game.Genre.action);
+        filter.setTags(Set.of("action"));
+        filter.setMinRating(4.0);
         filter.setSort("oldest");
 
         Page<CatalogGameDTO> result =

@@ -33,22 +33,8 @@ public class GithubService {
     @Value("${app.storage.path}")
     private String storagePath;
 
-    public GithubService(WebClient.Builder builder) {
-        HttpClient httpClient = HttpClient.create()
-                .followRedirect(true);
-        this.webClient = builder
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl("https://api.github.com")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
-                .defaultHeader(HttpHeaders.USER_AGENT, "MyNG")
-                .filter((request, next) -> {
-                    String token = githubToken;
-                    ClientRequest newRequest = ClientRequest.from(request)
-                            .headers(h -> h.setBearerAuth(token))
-                            .build();
-                    return next.exchange(newRequest);
-                })
-                .build();
+    public GithubService(WebClient githubWebClient) {
+        this.webClient = githubWebClient;
     }
 
     public void validateRepoExists(String repoUrl) {
