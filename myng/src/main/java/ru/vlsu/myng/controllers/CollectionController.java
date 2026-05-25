@@ -13,7 +13,6 @@ import ru.vlsu.myng.services.UserService;
 import ru.vlsu.myng.dto.CollectionName;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor

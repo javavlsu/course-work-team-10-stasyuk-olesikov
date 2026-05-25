@@ -83,7 +83,6 @@ public class CollectionService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Игра не найдена"));
 
-        // У сущности Collection поле называется games
         collection.getGames().add(game);
         collectionRepository.save(collection);
     }
