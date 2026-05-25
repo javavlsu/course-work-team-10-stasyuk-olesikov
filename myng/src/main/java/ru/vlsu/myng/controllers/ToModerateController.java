@@ -15,76 +15,69 @@ import org.springframework.web.bind.annotation.*;
 import ru.vlsu.myng.dto.ModerationItem;
 import ru.vlsu.myng.services.ModerationLogService;
 import ru.vlsu.myng.services.ModerationVerdictService;
-import ru.vlsu.myng.services.ToModerateService;
-
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/to-moderate")
 public class ToModerateController {
-    
-    private final ModerationVerdictService moderationVerdictService;
-    private final ModerationLogService moderationLogService;
 
-    @GetMapping("")
-    public String toModeratePage(
+        private final ModerationVerdictService moderationVerdictService;
+        private final ModerationLogService moderationLogService;
 
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+        @GetMapping("")
+        public String toModeratePage(
 
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String period,
-            @RequestParam(defaultValue = "newest") String sort,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size,
 
-            Model model
-    ) {
+                        @RequestParam(required = false) String search,
+                        @RequestParam(required = false) String type,
+                        @RequestParam(required = false) String period,
+                        @RequestParam(defaultValue = "newest") String sort,
 
-        Sort sorting = sort.equals("oldest")
-                ? JpaSort.unsafe(Sort.Direction.ASC,
-                "COALESCE(gv.createdAt, da.createdAt, r.createdAt)")
-                : JpaSort.unsafe(Sort.Direction.DESC,
-                "COALESCE(gv.createdAt, da.createdAt, r.createdAt)");
+                        Model model) {
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                sorting
-        );
+                Sort sorting = sort.equals("oldest")
+                                ? JpaSort.unsafe(Sort.Direction.ASC,
+                                                "COALESCE(gv.createdAt, da.createdAt, r.createdAt)")
+                                : JpaSort.unsafe(Sort.Direction.DESC,
+                                                "COALESCE(gv.createdAt, da.createdAt, r.createdAt)");
 
-        Page<ModerationItem> moderationPage =
-                moderationLogService.getModerationItems(
-                        search,
-                        type,
-                        "pending",
-                        period,
-                        pageable
-                );
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                sorting);
 
-        model.addAttribute("moderationPage", moderationPage);
-        model.addAttribute("moderationItems", moderationPage.getContent());
+                Page<ModerationItem> moderationPage = moderationLogService.getModerationItems(
+                                search,
+                                type,
+                                "pending",
+                                period,
+                                pageable);
 
-        return "to_moderate";
-    }
+                model.addAttribute("moderationPage", moderationPage);
+                model.addAttribute("moderationItems", moderationPage.getContent());
 
-    @PostMapping("/approve/{moderationVerdictId}")
-    public ResponseEntity<Void> approve(
-            @PathVariable Integer moderationVerdictId,
-            @AuthenticationPrincipal User user) {
+                return "to_moderate";
+        }
 
-        moderationVerdictService.approve(moderationVerdictId, user);
+        @PostMapping("/approve/{moderationVerdictId}")
+        public ResponseEntity<Void> approve(
+                        @PathVariable Integer moderationVerdictId,
+                        @AuthenticationPrincipal User user) {
 
-        return ResponseEntity.ok().build();
-    }
+                moderationVerdictService.approve(moderationVerdictId, user);
 
-    @PostMapping("/reject/{moderationVerdictId}")
-    public ResponseEntity<Void> reject(
-            @PathVariable Integer moderationVerdictId,
-            @RequestParam String reason,
-            @AuthenticationPrincipal User user) {
-        moderationVerdictService.reject(moderationVerdictId, reason, user);
+                return ResponseEntity.ok().build();
+        }
 
-        return ResponseEntity.ok().build();
-    }
+        @PostMapping("/reject/{moderationVerdictId}")
+        public ResponseEntity<Void> reject(
+                        @PathVariable Integer moderationVerdictId,
+                        @RequestParam String reason,
+                        @AuthenticationPrincipal User user) {
+                moderationVerdictService.reject(moderationVerdictId, reason, user);
+
+                return ResponseEntity.ok().build();
+        }
 }
