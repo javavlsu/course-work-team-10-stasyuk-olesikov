@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wiremock.spring.ConfigureWireMock;
@@ -50,6 +51,19 @@ class GithubServiceTest {
     void should_DownloadZip_ExtractFiles_AndInjectScriptsIntoHtml() throws Exception {
         ReflectionTestUtils.setField(githubService, "storagePath", tempStorageDir.toString());
         
+        WebClient mockWebClient = WebClient.builder()
+                .baseUrl(wireMockServer.baseUrl())
+                .build();
+
+        GithubService target =
+                AopTestUtils.getUltimateTargetObject(githubService);
+
+        ReflectionTestUtils.setField(
+                target,
+                "webClient",
+                mockWebClient
+        );
+        
         Game game = new Game();
         game.setId(7);
         game.setRepo("https://github.com/my-owner/my-repo");
@@ -58,15 +72,14 @@ class GithubServiceTest {
         version.setId(14);
         version.setCommitHash("xyz987");
         version.setGame(game);
-        version.setFiles("index.html");
+        version.setFiles("index.html, Route/Route.html");
 
         // Programmatically generate a dummy ZIP in memory (Mimicking GitHub's layout)
         // GitHub always wraps repo contents inside a root folder (e.g., 'repo-name-commithash/')
-        byte[] mockZipBytes = createMockGithubZip("my-repo-xyz987/index.html", "<html><head></head><body>Hello World</body></html>");
+        byte[] mockZipBytes = Files.readAllBytes(Path.of("src/test/resources/test-repo.zip"));
 
         // Stub the WireMock server endpoint
         wireMockServer.stubFor(get(urlEqualTo("/repos/my-owner/my-repo/zipball/xyz987"))
-                .withHeader("Authorization", containing("Bearer"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/zip")
@@ -80,8 +93,16 @@ class GithubServiceTest {
 
         Path expectedHtmlFile = expectedTargetDir.resolve("index.html");
 
+        Path expectedRouteFile =
+                expectedTargetDir.resolve("Route").resolve("Route.html");
+        
         assertTrue(Files.exists(expectedHtmlFile), "index.html should be extracted to the target directory");
 
+        assertTrue(
+                Files.exists(expectedRouteFile),
+                "Route.html should be extracted"
+        );
+        
         String finalHtml = Files.readString(expectedHtmlFile);
 
         assertTrue(finalHtml.contains("<script>window.__GAME_ID__=7; window.__GAMEVER_ID__=14</script>"),

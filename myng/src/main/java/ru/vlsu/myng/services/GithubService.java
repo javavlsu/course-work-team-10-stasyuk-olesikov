@@ -268,15 +268,13 @@ public class GithubService {
 
     private Path downloadZip(String owner, String repo, String commit) throws IOException
     {
-        String url = String.format(
-                "https://api.github.com/repos/%s/%s/zipball/%s",
-                owner, repo, commit
-        );
-
         Path tempFile = Files.createTempFile("repo-", ".zip");
 
         Flux<DataBuffer> flux = webClient.get()
-                .uri(url)
+                .uri("/repos/{owner}/{repo}/zipball/{commit}",
+                    owner,
+                    repo,
+                    commit)
                 .retrieve()
                 .bodyToFlux(DataBuffer.class);
 
