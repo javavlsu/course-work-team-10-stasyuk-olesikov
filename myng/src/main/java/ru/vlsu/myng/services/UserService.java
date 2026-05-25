@@ -37,44 +37,34 @@ public class UserService {
      */
     @Transactional
     public User registerNewUser(UserRegistrationDto registrationDto) {
-        // 1. Проверка совпадения паролей
         if (!registrationDto.isPasswordConfirmed()) {
             throw new RuntimeException("Пароли не совпадают");
         }
 
-        // 2. Проверка длины пароля (минимальная безопасность)
         if (registrationDto.getPassword() == null || registrationDto.getPassword().length() < 6) {
             throw new RuntimeException("Пароль должен быть не менее 6 символов");
         }
 
-        // 3. Проверка уникальности username
         if (userRepository.existsByUsername(registrationDto.getUsername())) {
             throw new RuntimeException("Имя пользователя уже занято");
         }
 
-        // 4. Проверка уникальности email
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
             throw new RuntimeException("Email уже используется");
         }
 
-        // 5. Создание нового пользователя
         User user = new User();
         user.setUsername(registrationDto.getUsername());
         user.setEmail(registrationDto.getEmail());
 
-        // Хешируем пароль перед сохранением
         user.setPasswordHash(passwordEncoder.encode(registrationDto.getPassword()));
 
-        // Устанавливаем дату регистрации
         user.setRegisteredAt(Instant.now());
 
-        // Роль по умолчанию - обычный пользователь
         user.setRole(User.Role.user);
 
-        // profilePic пока пустой (можно установить картинку по умолчанию позже)
         user.setProfilePic(new byte[0]);
 
-        // 6. Сохраняем пользователя
         return userRepository.save(user);
     }
 
@@ -119,12 +109,10 @@ public class UserService {
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Проверяем, существует ли аутентификация
         if (authentication == null) {
             throw new IllegalStateException("No authentication found");
         }
 
-        // Проверяем, аутентифицирован ли пользователь и не анонимный ли он
         if (!authentication.isAuthenticated() ||
                 authentication.getPrincipal().equals("anonymousUser")) {
             throw new IllegalStateException("User is not authenticated");

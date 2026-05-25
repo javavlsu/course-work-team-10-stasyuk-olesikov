@@ -40,14 +40,11 @@ class UserServiceTest {
 
     @BeforeEach()
     void setUp() {
-        // Инициализируем мок статического класса перед каждым тестом (нужно для
-        // getCurrentUser)
         mockedSecurityContextHolder = Mockito.mockStatic(SecurityContextHolder.class);
     }
 
     @AfterEach
     void tearDown() {
-        // Обязательно закрываем статический мок, чтобы не портить другие тесты
         mockedSecurityContextHolder.close();
     }
 
@@ -55,7 +52,6 @@ class UserServiceTest {
 
     @Test
     void registerNewUser_Success() {
-        // Given
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setUsername("player1");
         dto.setEmail("player1@mail.ru");
@@ -72,10 +68,8 @@ class UserServiceTest {
         savedUser.setRole(User.Role.user);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        // When
         User result = userService.registerNewUser(dto);
 
-        // Then
         assertNotNull(result);
         assertEquals("player1", result.getUsername());
         assertEquals(User.Role.user, result.getRole());
@@ -84,13 +78,11 @@ class UserServiceTest {
 
     @Test
     void registerNewUser_ThrowsException_WhenPasswordsDoNotMatch() {
-        // Given
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setUsername("player1");
         dto.setPassword("password123");
         dto.setConfirmPassword("different_password");
 
-        // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.registerNewUser(dto);
         });
@@ -100,7 +92,6 @@ class UserServiceTest {
 
     @Test
     void registerNewUser_ThrowsException_WhenUsernameTaken() {
-        // Given
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setUsername("existing_user");
         dto.setPassword("password123");
@@ -108,7 +99,6 @@ class UserServiceTest {
 
         when(userRepository.existsByUsername("existing_user")).thenReturn(true);
 
-        // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userService.registerNewUser(dto);
         });
@@ -119,11 +109,8 @@ class UserServiceTest {
 
     @Test
     void getCurrentUser_Success() {
-        // Given
         String userEmail = "active_player@mail.ru";
 
-        // Мокаем цепочку: SecurityContextHolder -> SecurityContext -> Authentication ->
-        // Principal(UserDetails)
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
         UserDetails userDetails = mock(UserDetails.class);
@@ -132,17 +119,15 @@ class UserServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(userEmail); // В Spring Security username часто равен email
+        when(userDetails.getUsername()).thenReturn(userEmail);
 
         User expectedUser = new User();
         expectedUser.setEmail(userEmail);
         expectedUser.setUsername("GamerX");
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(expectedUser));
 
-        // When
         User currentUser = userService.getCurrentUser();
 
-        // Then
         assertNotNull(currentUser);
         assertEquals(userEmail, currentUser.getEmail());
         assertEquals("GamerX", currentUser.getUsername());
