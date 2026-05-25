@@ -101,7 +101,6 @@ public class GameVersionService {
 
     @Transactional
     public void deleteGameVersion(Integer gameId, Integer versionId) {
-        // 1. Проверяем существование версии
         GameVersion version = gameVersionRepository.findById(versionId)
                 .orElseThrow(() -> new IllegalArgumentException("Версия не найдена"));
 
@@ -109,49 +108,36 @@ public class GameVersionService {
             throw new IllegalArgumentException("Версия не принадлежит данной игре");
         }
 
-        // 2. Физическое удаление файлов с сервера
-        // Так как приложение находится в /myng, а хранилище на одном уровне в /storage
         Path versionPath = Paths.get("..", "storage", "gamefiles", "game_" + gameId, "ver_" + versionId);
 
         if (Files.exists(versionPath)) {
             try {
-                // Рекурсивное удаление папки с подпапками и файлами
                 Files.walk(versionPath)
                         .sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
                         .forEach(File::delete);
                 System.out.println("Папка с файлами версии успешно удалена: " + versionPath.toAbsolutePath());
             } catch (IOException e) {
-                // Логируем ошибку, но можем решить, прерывать ли транзакцию.
-                // Обычно лучше выбросить ошибку, чтобы БД и файлы не рассинхронизировались.
                 throw new RuntimeException("Не удалось удалить файлы версии с сервера: " + e.getMessage());
             }
         }
-
-        // 3. Удаление из репозитория
-        // Если связь ModerationVerdict -> GameVersion не настроена на
-        // CascadeType.REMOVE,
-        // сперва удаляем вердикт:
+        
         if (version.getModerationVerdict() != null) {
             moderationVerdictRepository.delete(version.getModerationVerdict());
         }
         gameVersionRepository.delete(version);
 
-        // 4. Обновление поля firstReleaseDate у Game
         Game game = version.getGame();
 
-        // Вытаскиваем оставшиеся версии игры (уже без удаленной)
         var remainingVersions = gameVersionRepository.findByGameIdOrderByCreatedAtAsc(gameId);
 
         if (remainingVersions.isEmpty()) {
-            // Если версий больше нет, обнуляем дату релиза
             game.setFirstReleaseDate(null);
         } else {
-            // Если версии есть, берем createdAt самой старой (первой опубликованной) версии
             Instant oldestVersionDate = remainingVersions.get(0).getCreatedAt();
             game.setFirstReleaseDate(oldestVersionDate);
         }
 
-        gameRepository.save(game); // сохраняем обновленную сущность игры
+        gameRepository.save(game);
     }
 }
