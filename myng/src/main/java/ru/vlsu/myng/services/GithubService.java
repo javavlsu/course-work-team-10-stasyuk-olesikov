@@ -21,7 +21,26 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-// perhaps add caching later to avoid excess calls to GitHub API
+/**
+ * Сервис для взаимодействия с GitHub API.<br>
+ * <br>
+ * Обеспечивает интеграцию с GitHub для:<br>
+ * - валидации существования репозитория;<br>
+ * - проверки наличия коммита в репозитории;<br>
+ * - верификации списка файлов в коммите (включая обязательный index.html);<br>
+ * - загрузки ZIP-архива репозитория и извлечения необходимых файлов.<br>
+ * <br>
+ * Используется в следующих сценариях:<br>
+ * - разработчик публикует новую игру (проверка репозитория и коммита);<br>
+ * - разработчик публикует новую версию игры (проверка файлов);<br>
+ * - модератор одобряет версию игры (загрузка файлов на сервер).<br>
+ * <br>
+ * Все запросы к GitHub API выполняются с аутентификацией через токен,
+ * указанный в свойстве {@code github.token}.
+ * Для HTTP-запросов используется реактивный {@link WebClient},
+ * но вызовы блокируются для синхронной работы в MVC-контексте.
+ * Файлы загружаются в директорию, указанную в свойстве {@code app.storage.path}.
+ */
 @Service
 public class GithubService {
 
@@ -33,6 +52,21 @@ public class GithubService {
     @Value("${app.storage.path}")
     private String storagePath;
 
+    /**
+     * Создаёт экземпляр сервиса с настроенным {@link WebClient}.
+     *
+     * <p>
+     * WebClient конфигурируется с:
+     * </p>
+     * <ul>
+     *   <li>базовым URL {@code https://api.github.com};</li>
+     *   <li>заголовком авторизации с Bearer-токеном;</li>
+     *   <li>заголовком User-Agent;</li>
+     *   <li>автоматическим следованием редиректам.</li>
+     * </ul>
+     *
+     * @param builder построитель WebClient, предоставляемый Spring.
+     */
     public GithubService(WebClient.Builder builder) {
         HttpClient httpClient = HttpClient.create()
                 .followRedirect(true);
@@ -51,6 +85,26 @@ public class GithubService {
                 .build();
     }
 
+    /**
+     * Проверяет существование GitHub-репозитория по URL.
+     *
+     * <p>
+     * Извлекает владельца и имя репозитория из URL формата
+     * {@code https://github.com/[owner]/[repo]},
+     * затем выполняет GET-запрос к GitHub API.
+     * </p>
+     *
+     * @param repoUrl URL репозитория в формате https://github.com/owner/repo.
+     *                Не должен быть null или пустым.
+     *
+     * @throws GithubException с полем "repoLink" если:
+     *         <ul>
+     *           <li>репозиторий не найден (404);</li>
+     *           <li>некорректный запрос (400);</li>
+     *           <li>другая ошибка GitHub API;</li>
+     *           <li>GitHub недоступен.</li>
+     *         </ul>
+     */
     public void validateRepoExists(String repoUrl) {
         String[] parts = extractPath(repoUrl).split("/");
         System.out.println("GITHUB TOKEN: " + githubToken);
@@ -90,6 +144,26 @@ public class GithubService {
         }
     }
 
+    /**
+     * Проверяет существование коммита в указанном репозитории.
+     *
+     * <p>
+     * Выполняет GET-запрос к GitHub API для получения информации о коммите
+     * по его хешу. Если коммит не найден (404), выбрасывается исключение.
+     * </p>
+     *
+     * @param repoUrl    URL репозитория в формате https://github.com/owner/repo.
+     *                   Не должен быть null или пустым.
+     * @param commitHash хеш коммита. Не должен быть null или пустым.
+     *
+     * @throws GithubException с полем "commitHash" если:
+     *         <ul>
+     *           <li>коммит не найден в репозитории (404);</li>
+     *           <li>коммит не принадлежит данному репозиторию;</li>
+     *           <li>другая ошибка GitHub API;</li>
+     *           <li>GitHub недоступен.</li>
+     *         </ul>
+     */
     public void validateCommitExists(String repoUrl, String commitHash) {
         String[] path = extractPath(repoUrl).split("/");
 
@@ -127,10 +201,54 @@ public class GithubService {
         }
     }
 
+    /**
+     * Извлекает путь репозитория из полного URL.
+     *
+     * <p>
+     * Удаляет префикс {@code https://github.com/}
+     * и завершающий слеш (если есть).
+     * </p>
+     *
+     * @param url полный URL репозитория.
+     *
+     * @return путь в формате "owner/repo".
+     */
     private String extractPath(String url) {
         return url.replace("https://github.com/", "").replaceAll("/$", "");
     }
 
+    /**
+     * Проверяет наличие указанных файлов в коммите репозитория.
+     *
+     * <p>
+     * Алгоритм проверки:
+     * </p>
+     * <ol>
+     *   <li>Получает рекурсивное дерево файлов коммита через Git Trees API;</li>
+     *   <li>Проверяет наличие index.html в корне или в одной из указанных папок;</li>
+     *   <li>Проверяет существование каждого запрошенного файла/папки;</li>
+     *   <li>Если какие-либо файлы отсутствуют — выбрасывает исключение
+     *       со списком недостающих.</li>
+     * </ol>
+     *
+     * <p>
+     * Файл index.html является обязательным — он используется
+     * как точка входа для запуска игры в браузере.
+     * </p>
+     *
+     * @param repoUrl    URL репозитория. Не должен быть null или пустым.
+     * @param commitHash хеш коммита. Не должен быть null или пустым.
+     * @param files      список файлов через запятую (например, "index.html, game.js, assets/").
+     *                   Не должен быть null или пустым.
+     *
+     * @throws GithubException с полем "files" если:
+     *         <ul>
+     *           <li>не удалось получить дерево файлов коммита;</li>
+     *           <li>index.html отсутствует в списке или в коммите;</li>
+     *           <li>указанные файлы/папки не найдены в коммите;</li>
+     *           <li>GitHub недоступен.</li>
+     *         </ul>
+     */
     public void validateFilesExistInCommit(String repoUrl, String commitHash, String files) {
         String[] path = extractPath(repoUrl).split("/");
         String owner = path[0];
@@ -210,6 +328,24 @@ public class GithubService {
         }
     }
 
+    /**
+     * Проверяет существование файла или папки в списке путей репозитория.
+     *
+     * <p>
+     * Поддерживает несколько вариантов совпадения:
+     * </p>
+     * <ul>
+     *   <li>точное совпадение пути;</li>
+     *   <li>путь заканчивается на запрошенное имя;</li>
+     *   <li>запрошенный путь является родительской директорией
+     *       для существующих файлов.</li>
+     * </ul>
+     *
+     * @param repoPaths список всех путей в репозитории.
+     * @param requested запрошенный путь для проверки.
+     *
+     * @return true если путь существует в репозитории.
+     */
     private boolean existsInRepo(List<String> repoPaths, String requested) {
 
         String normalized = requested.endsWith("/")
@@ -233,6 +369,38 @@ public class GithubService {
                 );
     }
 
+    /**
+     * Загружает файлы версии игры из GitHub и сохраняет их на диск.
+     *
+     * <p>
+     * Процесс загрузки:
+     * </p>
+     * <ol>
+     *   <li>Создаёт целевую директорию в файловой системе сервера;</li>
+     *   <li>Скачивает ZIP-архив репозитория для указанного коммита;</li>
+     *   <li>Извлекает из архива только запрошенные файлы;</li>
+     *   <li>Внедряет JavaScript-патч в index.html для интеграции с платформой;</li>
+     *   <li>Удаляет временный ZIP-архив.</li>
+     * </ol>
+     *
+     * <p>
+     * Целевая директория имеет структуру:
+     * </p>
+     * <pre>
+     * {storagePath}/gamefiles/game_{gameId}/ver_{versionId}/
+     * </pre>
+     *
+     * <p>
+     * В index.html автоматически внедряется скрипт с информацией
+     * об игре и версии для взаимодействия с API платформы.
+     * </p>
+     *
+     * @param version версия игры, для которой загружаются файлы.
+     *                Не должна быть null.
+     *
+     * @throws RuntimeException если произошла ошибка при загрузке
+     *         или извлечении файлов
+     */
     public void downloadGameVersion(GameVersion version) {
         String repoUrl = version.getGame().getRepo();
         String commit = version.getCommitHash();
@@ -259,6 +427,17 @@ public class GithubService {
         }
     }
 
+    /**
+     * Формирует путь к директории для хранения файлов версии игры.
+     *
+     * <p>
+     * Структура пути: {storagePath}/gamefiles/game_{gameId}/ver_{versionId}
+     * </p>
+     *
+     * @param version версия игры. Не должна быть null.
+     *
+     * @return путь к директории версии.
+     */
     private Path buildTargetPath(GameVersion version) {
         return Paths.get(storagePath,
                 "gamefiles",
@@ -266,6 +445,22 @@ public class GithubService {
                 "ver_" + version.getId());
     }
 
+    /**
+     * Скачивает ZIP-архив репозитория для указанного коммита во временный файл.
+     *
+     * <p>
+     * Использует GitHub API endpoint {@code /repos/{owner}/{repo}/zipball/{commit}}
+     * для получения архива.
+     * </p>
+     *
+     * @param owner  владелец репозитория.
+     * @param repo   имя репозитория.
+     * @param commit хеш коммита.
+     *
+     * @return путь к временному ZIP-файлу.
+     *
+     * @throws IOException если произошла ошибка при создании или записи файла
+     */
     private Path downloadZip(String owner, String repo, String commit) throws IOException
     {
         Path tempFile = Files.createTempFile("repo-", ".zip");
@@ -284,6 +479,38 @@ public class GithubService {
         return tempFile;
     }
 
+    /**
+     * Извлекает из ZIP-архива только запрошенные файлы.
+     *
+     * <p>
+     * Для каждого файла из списка проверяется:
+     * </p>
+     * <ul>
+     *   <li>точное совпадение имени;</li>
+     *   <li>вхождение в указанную директорию.</li>
+     * </ul>
+     *
+     * <p>
+     * При извлечении index.html в него внедряется JavaScript-патч
+     * с идентификаторами игры и версии для взаимодействия с платформой.
+     * Повторное внедрение не выполняется, если патч уже присутствует.
+     * </p>
+     *
+     * <p>
+     * Безопасность: проверяется, что извлечённые файлы не выходят
+     * за пределы целевой директории (защита от Zip Slip атаки).
+     * </p>
+     *
+     * @param zipPath   путь к ZIP-архиву.
+     * @param targetDir целевая директория для извлечения.
+     * @param files     список запрошенных файлов через запятую.
+     * @param version   версия игры (для формирования патча).
+     *
+     * @throws IOException если произошла ошибка при чтении архива
+     *         или записи файлов
+     * @throws RuntimeException если обнаружен некорректный путь в архиве
+     *         (возможная Zip Slip атака)
+     */
     private void extractNeededFiles(Path zipPath, Path targetDir, String files, GameVersion version) throws IOException {
         List<String> requested = Arrays.stream(files.split("\\s*,\\s*"))
                 .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
@@ -336,6 +563,20 @@ public class GithubService {
         }
     }
 
+    /**
+     * Внедряет JavaScript-код в секцию {@code <head>} HTML-документа.
+     *
+     * <p>
+     * Если патч уже был внедрён ранее (определяется по наличию маркера
+     * {@code __myng-storage-patch.js}), повторное внедрение не выполняется.
+     * </p>
+     *
+     * @param html      исходный HTML-код.
+     * @param injection JavaScript-код для внедрения.
+     *
+     * @return HTML с внедрённым кодом или исходный HTML,
+     *         если патч уже присутствует.
+     */
     private String injectIntoHead(String html, String injection) {
         if (html == null) return null;
 
@@ -346,6 +587,22 @@ public class GithubService {
         return html.replaceFirst("(?i)<head>", "<head>\n" + injection);
     }
 
+    /**
+     * Формирует JavaScript-патч с информацией об игре и версии.
+     *
+     * <p>
+     * Патч содержит:
+     * </p>
+     * <ul>
+     *   <li>глобальные переменные с ID игры и версии;</li>
+     *   <li>подключение скрипта {@code __myng-storage-patch.js}
+     *       для взаимодействия с API платформы.</li>
+     * </ul>
+     *
+     * @param version версия игры. Не должна быть null.
+     *
+     * @return строка с JavaScript-кодом для внедрения в HTML.
+     */
     private String buildPatch(GameVersion version) {
         return "<script>window.__GAME_ID__=" + version.getGame().getId() + "; window.__GAMEVER_ID__=" + version.getId() + "</script>\n"
                 + "<script src=\"/__myng-storage-patch.js\"></script>";
