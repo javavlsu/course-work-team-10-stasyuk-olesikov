@@ -113,8 +113,95 @@ public interface ModerationVerdictRepository extends JpaRepository<ModerationVer
      */
     List<ModerationVerdict> findByDevApplicationIsNotNullAndApprovedIsNull();
 
+    /**
+     * Проверяет наличие модерационного вердикта для указанного отзыва.
+     *
+     * @param review отзыв, для которого выполняется проверка.
+     *               Не должен быть null.
+     *               Должен быть персистентной сущностью (id != null).
+     *
+     * @return true, если для отзыва существует модерационный вердикт;
+     *         false — если вердикт отсутствует.
+     *
+     * @throws IllegalArgumentException                    если review равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     boolean existsByReview(Review review);
 
+    /**
+     * Возвращает страницу элементов модерации
+     * с поддержкой фильтрации и пагинации.
+     *
+     * <p>
+     * В результат могут входить:
+     * </p>
+     * <ul>
+     *     <li>версии игр;</li>
+     *     <li>заявки разработчиков;</li>
+     *     <li>отзывы пользователей.</li>
+     * </ul>
+     *
+     * <p>
+     * Поддерживаются следующие фильтры:
+     * </p>
+     * <ul>
+     *     <li>поиск по имени пользователя, имени модератора,
+     *         commit hash, причине модерации и идентификатору объекта;</li>
+     *     <li>тип модерируемого объекта;</li>
+     *     <li>статус модерации;</li>
+     *     <li>дата создания объекта.</li>
+     * </ul>
+     *
+     * <p>
+     * Возможные значения параметра type:
+     * </p>
+     * <ul>
+     *     <li>GAME_VERSION</li>
+     *     <li>DEV_APPLICATION</li>
+     *     <li>REVIEW</li>
+     * </ul>
+     *
+     * <p>
+     * Возможные значения параметра status:
+     * </p>
+     * <ul>
+     *     <li>approved</li>
+     *     <li>rejected</li>
+     *     <li>pending</li>
+     * </ul>
+     *
+     * <p>
+     * Если параметр фильтра равен null
+     * (или пустой строке для search, type и status),
+     * соответствующая фильтрация не применяется.
+     * </p>
+     *
+     * @param search строка поискового запроса.
+     *               Может быть null или пустой строкой.
+     *
+     * @param type тип модерируемого объекта.
+     *             Может быть null или пустой строкой.
+     *
+     * @param status статус модерации.
+     *               Может быть null или пустой строкой.
+     *
+     * @param createdAfter минимальная дата создания объекта.
+     *                     Может быть null.
+     *
+     * @param pageable параметры пагинации и сортировки.
+     *                 Не должен быть null.
+     *
+     * @return страница элементов модерации,
+     *         удовлетворяющих условиям фильтрации.
+     *         Никогда не возвращает null.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
     SELECT new ru.vlsu.myng.dto.ModerationItem(
 

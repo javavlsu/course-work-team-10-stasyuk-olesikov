@@ -84,16 +84,80 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
      */
     List<Review> findByUser(User user);
 
+    /**
+     * Возвращает средний рейтинг указанной игры.
+     *
+     * @param game игра, для которой вычисляется средний рейтинг.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @return средний рейтинг игры.
+     *         Может возвращать null,
+     *         если у игры отсутствуют отзывы.
+     *
+     * @throws IllegalArgumentException                    если game равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.game = :game")
     Double getAverageRatingByGame(@Param("game") Game game);
 
+    /**
+     * Возвращает количество отзывов для указанной игры.
+     *
+     * @param game игра, для которой подсчитываются отзывы.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @return количество отзывов игры.
+     *         Никогда не возвращает null.
+     *         Возвращает 0, если отзывы отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если game равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("SELECT COUNT(r) FROM Review r WHERE r.game = :game")
     Integer countByGame(@Param("game") Game game);
 
     /**
-     * Считаем средний рейтинг только по тем отзывам, которые были оставлены
-     * недавно.
+     * Возвращает список игр с наивысшим средним рейтингом
+     * за указанный период времени.
      *
+     * <p>
+     * В расчёт включаются только отзывы,
+     * созданные после даты since.
+     * </p>
+     *
+     * <p>
+     * В результат включаются только игры,
+     * имеющие хотя бы одну подтверждённую модерацией версию.
+     * </p>
+     *
+     * <p>
+     * Список сортируется по среднему рейтингу
+     * в порядке убывания.
+     * </p>
+     *
+     * @param since дата начала периода.
+     *              Не должна быть null.
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список игр с наивысшим рейтингом за указанный период.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если подходящие игры отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если since
+     *                                                     или pageable равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
      */
     @Query("""
             SELECT r.game
@@ -111,6 +175,34 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
             """)
     List<Game> findTopRatedGamesSince(Instant since, PageRequest pageable);
 
+
+    /**
+     * Возвращает список игр с наивысшим средним рейтингом.
+     *
+     * <p>
+     * В результат включаются только игры,
+     * имеющие хотя бы одну подтверждённую модерацией версию.
+     * </p>
+     *
+     * <p>
+     * Список сортируется по среднему рейтингу
+     * в порядке убывания.
+     * </p>
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список игр с наивысшим рейтингом.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если подходящие игры отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
             SELECT g
             FROM Game g
@@ -125,18 +217,130 @@ public interface ReviewRepository extends JpaRepository<Review, Integer>, JpaSpe
             """)
     List<Game> findTopRatedGames(PageRequest pageable);
 
+    /**
+     * Возвращает список отзывов указанной игры,
+     * отсортированных по дате создания в порядке убывания.
+     *
+     * <p>
+     * Сначала возвращаются самые новые отзывы.
+     * </p>
+     *
+     * <p>
+     * Количество возвращаемых записей определяется
+     * параметрами pageable.
+     * </p>
+     *
+     * @param game игра, для которой загружаются отзывы.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список отзывов игры,
+     *         отсортированный от новых к старым.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если отзывы отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если game
+     *                                                     или pageable равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     List<Review> findByGameOrderByCreatedAtDesc(Game game, PageRequest pageable);
 
+    /**
+     * Проверяет наличие отзыва пользователя для указанной игры.
+     *
+     * @param game игра, для которой выполняется проверка.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @param user пользователь — автор отзыва.
+     *             Не должен быть null.
+     *             Должен быть персистентной сущностью (id != null).
+     *
+     * @return true, если пользователь уже оставил отзыв на игру;
+     *         false — если отзыв отсутствует.
+     *
+     * @throws IllegalArgumentException                    если game
+     *                                                     или user равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     boolean existsByGameAndUser(Game game, User user);
 
-    /*
-     * Получает игру по id отзыва
+    /**
+     * Возвращает игру, имеющую отзывы,
+     * по её идентификатору.
+     *
+     * <p>
+     * Поиск выполняется через сущность Review.
+     * </p>
+     *
+     * @param id идентификатор игры.
+     *           Не должен быть null.
+     *
+     * @return Optional с найденной игрой.
+     *         Возвращает Optional.empty(),
+     *         если игра не найдена
+     *         или не имеет отзывов.
+     *
+     * @throws IllegalArgumentException                    если id равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
      */
     @Query("""
                 SELECT r.game FROM Review r WHERE r.game.id = :id
             """)
     Optional<Game> findGameById(@Param("id") Integer id);
 
+    /**
+     * Возвращает список последних отзывов игры
+     * с ограничением по количеству жалоб.
+     *
+     * <p>
+     * В результат включаются только отзывы,
+     * у которых количество жалоб
+     * меньше либо равно maxReports.
+     * </p>
+     *
+     * <p>
+     * Список сортируется по дате создания
+     * в порядке убывания.
+     * </p>
+     *
+     * <p>
+     * Количество возвращаемых записей определяется
+     * параметрами pageable.
+     * </p>
+     *
+     * @param gameId идентификатор игры.
+     *               Не должен быть null.
+     *
+     * @param maxReports максимальное допустимое количество жалоб.
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список последних отзывов игры,
+     *         удовлетворяющих ограничению по жалобам.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если подходящие отзывы отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если gameId
+     *                                                     или pageable равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
             SELECT r FROM Review r
             WHERE r.game.id = :gameId

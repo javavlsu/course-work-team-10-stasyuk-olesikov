@@ -85,6 +85,24 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
          */
         boolean existsByRepo(String repo);
 
+        /**
+         * Возвращает список всех игр для отображения в каталоге.
+         *
+         * <p>
+         * Вместе с играми сразу загружаются связанные сущности:
+         * developer и tags.
+         * Это позволяет избежать проблемы N+1 запросов при работе
+         * с каталогом.
+         * </p>
+         *
+         * @return список всех игр каталога.
+         *         Никогда не возвращает null.
+         *         Может возвращать пустой список, если игры отсутствуют.
+         *
+         * @throws org.springframework.dao.DataAccessException
+         *                                                     при ошибке доступа к базе
+         *                                                     данных
+         */
         // EntityGraph говорит Hibernate загрузить эти связи сразу (EAGER) одним
         // запросом
         @EntityGraph(attributePaths = { "developer", "tags" })
@@ -92,7 +110,41 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
         List<Game> findAllForCatalog();
 
         /**
-         * Базовый поиск игр (без тегов и рейтинга)
+         * Возвращает список игр, отфильтрованных по поисковому запросу
+         * и жанру.
+         *
+         * <p>
+         * Поиск выполняется по:
+         * </p>
+         * <ul>
+         *     <li>названию игры;</li>
+         *     <li>описанию игры;</li>
+         *     <li>имени разработчика.</li>
+         * </ul>
+         *
+         * <p>
+         * Если search равен null или пустой строке,
+         * текстовый поиск не применяется.
+         * </p>
+         *
+         * <p>
+         * Если genre равен null,
+         * фильтрация по жанру не применяется.
+         * </p>
+         *
+         * @param search строка поискового запроса.
+         *               Может быть null или пустой строкой.
+         *
+         * @param genre жанр игры.
+         *              Может быть null.
+         *
+         * @return список игр, удовлетворяющих условиям фильтрации.
+         *         Никогда не возвращает null.
+         *         Может возвращать пустой список, если совпадений нет.
+         *
+         * @throws org.springframework.dao.DataAccessException
+         *                                                     при ошибке доступа к базе
+         *                                                     данных
          */
         @Query("SELECT DISTINCT g FROM Game g " +
                         "LEFT JOIN g.developer d " +
@@ -105,6 +157,55 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
                         @Param("genre") Game.Genre genre);
 
 
+    /**
+     * Возвращает страницу игр каталога с поддержкой фильтрации
+     * и пагинации.
+     *
+     * <p>
+     * В результат включаются только игры, имеющие хотя бы одну
+     * подтверждённую модерацией версию.
+     * </p>
+     *
+     * <p>
+     * Поддерживаются следующие фильтры:
+     * </p>
+     * <ul>
+     *     <li>поиск по названию, описанию и имени разработчика;</li>
+     *     <li>жанр игры;</li>
+     *     <li>минимальный рейтинг;</li>
+     *     <li>наличие хотя бы одного тега из указанного набора.</li>
+     * </ul>
+     *
+     * <p>
+     * Если параметр фильтра равен null
+     * (или пустой строке для search),
+     * соответствующая фильтрация не применяется.
+     * </p>
+     *
+     * @param search строка поискового запроса.
+     *               Может быть null или пустой строкой.
+     *
+     * @param genre жанр игры.
+     *              Может быть null.
+     *
+     * @param tags набор тегов для фильтрации.
+     *             Может быть null.
+     *
+     * @param minRating минимальный средний рейтинг игры.
+     *                  Может быть null.
+     *
+     * @param pageable параметры пагинации и сортировки.
+     *                 Не должен быть null.
+     *
+     * @return страница DTO игр каталога,
+     *         удовлетворяющих условиям фильтрации.
+     *         Никогда не возвращает null.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
     SELECT new ru.vlsu.myng.dto.CatalogGameDTO(
     
@@ -176,12 +277,32 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
             @Param("minRating") Double minRating,
             Pageable pageable
     );
-    
+
         /**
-         * Получаем игры отсортированные по колличеству запусков
-         * 
-         * @param pageable
-         * @return
+         * Возвращает список наиболее популярных игр,
+         * отсортированных по количеству запусков.
+         *
+         * <p>
+         * В результат включаются только игры, имеющие хотя бы одну
+         * подтверждённую модерацией версию.
+         * </p>
+         *
+         * <p>
+         * Количество возвращаемых игр определяется параметрами pageable.
+         * </p>
+         *
+         * @param pageable параметры пагинации,
+         *                 определяющие количество возвращаемых записей.
+         *                 Не должен быть null.
+         *
+         * @return список игр, отсортированных по убыванию количества запусков.
+         *         Никогда не возвращает null.
+         *         Может возвращать пустой список, если подходящие игры отсутствуют.
+         *
+         * @throws IllegalArgumentException                    если pageable равен null
+         * @throws org.springframework.dao.DataAccessException
+         *                                                     при ошибке доступа к базе
+         *                                                     данных
          */
         @Query("""
         SELECT g

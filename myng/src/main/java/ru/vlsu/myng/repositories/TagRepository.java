@@ -52,10 +52,40 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
      */
     boolean existsByName(String name);
 
-    // Получить все теги, отсортированные по имени
+    /**
+     * Возвращает список всех тегов,
+     * отсортированных по имени в алфавитном порядке.
+     *
+     * @return список тегов,
+     *         отсортированный по возрастанию имени.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если теги отсутствуют.
+     *
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     List<Tag> findAllByOrderByNameAsc();
 
-
+    /**
+     * Возвращает набор имён тегов,
+     * связанных с указанной игрой.
+     *
+     * @param gameId идентификатор игры.
+     *               Не должен быть null.
+     *
+     * @return набор имён тегов игры.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой набор,
+     *         если у игры отсутствуют теги
+     *         или игра не найдена.
+     *
+     * @throws IllegalArgumentException                    если gameId равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
     SELECT t.name
     FROM Game g
@@ -66,6 +96,42 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
             @Param("gameId") Integer gameId
     );
 
+    /**
+     * Выполняет поиск тегов по части имени.
+     *
+     * <p>
+     * Поиск выполняется без учёта регистра.
+     * </p>
+     *
+     * <p>
+     * Результаты сортируются по имени
+     * в алфавитном порядке.
+     * </p>
+     *
+     * <p>
+     * Количество возвращаемых записей определяется
+     * параметрами pageable.
+     * </p>
+     *
+     * @param query строка поискового запроса.
+     *              Не должна быть null.
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список имён тегов,
+     *         удовлетворяющих поисковому запросу.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если совпадения отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если query
+     *                                                     или pageable равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
     SELECT t.name
     FROM Tag t

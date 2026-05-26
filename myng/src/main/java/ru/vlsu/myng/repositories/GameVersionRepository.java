@@ -55,24 +55,108 @@ public interface GameVersionRepository extends JpaRepository<GameVersion, Intege
      */
     Optional<GameVersion> findByCommitHash(String commitHash);
 
+    /**
+     * Возвращает первую созданную версию указанной игры.
+     *
+     * <p>
+     * Версия определяется по минимальному значению createdAt.
+     * </p>
+     *
+     * @param game игра, для которой выполняется поиск версии.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @return Optional с самой ранней версией игры.
+     *         Возвращает Optional.empty(),
+     *         если у игры отсутствуют версии.
+     *
+     * @throws IllegalArgumentException                    если game равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     Optional<GameVersion> findFirstByGameOrderByCreatedAtAsc(Game game);
 
+
     /**
-     * Находим самую последнюю версию среди всех игр, которая имеет хотя бы одну
-     * подтвежденную версию
+     * Возвращает последнюю созданную версию игры.
      *
-     * @return
+     * <p>
+     * Версия определяется по максимальному значению createdAt.
+     * </p>
+     *
+     * @return последняя созданная версия игры.
+     *         Может возвращать null,
+     *         если версии отсутствуют.
+     *
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
      */
     GameVersion findFirstByOrderByCreatedAtDesc();
 
+
+    /**
+     * Возвращает список версий игры,
+     * отсортированных по дате создания в порядке возрастания.
+     *
+     * @param gameId идентификатор игры.
+     *               Не должен быть null.
+     *               Должен соответствовать существующей игре.
+     *
+     * @return список версий игры,
+     *         отсортированный от самой ранней версии
+     *         к самой новой.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если у игры отсутствуют версии.
+     *
+     * @throws IllegalArgumentException                    если gameId равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     List<GameVersion> findByGameIdOrderByCreatedAtAsc(Integer gameId);
 
+
+    /**
+     * Возвращает список последних подтверждённых версий игр.
+     *
+     * <p>
+     * В результат включаются только версии,
+     * прошедшие модерацию и имеющие approved = true.
+     * </p>
+     *
+     * <p>
+     * Список сортируется по дате создания
+     * в порядке убывания.
+     * </p>
+     *
+     * <p>
+     * Количество возвращаемых записей определяется
+     * параметрами pageable.
+     * </p>
+     *
+     * @param pageable параметры пагинации,
+     *                 определяющие количество возвращаемых записей.
+     *                 Не должен быть null.
+     *
+     * @return список последних подтверждённых версий игр.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если подтверждённые версии отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("""
-            SELECT gv
-            FROM GameVersion gv
-            WHERE gv.moderationVerdict IS NOT NULL
-            AND gv.moderationVerdict.approved = true
-            ORDER BY gv.createdAt DESC
-            """)
+        SELECT gv
+        FROM GameVersion gv
+        WHERE gv.moderationVerdict IS NOT NULL
+        AND gv.moderationVerdict.approved = true
+        ORDER BY gv.createdAt DESC
+        """)
     List<GameVersion> findLatestApproved(Pageable pageable);
 }

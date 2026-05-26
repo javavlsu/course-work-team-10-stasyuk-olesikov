@@ -129,13 +129,50 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     boolean existsByGithubUsername(String githubUsername);
 
-    // TODO Написать документацию к этому методу
     /**
-     * 
-     * @param search
-     * @param role
-     * @param pageable
-     * @return
+     * Возвращает страницу пользователей
+     * с поддержкой фильтрации и пагинации.
+     *
+     * <p>
+     * Поддерживаются следующие фильтры:
+     * </p>
+     * <ul>
+     *     <li>поиск по имени пользователя;</li>
+     *     <li>поиск по email;</li>
+     *     <li>фильтрация по роли пользователя.</li>
+     * </ul>
+     *
+     * <p>
+     * Поиск выполняется без учёта регистра.
+     * </p>
+     *
+     * <p>
+     * Если search равен null или пустой строке,
+     * текстовый поиск не применяется.
+     * </p>
+     *
+     * <p>
+     * Если role равен null,
+     * фильтрация по роли не применяется.
+     * </p>
+     *
+     * @param search строка поискового запроса.
+     *               Может быть null или пустой строкой.
+     *
+     * @param role роль пользователя.
+     *             Может быть null.
+     *
+     * @param pageable параметры пагинации и сортировки.
+     *                 Не должен быть null.
+     *
+     * @return страница пользователей,
+     *         удовлетворяющих условиям фильтрации.
+     *         Никогда не возвращает null.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
      */
     @Query("SELECT u FROM User u WHERE " +
             "(:search IS NULL OR :search = '' OR " +

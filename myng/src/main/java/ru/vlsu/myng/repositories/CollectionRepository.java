@@ -41,12 +41,48 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
      */
     List<Collection> findByUser(User user);
 
-    // Используем подзапрос, чтобы найти все коллекции пользователя,
-    // ID которых не входят в список коллекций, где эта игра уже есть
+    /**
+     * Возвращает список коллекций пользователя, в которых отсутствует указанная игра.
+     *
+     * @param userId идентификатор пользователя — владельца коллекций.
+     *               Не должен быть null.
+     *               Должен соответствовать существующему пользователю.
+     *
+     * @param gameId идентификатор игры, которая не должна присутствовать
+     *               в коллекциях.
+     *               Не должен быть null.
+     *               Должен соответствовать существующей игре.
+     *
+     * @return список коллекций пользователя, не содержащих указанную игру.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список, если все коллекции уже
+     *         содержат игру или коллекции отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если userId или gameId равны null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     @Query("SELECT c FROM Collection c WHERE c.user.id = :userId AND c.id NOT IN " +
             "(SELECT col.id FROM Collection col JOIN col.games g WHERE g.id = :gameId)")
-    List<Collection> findAllByUserIdAndGameNotPresent(@Param("userId") Integer userId, @Param("gameId") Integer gameId);
+    List<Collection> findAllByUserIdAndGameNotPresent(@Param("userId") Integer userId,
+                                                      @Param("gameId") Integer gameId);
 
-    // Дополнительно: метод для проверки, есть ли у пользователя вообще коллекции
+
+    /**
+     * Проверяет наличие коллекций у указанного пользователя.
+     *
+     * @param userId идентификатор пользователя.
+     *               Не должен быть null.
+     *               Должен соответствовать существующему пользователю.
+     *
+     * @return true, если у пользователя существует хотя бы одна коллекция;
+     *         false — если коллекции отсутствуют.
+     *
+     * @throws IllegalArgumentException                    если userId равен null
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе
+     *                                                     данных
+     */
     boolean existsByUserId(Integer userId);
 }
