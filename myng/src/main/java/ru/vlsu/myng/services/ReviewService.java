@@ -32,21 +32,75 @@ public class ReviewService {
     private final NotificationRepository notificationRepository;
     private final ModerationVerdictRepository verdictRepository;
 
+    /**
+     * Обновляет текст и рейтинг отзыва.
+     *
+     * <p>
+     * Выполняется поиск отзыва по идентификатору,
+     * после чего обновляются поля text и rating.
+     * </p>
+     *
+     * @param reviewId идентификатор отзыва.
+     *                 Не должен быть null.
+     *
+     * @param dto DTO с новыми данными отзыва.
+     *            Не должен быть null.
+     *
+     * @throws IllegalArgumentException                    если отзыв с указанным id не найден
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     public void updateReview(Integer reviewId, ReviewUpdate dto) {
         Review review = reviewRepository.findById(reviewId).orElseThrow();
 
         review.setText(dto.getText());
         review.setRating(dto.getRating());
 
-        reviewRepository.save(review);
+        save(review);
     }
 
+    /**
+     * Возвращает отзыв по идентификатору.
+     *
+     * <p>
+     * Метод выполняется в режиме read-only транзакции.
+     * </p>
+     *
+     * @param id идентификатор отзыва.
+     *           Не должен быть null.
+     *
+     * @return найденный отзыв.
+     *
+     * @throws RuntimeException                           если отзыв не найден
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     @Transactional(readOnly = true)
     public Review getReviewById(Integer id) {
         return reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Отзыв не найден"));
     }
 
+    /**
+     * Возвращает список отзывов, оставленных указанным пользователем.
+     *
+     * <p>
+     * Сначала выполняется поиск пользователя,
+     * затем загружаются все его отзывы.
+     * </p>
+     *
+     * @param userId идентификатор пользователя.
+     *               Не должен быть null.
+     *
+     * @return список отзывов пользователя.
+     *         Никогда не возвращает null.
+     *         Может возвращать пустой список,
+     *         если отзывов нет.
+     *
+     * @throws IllegalArgumentException                    если пользователь с указанным id не найден
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     public List<Review> getByUser(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -58,14 +112,35 @@ public class ReviewService {
         return reviewRepository.findByGame(game);
     }
 
-    public Optional<Review> getUserGameReview(User user, Game game) {
-        return reviewRepository.findByUserAndGame(user, game);
-    }
+    public Optional<Review> getUserGameReview(User user, Game game) { return reviewRepository.findByUserAndGame(user, game); }
 
     public boolean reviewExists(User user, Game game) {
         return reviewRepository.existsByUserAndGame(user, game);
     }
 
+    /**
+     * Сохраняет отзыв и обновляет агрегированную статистику игры.
+     *
+     * <p>
+     * Если отзыв уже существует (определяется по id),
+     * то пересчитываются:
+     * <ul>
+     *     <li>сумма рейтингов (ratingSum);</li>
+     *     <li>количество отзывов (reviewCount);</li>
+     *     <li>средний рейтинг (averageRating).</li>
+     * </ul>
+     * </p>
+     *
+     * @param review отзыв для сохранения.
+     *               Не должен быть null.
+     *               Должен содержать корректный game и rating.
+     *
+     * @return сохранённый отзыв.
+     *
+     * @throws IllegalArgumentException                    если review или его id некорректны
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     @Transactional
     public Review save(Review review) {
         var game = reviewRepository.findGameById(review.getId());
@@ -85,6 +160,30 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
+    /**
+     * Удаляет отзыв по идентификатору и обновляет статистику игры.
+     *
+     * <p>
+     * При удалении отзыва пересчитываются:
+     * <ul>
+     *     <li>сумма рейтингов (ratingSum);</li>
+     *     <li>количество отзывов (reviewCount);</li>
+     *     <li>средний рейтинг (averageRating).</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * Если после удаления отзывов не остаётся,
+     * средний рейтинг устанавливается в 0.0.
+     * </p>
+     *
+     * @param id идентификатор отзыва.
+     *           Не должен быть null.
+     *
+     * @throws IllegalArgumentException                    если отзыв или связанная игра не найдены
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     @Transactional
     public void delete(Integer id) {
         var game = reviewRepository.findGameById(id);
@@ -107,10 +206,43 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public boolean hasUserReviewedGame(Game game, User user) {
-        return reviewRepository.existsByGameAndUser(game, user);
-    }
+    public boolean hasUserReviewedGame(Game game, User user) { return reviewRepository.existsByGameAndUser(game, user); }
 
+    /**
+     * Создаёт новый отзыв и обновляет агрегированную статистику игры.
+     *
+     * <p>
+     * При создании отзыва:
+     * <ul>
+     *     <li>заполняются базовые поля отзыва;</li>
+     *     <li>обновляется сумма рейтингов игры;</li>
+     *     <li>увеличивается количество отзывов;</li>
+     *     <li>пересчитывается средний рейтинг.</li>
+     * </ul>
+     * </p>
+     *
+     * @param game игра, для которой создаётся отзыв.
+     *             Не должна быть null.
+     *             Должна быть персистентной сущностью (id != null).
+     *
+     * @param user пользователь — автор отзыва.
+     *             Не должен быть null.
+     *             Должен быть персистентной сущностью (id != null).
+     *
+     * @param rating рейтинг отзыва.
+     *               Не должен быть null.
+     *               Ожидается значение в допустимом диапазоне рейтингов.
+     *
+     * @param text текст отзыва.
+     *             Не должен быть null.
+     *             Будет обрезан через trim().
+     *
+     * @return сохранённый отзыв.
+     *
+     * @throws IllegalArgumentException                    если game, user, rating или text некорректны
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     @Transactional
     public Review createReview(Game game, User user, Byte rating, String text) {
         Review review = new Review();
@@ -134,6 +266,30 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
+    /**
+     * Увеличивает количество жалоб на отзыв.
+     *
+     * <p>
+     * Если количество жалоб достигает порога (10+),
+     * создаётся или проверяется модерационный вердикт:
+     * <ul>
+     *     <li>если вердикт отсутствует — создаётся новый;</li>
+     *     <li>если уже существует — счётчик сбрасывается.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * При первом достижении порога также создаётся
+     * предупреждающее уведомление автору отзыва.
+     * </p>
+     *
+     * @param id идентификатор отзыва.
+     *           Не должен быть null.
+     *
+     * @throws EntityNotFoundException                    если отзыв с указанным id не найден
+     * @throws org.springframework.dao.DataAccessException
+     *                                                    при ошибке доступа к базе данных
+     */
     @Transactional()
     public void incrementReportCount(Integer id) {
         Review review = reviewRepository.findById(id)
@@ -169,6 +325,24 @@ public class ReviewService {
         }
     }
 
+    /**
+     * Создаёт предупреждающее уведомление для пользователя.
+     *
+     * <p>
+     * Уведомление относится к типу warning и отправляется
+     * конкретному пользователю.
+     * </p>
+     *
+     * @param user пользователь, которому отправляется уведомление.
+     *             Не должен быть null.
+     *
+     * @param text текст уведомления.
+     *             Не должен быть null.
+     *
+     * @throws IllegalArgumentException                    если user или text некорректны
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
+     */
     private void createWarningNotification(User user, String text) {
         Notification notification = new Notification();
         notification.setCreatedAt(Instant.now());

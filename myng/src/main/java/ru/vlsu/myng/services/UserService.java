@@ -24,16 +24,39 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     /**
-     * Регистрация нового пользователя.
+     * Регистрирует нового пользователя в системе.
      *
-     * @param registrationDto данные из формы регистрации
-     * @return зарегистрированный пользователь
-     * @throws RuntimeException если:
-     *                          - пароли не совпадают
-     *                          - username уже занят
-     *                          - email уже используется
-     *                          - пароль слишком короткий
+     * <p>
+     * Выполняются проверки:
+     * <ul>
+     *     <li>подтверждение пароля;</li>
+     *     <li>минимальная длина пароля (>= 6 символов);</li>
+     *     <li>уникальность username;</li>
+     *     <li>уникальность email.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>
+     * При успешной регистрации:
+     * <ul>
+     *     <li>пароль хешируется;</li>
+     *     <li>устанавливается роль user;</li>
+     *     <li>задаётся дата регистрации;</li>
+     *     <li>создаётся пустой профильный аватар.</li>
+     * </ul>
+     * </p>
+     *
+     * @param registrationDto DTO с данными регистрации.
+     *                        Не должен быть null.
+     *
+     * @return созданный пользователь.
+     *
+     * @throws RuntimeException если данные некорректны
+     *                          или пользователь/почта уже существуют
+     * @throws org.springframework.dao.DataAccessException
+     *                          при ошибке доступа к базе данных
      */
     @Transactional
     public User registerNewUser(UserRegistrationDto registrationDto) {
@@ -106,6 +129,28 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    /**
+     * Возвращает текущего аутентифицированного пользователя.
+     *
+     * <p>
+     * Извлекает пользователя из Spring Security Context.
+     * </p>
+     *
+     * <p>
+     * Поддерживаются только аутентифицированные пользователи
+     * с principal типа UserDetails.
+     * </p>
+     *
+     * @return текущий пользователь системы.
+     *
+     * @throws IllegalStateException если:
+     *                                <ul>
+     *                                    <li>нет authentication;</li>
+     *                                    <li>пользователь не аутентифицирован;</li>
+     *                                    <li>principal неизвестного типа;</li>
+     *                                    <li>пользователь не найден в базе.</li>
+     *                                </ul>
+     */
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -130,11 +175,25 @@ public class UserService {
         throw new IllegalStateException("Unknown authentication principal: " + principal);
     }
 
+    /**
+     * Сохранение пользователя.
+     */
     @Transactional
     public User save(User user) {
         return userRepository.save(user);
     }
 
+    /**
+     * Проверяет, является ли текущий пользователь разработчиком.
+     *
+     * <p>
+     * Если пользователь не аутентифицирован,
+     * возвращает false.
+     * </p>
+     *
+     * @return true, если текущий пользователь имеет роль dev;
+     *         false в остальных случаях.
+     */
     public boolean isCurrentUserDev() {
         try {
             User currentUser = getCurrentUser();

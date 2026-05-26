@@ -17,7 +17,23 @@ public class TagService {
     private final TagRepository tagRepository;
 
     /**
-     * Find tag by name or create if not exists.
+     * Находит тег по имени или создаёт новый, если он отсутствует.
+     *
+     * <p>
+     * Перед поиском имя нормализуется:
+     * приводится к нижнему регистру,
+     * обрезаются пробелы,
+     * пробелы внутри заменяются на дефисы.
+     * </p>
+     *
+     * @param rawName исходное имя тега.
+     *               Не должно быть null или пустым.
+     *
+     * @return найденный или созданный тег.
+     *
+     * @throws IllegalArgumentException                    если rawName некорректен
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
      */
     @Transactional
     public Tag findOrCreate(String rawName) {
@@ -32,7 +48,23 @@ public class TagService {
     }
 
     /**
-     * Get tag by name (throws if not found).
+     * Возвращает тег по имени.
+     *
+     * <p>
+     * Перед поиском имя нормализуется:
+     * приводится к нижнему регистру,
+     * обрезаются пробелы,
+     * пробелы внутри заменяются на дефисы.
+     * </p>
+     *
+     * @param rawName исходное имя тега.
+     *               Не должно быть null или пустым.
+     *
+     * @return найденный тег.
+     *
+     * @throws IllegalArgumentException                    если тег не найден или имя некорректно
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
      */
     public Tag getByName(String rawName) {
         String name = normalize(rawName);
@@ -42,8 +74,32 @@ public class TagService {
     }
 
     /**
-     * Parse DTO tag string:
-     * "#action, #sci-fi" -> Set<Tag>
+     * Разбирает строку тегов и возвращает набор Tag-сущностей.
+     *
+     * <p>
+     * Строка может содержать несколько тегов, разделённых запятыми.
+     * Поддерживаются теги с префиксом '#'.
+     * </p>
+     *
+     * <p>
+     * Для каждого тега выполняется:
+     * <ul>
+     *     <li>обрезка пробелов;</li>
+     *     <li>удаление символа '#', если он есть;</li>
+     *     <li>нормализация имени;</li>
+     *     <li>поиск или создание тега в базе.</li>
+     * </ul>
+     * </p>
+     *
+     * @param tagsRaw строка с тегами, разделёнными запятыми.
+     *                Не должна быть null или пустой.
+     *
+     * @return множество Tag-сущностей.
+     *         Никогда не возвращает null.
+     *
+     * @throws IllegalArgumentException                    если tagsRaw некорректна
+     * @throws org.springframework.dao.DataAccessException
+     *                                                     при ошибке доступа к базе данных
      */
     @Transactional
     public Set<Tag> parseTags(String tagsRaw) {
@@ -58,13 +114,7 @@ public class TagService {
                 .map(this::findOrCreate)
                 .collect(Collectors.toSet());
     }
-
-    /**
-     * Normalize tag:
-     * - lowercase
-     * - trim
-     * - replace spaces with "-"
-     */
+    
     private String normalize(String tag) {
         if (tag == null || tag.isBlank()) {
             throw new IllegalArgumentException("Tag cannot be null or empty");
