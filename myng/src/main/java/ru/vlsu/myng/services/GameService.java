@@ -23,13 +23,35 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для управления играми на платформе.<br>
+ * <br>
+ * Обеспечивает полный жизненный цикл игры:<br>
+ * - публикация новой игры разработчиком с валидацией репозитория;<br>
+ * - фильтрация и поиск игр в каталоге с пагинацией и сортировкой;<br>
+ * - получение детальной информации об игре для страницы игры;<br>
+ * - обновление метаданных игры (название, описание, изображение);<br>
+ * - отслеживание статистики просмотров и запусков;<br>
+ * - формирование выборок: популярные, новинки, лучшие за месяц.<br>
+ * <br>
+ * Используется в следующих сценариях:<br>
+ * - разработчик публикует новую игру или новую версию;<br>
+ * - пользователь просматривает каталог игр с фильтрами;<br>
+ * - пользователь открывает страницу конкретной игры;<br>
+ * - администратор или разработчик редактирует информацию об игре;<br>
+ * - система формирует подборки для главной страницы.<br>
+ * <br>
+ * При публикации игры выполняется валидация GitHub-репозитория,
+ * коммита и списка файлов через {@link GithubService}.
+ * После сохранения создаётся связанная {@link GameVersion}
+ * и {@link ModerationVerdict} для модерации.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
 
     private final GameRepository gameRepository;
-    private final GameStatsRepository gameStatsRepository;
     private final ReviewRepository reviewRepository;
     private final GameVersionRepository gameVersionRepository;
     private final ModerationVerdictRepository moderationVerdictRepository;
@@ -39,6 +61,18 @@ public class GameService {
     private final TagService tagService;
     private final TagRepository tagRepository;
 
+    /**
+     * Возвращает список всех игр указанного разработчика.
+     *
+     * @param userId идентификатор пользователя-разработчика. Не должен быть null.
+     *
+     * @return список игр разработчика. Никогда не возвращает null.
+     *         Может быть пустым, если разработчик ещё не опубликовал ни одной игры.
+     *
+     * @throws IllegalArgumentException                    если разработчик с
+     *                                                     указанным id не найден
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public List<Game> getDeveloperGames(Integer userId) {
         User developer = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Developer not found"));
@@ -46,25 +80,75 @@ public class GameService {
         return gameRepository.findByDeveloper(developer);
     }
 
+    /**
+     * Находит игру по уникальной ссылке на репозиторий.
+     *
+     * @param repo URL GitHub-репозитория. Не должен быть null или пустым.
+     *
+     * @return игра с указанным репозиторием.
+     *
+     * @throws IllegalArgumentException                    если игра с указанным
+     *                                                     репозиторием не найдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public Game getGameByRepo(String repo) {
         return gameRepository.findByRepo(repo)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found"));
     }
 
+    /**
+     * Возвращает список игр указанного жанра.
+     *
+     * @param genre жанр игры. Не должен быть null.
+     *
+     * @return список игр данного жанра. Никогда не возвращает null.
+     *         Может быть пустым, если игр с таким жанром нет.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public List<Game> getGamesByGenre(Game.Genre genre) {
         return gameRepository.findByGenre(genre);
     }
 
+    /**
+     * Проверяет, существует ли игра с указанным репозиторием.
+     *
+     * @param repo URL GitHub-репозитория. Не должен быть null или пустым.
+     *
+     * @return true если игра с таким репозиторием уже зарегистрирована.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public boolean repoExists(String repo) {
         return gameRepository.existsByRepo(repo);
     }
 
+    /**
+     * Сохраняет или обновляет игру в базе данных.
+     *
+     * @param game игра для сохранения. Не должна быть null.
+     *
+     * @return сохранённая игра с актуальными данными.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public Game save(Game game) {
         return gameRepository.save(game);
     }
 
     /**
-     * Популярная игра (больше всего запусков за все время)
+     * Возвращает самую запускаемую игру на платформе.
+     *
+     * <p>
+     * Игра с наибольшим количеством запусков за всё время.
+     * Учитываются только игры, имеющие хотя бы одну
+     * подтверждённую модерацией версию.
+     * </p>
+     *
+     * @return DTO самой популярной игры или null,
+     *         если на платформе нет опубликованных игр.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public CatalogGameDTO getMostLaunchedGame() {
@@ -73,8 +157,18 @@ public class GameService {
     }
 
     /**
-     * Новинка (самая последняя добавленная версия в системе, имеющая хотя бы одну
-     * подтвержденную версию)
+     * Возвращает самую новую игру на платформе.
+     *
+     * <p>
+     * Игра с самой последней подтверждённой версией.
+     * Учитываются только игры, имеющие хотя бы одну
+     * подтверждённую модерацией версию.
+     * </p>
+     *
+     * @return DTO самой новой игры или null,
+     *         если на платформе нет опубликованных игр.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public CatalogGameDTO getNewestGame() {
@@ -86,15 +180,24 @@ public class GameService {
     }
 
     /**
-     * Лучшее за месяц (высший средний рейтинг по отзывам за последние 30 дней)
+     * Возвращает игру с наивысшим рейтингом за последние 30 дней.
+     *
+     * <p>
+     * Если за последний месяц ни одна игра не получила оценок,
+     * возвращается игра с наивысшим рейтингом за всё время.
+     * Учитываются только игры с подтверждёнными версиями.
+     * </p>
+     *
+     * @return DTO лучшей игры за месяц или null,
+     *         если на платформе нет игр с рейтингом.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public CatalogGameDTO getTopRatingGameMonth() {
         Instant monthAgo = Instant.now().minus(30, ChronoUnit.DAYS);
         List<Game> games = reviewRepository.findTopRatedGamesSince(monthAgo, PageRequest.of(0, 1));
 
-        // Если за месяц никто не ставил оценки, берем просто лучшую игру по рейтингу за
-        // все время
         if (games.isEmpty()) {
             List<Game> allTimeBest = reviewRepository.findTopRatedGames(PageRequest.of(0, 1));
             return allTimeBest.isEmpty() ? null : convertToCatalogDto(allTimeBest.get(0));
@@ -104,7 +207,19 @@ public class GameService {
     }
 
     /**
-     * Список популярных игр для мини-каталога
+     * Возвращает список популярных игр для мини-каталога.
+     *
+     * <p>
+     * Популярность определяется по количеству запусков
+     * (сортировка "popular").
+     * </p>
+     *
+     * @param limit максимальное количество возвращаемых игр. Должен быть > 0.
+     *
+     * @return список DTO популярных игр. Никогда не возвращает null.
+     *         Может быть пустым, если на платформе нет игр.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public List<CatalogGameDTO> getPopularGames(int limit) {
@@ -120,11 +235,20 @@ public class GameService {
     }
 
     /**
-     * Получить все игры для каталога с дополнительной информацией
+     * Возвращает все игры для отображения в каталоге.
+     *
+     * <p>
+     * Использует {@code findAllForCatalog} с EntityGraph
+     * для предотвращения проблемы N+1 запросов.
+     * </p>
+     *
+     * @return список DTO всех игр каталога. Никогда не возвращает null.
+     *         Может быть пустым, если игры отсутствуют.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public List<CatalogGameDTO> getAllGamesForCatalog() {
-        // Получаем уже инициализированные объекты
         List<Game> games = gameRepository.findAllForCatalog();
 
         return games.stream()
@@ -133,7 +257,15 @@ public class GameService {
     }
 
     /**
-     * Получить игру по ID
+     * Находит игру по идентификатору.
+     *
+     * @param id идентификатор игры. Не должен быть null.
+     *
+     * @return игра с указанным id.
+     *
+     * @throws RuntimeException                            если игра с указанным id
+     *                                                     не найдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public Game getGameById(Integer id) {
@@ -142,7 +274,16 @@ public class GameService {
     }
 
     /**
-     * Конвертирует Game в CatalogGameDTO с дополнительными данными
+     * Преобразует сущность {@link Game} в DTO для каталога.
+     *
+     * <p>
+     * Включает преобразование изображения в Base64
+     * и назначение цвета жанра для UI.
+     * </p>
+     *
+     * @param game игра для преобразования. Не должна быть null.
+     *
+     * @return DTO игры для каталога.
      */
     private CatalogGameDTO convertToCatalogDto(Game game) {
         Double avgRating = game.getAverageRating();
@@ -183,6 +324,18 @@ public class GameService {
         return dto;
     }
 
+    /**
+     * Возвращает CSS-класс градиента для указанного жанра.
+     *
+     * <p>
+     * Каждый жанр имеет уникальную цветовую схему
+     * для визуального различения в каталоге.
+     * </p>
+     *
+     * @param genre жанр игры. Может быть null.
+     *
+     * @return строка с CSS-классами Tailwind.
+     */
     private String getGenreColor(Game.Genre genre) {
         if (genre == null)
             return "from-blue-500 to-cyan-600";
@@ -216,6 +369,38 @@ public class GameService {
         }
     }
 
+    /**
+     * Возвращает страницу игр каталога с фильтрацией и пагинацией.
+     *
+     * <p>
+     * Поддерживаемые фильтры:
+     * </p>
+     * <ul>
+     * <li>поиск по названию, описанию и разработчику;</li>
+     * <li>жанр игры;</li>
+     * <li>теги;</li>
+     * <li>минимальный рейтинг.</li>
+     * </ul>
+     *
+     * <p>
+     * Поддерживаемые сортировки:
+     * </p>
+     * <ul>
+     * <li>newest — сначала новые (по дате первого релиза);</li>
+     * <li>oldest — сначала старые;</li>
+     * <li>rating_high — по убыванию рейтинга;</li>
+     * <li>rating_low — по возрастанию рейтинга;</li>
+     * <li>popular — по убыванию количества запусков.</li>
+     * </ul>
+     *
+     * @param filter   DTO с параметрами фильтрации. Может быть с null-полями.
+     * @param pageable параметры пагинации. Не должен быть null.
+     *
+     * @return страница DTO игр, удовлетворяющих фильтрам.
+     *
+     * @throws IllegalArgumentException                    если pageable равен null
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional(readOnly = true)
     public Page<CatalogGameDTO> getFilteredGames(
             GameFilterDTO filter,
@@ -247,6 +432,19 @@ public class GameService {
         return page;
     }
 
+    /**
+     * Преобразует строковый параметр сортировки в объект {@link Sort}
+     * для использования в запросах к базе данных.
+     *
+     * <p>
+     * Если параметр sort равен null, используется сортировка "newest"
+     * (сначала новые игры).
+     * </p>
+     *
+     * @param sort строковый идентификатор сортировки. Может быть null.
+     *
+     * @return объект Sort для JPA-запроса.
+     */
     private Sort buildAggregateSort(String sort) {
 
         if (sort == null)
@@ -282,13 +480,33 @@ public class GameService {
     }
 
     /**
-     * Получить игру для страницы игры с полными данными
+     * Возвращает полные данные игры для отображения на странице игры.
+     *
+     * <p>
+     * Включает:
+     * </p>
+     * <ul>
+     * <li>основную информацию об игре;</li>
+     * <li>список подтверждённых версий (от новых к старым);</li>
+     * <li>последнюю подтверждённую версию;</li>
+     * <li>последние отзывы (до 5);</li>
+     * <li>статистику просмотров и запусков;</li>
+     * <li>изображение игры в формате Base64.</li>
+     * </ul>
+     *
+     * @param gameId идентификатор игры. Не должен быть null.
+     *
+     * @return DTO с полными данными игры.
+     *
+     * @throws RuntimeException                            если игра с указанным id
+     *                                                     не найдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
     @Transactional(readOnly = true)
     public GamePageDTO getGamePageData(Integer gameId) {
 
         Game game = getGameById(gameId);
-        
+
         Double avgRating = game.getAverageRating();
         Integer reviewsCount = game.getReviewCount();
         Integer totalViews = game.getTotalViews();
@@ -343,6 +561,24 @@ public class GameService {
         return dto;
     }
 
+    /**
+     * Обновляет метаданные игры.
+     *
+     * <p>
+     * Можно обновить название, описание и изображение.
+     * Если поле в запросе равно null или пустой строке,
+     * соответствующее поле игры не изменяется.
+     * </p>
+     *
+     * @param gameId  идентификатор игры. Не должен быть null.
+     * @param request DTO с новыми данными. Не должен быть null.
+     *
+     * @throws RuntimeException                            если игра с указанным id
+     *                                                     не найдена
+     * @throws IOException                                 если не удалось прочитать
+     *                                                     байты изображения
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional
     public void updateGame(Integer gameId, GameEditRequestDTO request) throws IOException {
         Game game = gameRepository.findById(gameId)
@@ -360,6 +596,28 @@ public class GameService {
         gameRepository.save(game);
     }
 
+    /**
+     * Возвращает список игр указанного пользователя с дополнительной
+     * информацией для личного кабинета разработчика.
+     *
+     * <p>
+     * Для каждой игры определяется:
+     * </p>
+     * <ul>
+     * <li>статус модерации последней версии (опубликована/отклонена/на
+     * модерации);</li>
+     * <li>общее количество просмотров;</li>
+     * <li>средний рейтинг;</li>
+     * <li>изображение в формате Base64.</li>
+     * </ul>
+     *
+     * @param user пользователь-разработчик. Не должен быть null.
+     *
+     * @return список DTO игр пользователя. Никогда не возвращает null.
+     *         Может быть пустым, если пользователь ещё не публиковал игры.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public List<MyGame> getGamesForUser(User user) {
         List<Game> games = gameRepository.findByDeveloper(user);
 
@@ -409,35 +667,43 @@ public class GameService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Публикует новую игру на платформе.
+     *
+     * <p>
+     * Процесс публикации включает:
+     * </p>
+     * <ol>
+     * <li>Валидацию GitHub-репозитория через {@link GithubService};</li>
+     * <li>Валидацию существования коммита;</li>
+     * <li>Валидацию наличия указанных файлов в коммите;</li>
+     * <li>Создание сущности {@link Game} с метаданными и изображением;</li>
+     * <li>Привязку тегов (существующих или новых);</li>
+     * <li>Создание {@link GameVersion} с информацией о коммите;</li>
+     * <li>Создание {@link ModerationVerdict} для отправки на модерацию.</li>
+     * </ol>
+     *
+     * <p>
+     * Требования к входным данным:
+     * </p>
+     * <ul>
+     * <li>repoLink — URL формата https://github.com/[username]/[repo];</li>
+     * <li>gameVer — строка версии формата v[число].[число]...;</li>
+     * <li>commitHash — 7-значный хеш коммита;</li>
+     * <li>title — от 3 до 100 символов;</li>
+     * <li>description — от 10 до 2000 символов;</li>
+     * <li>mainPic — изображение размером не более 32 МБ;</li>
+     * <li>tags — строка тегов формата "#tag1, #tag2";</li>
+     * <li>files — список имён файлов через запятую.</li>
+     * </ul>
+     *
+     * @param dto запрос на публикацию игры. Не должен быть null.
+     *
+     * @throws RuntimeException                            если валидация GitHub не
+     *                                                     пройдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     public void publishGame(PublishGameRequest dto) {
-        /*
-         * 1. Check if game already exists via repo parameter. DONE
-         * 2. If game doesn't exist already create a Game entity inside the DB;
-         * create a GameVersion entity as well; create ModerationVerdict related
-         * to that GameVersion.
-         * 3. If new tags are present, add them to the Tags table. Link tags and the
-         * published game.
-         * 4. NOTICE: GameStats entity should be created only after approval of the
-         * game;
-         * It doesn't make sense to create it right away as nobody will see it anyway.
-         * Also, the archive with game files should also be downloaded only after
-         * approval.
-         */
-
-        /*
-         * The repo link must be in the format
-         * https://github.com/[github_username]/[repo-name]
-         * The game version must be a string of type v<number>.<number>.<number>...
-         * The commit_hash must be a 7 digit hexadecimal number
-         * Description must be at least 10 and at most 2000 chars long
-         * Game's name must be at least 3 and at most 100 chars long
-         * File is required, it's a picture and its size must at most be 32 mb
-         * The file list is a string of filenames separated by ", " (file0.ext0,
-         * file0.ext1, file1.ext0)
-         * The tags is a string of tags of format "#this-is-tag-name" separated by ", ".
-         * It must have at least one tag.
-         */
-
         githubService.validateRepoExists(dto.getRepoLink());
         githubService.validateCommitExists(dto.getRepoLink(), dto.getCommitHash());
         githubService.validateFilesExistInCommit(dto.getRepoLink(), dto.getCommitHash(), dto.getFiles());
@@ -498,12 +764,28 @@ public class GameService {
         version.setModerationVerdict(verdict);
     }
 
+    /**
+     * Увеличивает счётчик запусков игры на 1.
+     *
+     * @param game игра, для которой увеличивается счётчик. Не должна быть null.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional
     public void incrementGameTotalLaunches(Game game) {
         game.setTotalLaunches(game.getTotalLaunches() + 1);
         gameRepository.save(game);
     }
 
+    /**
+     * Увеличивает счётчик запусков игры на 1 по её идентификатору.
+     *
+     * @param gameId идентификатор игры. Не должен быть null.
+     *
+     * @throws RuntimeException                            если игра с указанным id
+     *                                                     не найдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional
     public void incrementGameTotalLaunches(Integer gameId) {
         var game = getGameById(gameId);
@@ -511,12 +793,28 @@ public class GameService {
         gameRepository.save(game);
     }
 
+    /**
+     * Увеличивает счётчик просмотров игры на 1.
+     *
+     * @param game игра, для которой увеличивается счётчик. Не должна быть null.
+     *
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional
     public void incrementGameTotalViews(Game game) {
         game.setTotalViews(game.getTotalViews() + 1);
         gameRepository.save(game);
     }
 
+    /**
+     * Увеличивает счётчик просмотров игры на 1 по её идентификатору.
+     *
+     * @param gameId идентификатор игры. Не должен быть null.
+     *
+     * @throws RuntimeException                            если игра с указанным id
+     *                                                     не найдена
+     * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
+     */
     @Transactional
     public void incrementGameTotalViews(Integer gameId) {
         var game = getGameById(gameId);
