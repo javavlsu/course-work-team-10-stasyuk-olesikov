@@ -3,7 +3,6 @@ package ru.vlsu.myng.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 import ru.vlsu.myng.dto.ModerationItem;
 import ru.vlsu.myng.entities.ModerationVerdict;

@@ -3,24 +3,18 @@ package ru.vlsu.myng.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ru.vlsu.myng.dto.*;
 import ru.vlsu.myng.services.*;
 import ru.vlsu.myng.entities.Game;
-import ru.vlsu.myng.entities.Review;
 import ru.vlsu.myng.entities.User;
 
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
