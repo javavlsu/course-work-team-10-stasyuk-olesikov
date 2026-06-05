@@ -22,6 +22,8 @@ public class PublishGameVersionRequest {
             message = "Хэш должен быть 7-значным HEX"
     )
     private String commitHash;
+    
+    private String entryPoint;
 
     @Pattern(
             regexp = "^([a-zA-Z0-9_\\-./]+)(,\\s*[a-zA-Z0-9_\\-./]+)*$",

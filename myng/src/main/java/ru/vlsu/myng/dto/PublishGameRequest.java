@@ -36,6 +36,13 @@ public class PublishGameRequest {
     )
     private String commitHash;
 
+    @NotBlank(message = "Точка входа обязательна")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9_\\-./]+\\.html$",
+            message = "Укажите путь к HTML-файлу относительно корня репозитория (например: index.html или game/index.html)"
+    )
+    private String entryPoint;
+    
     @Pattern(
             regexp = "^([a-zA-Z0-9_\\-./]+)(,\\s*[a-zA-Z0-9_\\-./]+)*$",
             message = "Введите названия файлов и папок в формате: file.ext, folder, dir/file.ext"

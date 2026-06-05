@@ -295,13 +295,72 @@
                     </div>
                 </div>
 
-                <!-- Files & Tags -->
+                <!-- Load Tree Button -->
                 <div>
-            <textarea name="files" placeholder="Список файлов"
-                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
-                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="files"></div>
+                    <button
+                            type="button"
+                            class="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                            data-action="load-repo-tree"
+                            th:data-github="${user.githubUsername}"
+                    >
+
+                        <i class="fas fa-folder-tree"></i>
+                        Загрузить дерево репозитория
+                    </button>
                 </div>
 
+                <!-- Repository Tree -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Содержимое репозитория
+                    </label> 
+
+                    <div class="text-xs text-gray-500">
+                        ЛКМ — добавить файл или папку в игру.
+                        ПКМ — назначить HTML-файл точкой входа.
+                    </div>
+
+                    <div
+                            id="repo-tree-container"
+                            class="border border-gray-200 rounded-xl bg-white overflow-hidden"
+                    >
+                        <div
+                                id="repo-tree-loading"
+                                class="hidden p-4 text-sm text-gray-500"
+                        >
+                            Загрузка структуры репозитория...
+                        </div>
+
+                        <div
+                                id="repo-tree"
+                                class="max-h-96 overflow-y-auto py-2"
+                        >
+                            <div class="p-4 text-gray-400 text-sm">
+                                Укажите репозиторий и хэш коммита
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                            id="selected-entrypoint"
+                            class="hidden text-sm px-3 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200"
+                    >
+                        Точка входа:
+                        <span class="font-medium"></span>
+                    </div>
+
+                    <div class="error-message text-red-500 text-sm mt-1 hidden"
+                         data-error-for="files"></div>
+
+                    <div class="error-message text-red-500 text-sm mt-1 hidden"
+                         data-error-for="entryPoint"></div>
+
+                    <!-- Hidden inputs for backend compatibility -->
+                    <input type="hidden" name="files" />
+                    <input type="hidden" name="entryPoint" />
+                </div>
+
+                <!-- Tags -->
                 <div>
             <textarea name="tags" placeholder="Теги"
                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
@@ -332,6 +391,32 @@
                     </button>
                 </div>
             </form>
+        </template>
+
+        <template id="tpl-repo-file">
+            <div class="repo-node file">
+                <div class="repo-row">
+                    <span class="expand-placeholder"></span>
+                    <i class="fas fa-file"></i>
+                    <span class="repo-name"></span>
+                </div>
+            </div>
+        </template>
+
+        <template id="tpl-repo-folder">
+            <div class="repo-node folder">
+                <div class="repo-row">
+            <span class="expand-icon">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+
+                    <i class="fas fa-folder"></i>
+
+                    <span class="repo-name"></span>
+                </div>
+
+                <div class="repo-children hidden"></div>
+            </div>
         </template>
 
         <template id="tpl-become-dev">
@@ -824,6 +909,446 @@
                         alert("Ошибка сети");
                     }
                 }
+                
+                if (action === "load-repo-tree") {
+                    async function loadRepositoryTree(repoLink, commit) {
+                        const match = repoLink.match(
+                            /^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/
+                        );
+                        
+                        if (!match) {
+                            throw new Error("Invalid GitHub URL");
+                        }
+                        
+                        const [, githubUsername, repoName] = match;
+                    
+                        const treeContainer =
+                            document.getElementById("repo-tree");
+                    
+                        const loading =
+                            document.getElementById("repo-tree-loading");
+                    
+                        try {
+                            treeContainer.innerHTML = "";
+                    
+                            loading.classList.remove("hidden"); 
+                    
+                            const response = await fetch(
+                                `https://api.github.com/repos/${githubUsername}/${repoName}/git/trees/${commit}?recursive=1`
+                            );
+                    
+                            if (!response.ok) {
+                                throw new Error(
+                                    "Не удалось загрузить дерево репозитория"
+                                );
+                            }
+                    
+                            const githubTree = await response.json();
+
+                            const root = {
+                                name: repoName,
+                                path: "",
+                                type: "directory",
+                                children: []
+                            };
+                            
+                            for (const entry of githubTree.tree) {
+                            
+                                const parts = entry.path.split("/");
+                            
+                                let current = root;
+                            
+                                for (let i = 0; i < parts.length; i++) {
+                            
+                                    const part = parts[i];
+                                    const isLast = i === parts.length - 1;
+                            
+                                    let child =
+                                        current.children.find(
+                                            c => c.name === part
+                                        );
+                            
+                                    if (!child) {
+                            
+                                        child = {
+                                            name: part,
+                                            path: parts.slice(0, i + 1).join("/"),
+                                            type:
+                                                isLast
+                                                    ? (entry.type === "tree"
+                                                        ? "directory"
+                                                        : "file")
+                                                    : "directory",
+                                            children: []
+                                        };
+                            
+                                        current.children.push(child);
+                                    }
+                            
+                                    current = child;
+                                }
+                            }
+                            
+                            treeContainer.innerHTML = "";
+                            
+                            treeContainer.appendChild(
+                                renderNode(root, true)
+                            );
+                    
+                        } catch (err) {
+                            console.error(err);
+                    
+                            treeContainer.innerHTML = `
+                                <div class="p-4 text-red-500">
+                                    ${err.message}
+                                </div>
+                            `;
+                        } finally {
+                            loading.classList.add("hidden");
+                        }
+                    }
+                    
+                    function renderNode(node, isRoot = false) {
+                        return node.type === "directory"
+                            ? renderFolder(node, isRoot)
+                            : renderFile(node);
+                    }
+                    
+                    const selectedPaths = new Set();
+                    let entryPoint = null;
+                    let entryPointElement = null;
+                    
+                    function syncHiddenInputs() {
+                        document.querySelector('[name="files"]').value =
+                            [...selectedPaths].join(",");
+                    
+                        document.querySelector('[name="entryPoint"]').value =
+                            entryPoint ?? "";
+                    }
+                    
+                    function updateEntryPointLabel() {
+                        const container =
+                            document.getElementById("selected-entrypoint");
+                    
+                        const text =
+                            container.querySelector("span");
+                    
+                        if (!entryPoint) {
+                            container.classList.add("hidden");
+                            return;
+                        }
+                    
+                        text.textContent = entryPoint;
+                        container.classList.remove("hidden");
+                    }
+                    
+                    function markSelected(element) {
+                        element.classList.add(
+                            "bg-green-100",
+                            "border-green-400"
+                        );
+                    }
+                    
+                    function unmarkSelected(element) {
+                        element.classList.remove(
+                            "bg-green-100",
+                            "border-green-400"
+                        );
+                    }
+                    
+                    function markEntrypoint(element) {
+                        element.classList.add(
+                            "bg-amber-100",
+                            "border-amber-400"
+                        );
+                    }
+                    
+                    function unmarkEntrypoint(element) {
+                        element.classList.remove(
+                            "bg-amber-100",
+                            "border-amber-400"
+                        );
+                    }
+                    
+                    function setEntryPoint(path, element) {
+                        if (entryPointElement) {
+                    
+                            unmarkEntrypoint(entryPointElement);
+                    
+                            if (
+                                selectedPaths.has(
+                                    entryPointElement.dataset.path
+                                )
+                            ) {
+                                markSelected(entryPointElement);
+                            }
+                        }
+                    
+                        entryPoint = path;
+                        entryPointElement = element;
+                    
+                        unmarkSelected(element);
+                        markEntrypoint(element);
+                    
+                        updateEntryPointLabel();
+                        syncHiddenInputs();
+                    }
+                    
+                    function applyFileIcon(icon, fileName) {
+                        function setIcon(iconClasses, colorClass) {
+                            icon.className = "";
+                    
+                            icon.classList.add(...iconClasses);
+                    
+                            if (colorClass) {
+                                icon.classList.add(colorClass);
+                            }
+                        }
+                    
+                        if (/\.html?$/i.test(fileName)) {
+                            setIcon(["fab", "fa-html5"], "icon-html");
+                        }
+                        else if (/\.css$/i.test(fileName)) {
+                            setIcon(["fas", "fa-paint-brush"], "icon-css");
+                        }
+                        else if (/\.js$/i.test(fileName)) {
+                            setIcon(["fas", "fa-file-code"], "icon-js");
+                        }
+                        else if (/\.json$/i.test(fileName)) {
+                            setIcon(["fas", "fa-code"], "icon-json");
+                        }
+                        else if (/\.md$/i.test(fileName)) {
+                            setIcon(["fas", "fa-file-alt"], "icon-md");
+                        }
+                        else if (/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(fileName)) {
+                            setIcon(["fas", "fa-image"], "icon-image");
+                        }
+                        else if (/\.(mp3|wav|ogg)$/i.test(fileName)) {
+                            setIcon(["fas", "fa-music"], "icon-audio");
+                        }
+                        else if (/\.(mp4|webm|avi)$/i.test(fileName)) {
+                            setIcon(["fas", "fa-video"], "icon-video");
+                        }
+                        else if (/\.(zip|rar|7z|tar|gz)$/i.test(fileName)) {
+                            setIcon(["fas", "fa-file-archive"], "icon-archive");
+                        }
+                        else {
+                            setIcon(["fas", "fa-file"], "icon-file");
+                        }
+                    }
+                    
+                    function renderFile(file) {
+                        const template =
+                            document.getElementById("tpl-repo-file");
+                    
+                        const element =
+                            template.content.firstElementChild.cloneNode(true);
+                    
+                        element.dataset.path = file.path;
+                    
+                        element.querySelector(".repo-name").textContent =
+                            file.name;
+                    
+                        applyFileIcon(
+                            element.querySelector("i"),
+                            file.name
+                        );
+                    
+                        element.addEventListener("click", () => {
+                    
+                            const path = file.path;
+                    
+                            if (selectedPaths.has(path)) {
+                    
+                                selectedPaths.delete(path);
+                    
+                                unmarkSelected(element);
+                    
+                            } else {
+                    
+                                selectedPaths.add(path);
+                    
+                                markSelected(element);
+                            }
+                    
+                            syncHiddenInputs();
+                        });
+                    
+                        element.addEventListener("contextmenu", e => {
+                    
+                            e.preventDefault();
+                    
+                            if (!/\.html?$/i.test(file.name)) {
+                                return;
+                            }
+                    
+                            if (entryPoint === file.path) {
+                    
+                                entryPoint = null;
+                    
+                                unmarkEntrypoint(element);
+                    
+                                if (selectedPaths.has(file.path)) {
+                                    markSelected(element);
+                                }
+                    
+                                entryPointElement = null;
+                    
+                                updateEntryPointLabel();
+                                syncHiddenInputs();
+                    
+                                return;
+                            }
+                    
+                            setEntryPoint(
+                                file.path,
+                                element
+                            );
+                        });
+                    
+                        return element;
+                    }
+                    
+                    function collectFiles(node, result = []) {
+                        if (node.type === "file") {
+                            result.push(node.path);
+                        }
+                    
+                        if (node.children) {
+                            node.children.forEach(child =>
+                                collectFiles(child, result)
+                            );
+                        }
+                    
+                        return result;
+                    }
+                    
+                    function renderFolder(folder, isRoot = false) {
+                        const template =
+                            document.getElementById("tpl-repo-folder");
+                    
+                        const element =
+                            template.content.firstElementChild.cloneNode(true);
+                    
+                        element.dataset.path = folder.path;
+                    
+                        const name =
+                            element.querySelector(".repo-name");
+                    
+                        const childrenContainer =
+                            element.querySelector(".repo-children");
+                    
+                        const folderIcon =
+                            element.querySelector(".fa-folder");
+                    
+                        const chevronIcon =
+                            element.querySelector(".expand-icon i");
+                    
+                        const expandButton =
+                            element.querySelector(".expand-icon");
+                    
+                        name.textContent = folder.name;
+                    
+                        if (isRoot) {
+                            folderIcon.classList.remove("fa-folder");
+                            folderIcon.classList.add("fa-box-open");
+                        }
+                    
+                        if (folder.children?.length) {
+                            for (const child of folder.children) {
+                                childrenContainer.appendChild(
+                                    renderNode(child)
+                                );
+                            }
+                        } else {
+                            expandButton.style.visibility = "hidden";
+                        }
+                    
+                        if (isRoot) {
+                            childrenContainer.classList.remove("hidden");
+                    
+                            chevronIcon.classList.remove("fa-chevron-right");
+                            chevronIcon.classList.add("fa-chevron-down");
+                        }
+                    
+                        expandButton.addEventListener("click", e => {
+                            e.stopPropagation();
+                    
+                            const expanded =
+                                !childrenContainer.classList.contains("hidden");
+                    
+                            if (expanded) {
+                                childrenContainer.classList.add("hidden");
+                    
+                                chevronIcon.classList.remove("fa-chevron-down");
+                                chevronIcon.classList.add("fa-chevron-right");
+                    
+                                folderIcon.classList.remove("fa-folder-open");
+                                folderIcon.classList.add("fa-folder");
+                            } else {
+                                childrenContainer.classList.remove("hidden");
+                    
+                                chevronIcon.classList.remove("fa-chevron-right");
+                                chevronIcon.classList.add("fa-chevron-down");
+                    
+                                folderIcon.classList.remove("fa-folder");
+                                folderIcon.classList.add("fa-folder-open");
+                            }
+                        });
+                        
+                        element.querySelector(".repo-row")
+                        .addEventListener("click", e => {
+                    
+                            if (e.target.closest(".expand-icon")) {
+                                return;
+                            }
+                    
+                            const files =
+                                collectFiles(folder);
+                    
+                            const allSelected =
+                                files.every(path =>
+                                    selectedPaths.has(path)
+                                );
+                    
+                            if (allSelected) {
+                    
+                                files.forEach(path =>
+                                    selectedPaths.delete(path)
+                                );
+                    
+                                unmarkSelected(element);
+                    
+                            } else {
+                    
+                                files.forEach(path =>
+                                    selectedPaths.add(path)
+                                );
+                    
+                                markSelected(element);
+                            }
+                    
+                            syncHiddenInputs();
+                        });
+                    
+                        return element;
+                    }
+                
+                    const repo =
+                        document.querySelector("[name=repoLink]").value;
+            
+                    const commit =
+                        document.querySelector("[name=commitHash]").value;
+            
+                    if (!repo || !commit) {
+                        throw new Error(
+                            "Сначала укажите репозиторий и хэш коммита"
+                        );
+                        return;
+                    }
+            
+                    await loadRepositoryTree(repo, commit);
+                }
 
                 /* =========================
                    OPEN MODALS
@@ -1101,6 +1626,110 @@
               });
             });
         </script>
+        
+        <style>
+            .repo-node {
+                font-size: 14px;
+            }
+            
+            .repo-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 12px;
+                cursor: pointer;
+                border-radius: 6px;
+                user-select: none;
+            }
+            
+            .repo-row:hover {
+                background: #f6f8fa;
+            }
+            
+            .repo-children {
+                margin-left: 20px;
+            }
+            
+            .expand-icon,
+            .expand-placeholder {
+                width: 14px;
+                min-width: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .expand-icon {
+                cursor: pointer;
+            }
+            
+            .expand-icon:hover {
+                color: #2563eb;
+            }
+            
+            .repo-node .fa-folder,
+            .repo-node .fa-folder-open {
+                color: #54aeff;
+            }
+            
+            .repo-node .fa-box-open {
+                color: #57606a;
+            }
+            
+            .icon-html {
+                color: #e34f26;
+            }
+            
+            .icon-css {
+                color: #1572b6;
+            }
+            
+            .icon-js {
+                color: #f7df1e;
+            }
+            
+            .icon-json {
+                color: #8bc34a;
+            }
+            
+            .icon-md {
+                color: #6e7681;
+            }
+            
+            .icon-image {
+                color: #8e44ad;
+            }
+            
+            .icon-audio {
+                color: #e91e63;
+            }
+            
+            .icon-video {
+                color: #ff5722;
+            }
+            
+            .icon-archive {
+                color: #795548;
+            }
+            
+            .icon-file {
+                color: #9aa0a6;
+            }
+            
+            .selected {
+                background: #dcfce7;
+            }
+            
+            .tree-node.selected {
+                background: #dcfce7;
+                color: #166534;
+            }
+            
+            .tree-node.entrypoint {
+                background: #fef3c7;
+                color: #92400e;
+            }
+        </style>
 
         <!-- ===== SECTION WRAPPERS ===== -->
         <div id="collections-wrapper" class="hidden"></div>
