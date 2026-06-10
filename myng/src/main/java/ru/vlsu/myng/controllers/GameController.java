@@ -155,4 +155,17 @@ public class GameController {
                     "message", e.getMessage()));
         }
     }
+
+    @GetMapping("/repo-tree")
+    public String getRepoTreeFragment(
+            @RequestParam String repoLink,
+            @RequestParam String commitHash,
+            Model model
+    ) {
+
+        model.addAttribute("repoLink", repoLink);
+        model.addAttribute("commitHash", commitHash);
+
+        return "fragments/repo_tree :: repoTreeFragment";
+    }
 }

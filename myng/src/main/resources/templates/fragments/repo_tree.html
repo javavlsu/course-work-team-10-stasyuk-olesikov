@@ -1,0 +1,424 @@
+<div th:fragment="repoTreeFragment(collection, games)"
+     id="repo-tree-fragment"
+     class="max-w-5xl mx-auto px-4 py-6"
+     th:data-repo-link="${repoLink}"
+     th:data-commit-hash="${commitHash}">
+
+    <template id="tpl-repo-file">
+        <div class="repo-node file">
+            <div class="repo-row">
+                <span class="expand-placeholder"></span>
+                <i class="fas fa-file"></i>
+                <span class="repo-name"></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-repo-folder">
+        <div class="repo-node folder">
+            <div class="repo-row">
+            <span class="expand-icon">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+
+                <i class="fas fa-folder"></i>
+
+                <span class="repo-name"></span>
+            </div>
+
+            <div class="repo-children hidden"></div>
+        </div>
+    </template>
+    
+    <!-- Repository Tree -->
+    <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+            Содержимое репозитория
+        </label>
+
+        <div class="text-xs text-gray-500">
+            ЛКМ — добавить файл или папку в игру.
+            ПКМ — назначить HTML-файл точкой входа.
+        </div>
+
+        <div
+                id="repo-tree-container"
+                class="border border-gray-200 rounded-xl bg-white overflow-hidden"
+        >
+            <div
+                    id="repo-tree-loading"
+                    class="hidden p-4 text-sm text-gray-500"
+            >
+                Загрузка структуры репозитория...
+            </div>
+
+            <div
+                    id="repo-tree"
+                    class="max-h-96 overflow-y-auto py-2"
+            >
+                <div class="p-4 text-gray-400 text-sm">
+                    Укажите репозиторий и хэш коммита
+                </div>
+            </div>
+        </div>
+
+        <div
+                id="selected-entrypoint"
+                class="hidden text-sm px-3 py-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200"
+        >
+            Точка входа:
+            <span class="font-medium"></span>
+        </div>
+
+        <div class="error-message text-red-500 text-sm mt-1 hidden"
+             data-error-for="files"></div>
+
+        <div class="error-message text-red-500 text-sm mt-1 hidden"
+             data-error-for="entryPoint"></div>
+
+        <!-- Hidden inputs for backend compatibility -->
+        <input type="hidden" name="files" />
+        <input type="hidden" name="entryPoint" />
+    </div>
+
+    <style>
+        .repo-node {
+            font-size: 14px;
+        }
+        
+        .repo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            user-select: none;
+        }
+        
+        .repo-row:hover {
+          border-width: 1px;
+          border-color: #3b82f6;
+        }
+        
+        .repo-children {
+            margin-left: 20px;
+        }
+        
+        .expand-icon,
+        .expand-placeholder {
+            width: 14px;
+            min-width: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .expand-icon {
+            cursor: pointer;
+        }
+        
+        .expand-icon:hover {
+            color: #2563eb;
+        }
+        
+        .repo-node .fa-folder,
+        .repo-node .fa-folder-open {
+            color: #54aeff;
+        }
+        
+        .repo-node .fa-box-open {
+            color: #57606a;
+        }
+        
+        .icon-html {
+            color: #e34f26;
+        }
+        
+        .icon-css {
+            color: #1572b6;
+        }
+        
+        .icon-js {
+            color: #f7df1e;
+        }
+        
+        .icon-json {
+            color: #8bc34a;
+        }
+        
+        .icon-md {
+            color: #6e7681;
+        }
+        
+        .icon-image {
+            color: #8e44ad;
+        }
+        
+        .icon-audio {
+            color: #e91e63;
+        }
+        
+        .icon-video {
+            color: #ff5722;
+        }
+        
+        .icon-archive {
+            color: #795548;
+        }
+        
+        .icon-file {
+            color: #9aa0a6;
+        }
+        
+        .selected {
+            background: #dcfce7;
+        }
+        
+        .tree-node.selected {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .tree-node.entrypoint {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+
+    <script>
+        const selectedPaths = new Set();
+        let entryPoint = null;
+        
+        const treeContainer = document.getElementById("repo-tree");
+        const loadingEl = document.getElementById("repo-tree-loading");
+        const fragmentContainer = document.getElementById("repo-tree-fragment");
+        const hiddenFilesInput = document.querySelector('[name="files"]');
+        const hiddenEntryInput = document.querySelector('[name="entryPoint"]');
+        const entryPointLabelContainer = document.getElementById("selected-entrypoint");
+        const entryPointLabelText = entryPointLabelContainer?.querySelector("span");
+    
+        function updateVisualState() {
+            if (hiddenFilesInput) hiddenFilesInput.value = [...selectedPaths].join(",");
+            if (hiddenEntryInput) hiddenEntryInput.value = entryPoint ?? "";
+    
+            if (entryPointLabelContainer && entryPointLabelText) {
+                if (!entryPoint) {
+                    entryPointLabelContainer.classList.add("hidden");
+                } else {
+                    entryPointLabelText.textContent = entryPoint;
+                    entryPointLabelContainer.classList.remove("hidden");
+                }
+            }
+    
+            document.querySelectorAll(".repo-node").forEach(nodeEl => {
+                const path = nodeEl.dataset.path;
+                const rowEl = nodeEl.querySelector(".repo-row") || nodeEl; 
+                
+                rowEl.classList.remove("bg-green-100", "border-green-400", "bg-amber-100", "border-amber-400");
+    
+                if (entryPoint === path) {
+                    rowEl.classList.add("bg-amber-100", "border-amber-400");
+                } else if (nodeEl.classList.contains("file")) {
+                    if (selectedPaths.has(path)) {
+                        rowEl.classList.add("bg-green-100", "border-green-400");
+                    }
+                } else if (nodeEl.classList.contains("folder")) {
+                    const fileNodes = nodeEl.querySelectorAll(".repo-node.file");
+                    if (fileNodes.length > 0) {
+                        const allSelected = [...fileNodes].every(f => selectedPaths.has(f.dataset.path));
+                        if (allSelected) {
+                            rowEl.classList.add("bg-green-100", "border-green-400");
+                        }
+                    }
+                }
+            });
+        }
+    
+        function collectFiles(node, result = []) {
+            if (node.type === "file") result.push(node.path);
+            if (node.children) node.children.forEach(child => collectFiles(child, result));
+            return result;
+        }
+
+        function applyFileIcon(iconEl, fileName) {
+            iconEl.className = ""; // Clear existing classes
+            
+            const extensionMap = [
+                { regex: /\.html?$/i, classes: ["fab", "fa-html5"], color: "icon-html" },
+                { regex: /\.css$/i, classes: ["fas", "fa-paint-brush"], color: "icon-css" },
+                { regex: /\.js$/i, classes: ["fas", "fa-file-code"], color: "icon-js" },
+                { regex: /\.json$/i, classes: ["fas", "fa-code"], color: "icon-json" },
+                { regex: /\.md$/i, classes: ["fas", "fa-file-alt"], color: "icon-md" },
+                { regex: /\.(png|jpg|jpeg|gif|svg|webp)$/i, classes: ["fas", "fa-image"], color: "icon-image" },
+                { regex: /\.(mp3|wav|ogg)$/i, classes: ["fas", "fa-music"], color: "icon-audio" },
+                { regex: /\.(mp4|webm|avi)$/i, classes: ["fas", "fa-video"], color: "icon-video" },
+                { regex: /\.(zip|rar|7z|tar|gz)$/i, classes: ["fas", "fa-file-archive"], color: "icon-archive" }
+            ];
+    
+            const match = extensionMap.find(item => item.regex.test(fileName));
+            const iconClasses = match ? match.classes : ["fas", "fa-file"];
+            const colorClass = match ? match.color : "icon-file";
+    
+            iconEl.classList.add(...iconClasses, colorClass);
+        }
+    
+        function renderFile(file) {
+            const template = document.getElementById("tpl-repo-file");
+            const element = template.content.firstElementChild.cloneNode(true);
+            
+            element.dataset.path = file.path;
+            element.classList.add("repo-node", "file");
+            element.querySelector(".repo-name").textContent = file.name;
+            applyFileIcon(element.querySelector("i"), file.name);
+    
+            element.addEventListener("click", () => {
+                if (selectedPaths.has(file.path)) {
+                    selectedPaths.delete(file.path);
+                } else {
+                    selectedPaths.add(file.path);
+                }
+                updateVisualState();
+            });
+    
+            element.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                if (!/\.html?$/i.test(file.name)) return;
+    
+                if (entryPoint === file.path) {
+                    entryPoint = null;
+                } else {
+                    entryPoint = file.path;
+                }
+                updateVisualState();
+            });
+    
+            return element;
+        }
+    
+        function renderFolder(folder, isRoot = false) {
+            const template = document.getElementById("tpl-repo-folder");
+            const element = template.content.firstElementChild.cloneNode(true);
+    
+            element.dataset.path = folder.path;
+            element.classList.add("repo-node", "folder");
+    
+            const nameEl = element.querySelector(".repo-name");
+            const childrenContainer = element.querySelector(".repo-children");
+            const folderIcon = element.querySelector(".fa-folder");
+            const chevronIcon = element.querySelector(".expand-icon i");
+            const expandButton = element.querySelector(".expand-icon");
+            const rowEl = element.querySelector(".repo-row");
+    
+            nameEl.textContent = folder.name;
+    
+            if (isRoot) {
+                folderIcon.classList.replace("fa-folder", "fa-box-open");
+                childrenContainer.classList.remove("hidden");
+                chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
+            }
+    
+            if (folder.children?.length) {
+                folder.children.forEach(child => childrenContainer.appendChild(renderNode(child)));
+            } else if (expandButton) {
+                expandButton.style.visibility = "hidden";
+            }
+    
+            expandButton?.addEventListener("click", e => {
+                e.stopPropagation();
+                const isHidden = childrenContainer.classList.toggle("hidden");
+                
+                if (isHidden) {
+                    chevronIcon.classList.replace("fa-chevron-down", "fa-chevron-right");
+                    if (!isRoot) folderIcon.classList.replace("fa-folder-open", "fa-folder");
+                } else {
+                    chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
+                    if (!isRoot) folderIcon.classList.replace("fa-folder", "fa-folder-open");
+                }
+            });
+    
+            rowEl.addEventListener("click", e => {
+                if (e.target.closest(".expand-icon")) return;
+    
+                const allFilePaths = collectFiles(folder);
+                const allSelected = allFilePaths.every(path => selectedPaths.has(path));
+    
+                if (allSelected) {
+                    // Deselect everything inside this folder completely
+                    allFilePaths.forEach(path => selectedPaths.delete(path));
+                } else {
+                    // Select all nested files
+                    allFilePaths.forEach(path => selectedPaths.add(path));
+                }
+                updateVisualState();
+            });
+    
+            return element;
+        }
+    
+        function renderNode(node, isRoot = false) {
+            return node.type === "directory" ? renderFolder(node, isRoot) : renderFile(node);
+        }
+    
+        async function loadRepositoryTree(repoLink, commit) {
+            const match = repoLink.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/);
+            if (!match) throw new Error("Invalid GitHub URL");
+            
+            const [, githubUsername, repoName] = match;
+    
+            try {
+                treeContainer.innerHTML = "";
+                loadingEl.classList.remove("hidden");
+    
+                const response = await fetch(
+                    `https://api.github.com/repos/${githubUsername}/${repoName}/git/trees/${commit}?recursive=1`
+                );
+                if (!response.ok) throw new Error("Failed to load repository tree");
+    
+                const githubTree = await response.json();
+                const root = { name: repoName, path: "", type: "directory", children: [] };
+    
+                for (const entry of githubTree.tree) {
+                    const parts = entry.path.split("/");
+                    let current = root;
+    
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = parts[i];
+                        const isLast = i === parts.length - 1;
+                        let child = current.children.find(c => c.name === part);
+    
+                        if (!child) {
+                            child = {
+                                name: part,
+                                path: parts.slice(0, i + 1).join("/"),
+                                type: isLast ? (entry.type === "tree" ? "directory" : "file") : "directory",
+                                children: []
+                            };
+                            current.children.push(child);
+                        }
+                        current = child;
+                    }
+                }
+    
+                treeContainer.appendChild(renderNode(root, true));
+                updateVisualState(); // Initial check to apply styles if selectedPaths has defaults
+    
+            } catch (err) {
+                console.error(err);
+                treeContainer.innerHTML = `<div class="p-4 text-red-500">${err.message}</div>`;
+            } finally {
+                loadingEl.classList.add("hidden");
+            }
+        }
+    
+        if (fragmentContainer) {
+            const repo = fragmentContainer.dataset.repoLink;
+            const commitHash = fragmentContainer.dataset.commitHash;
+            if (repo && commitHash) {
+                loadRepositoryTree(repo, commitHash);
+            }
+        }
+    </script>
+    
+    
+</div>
