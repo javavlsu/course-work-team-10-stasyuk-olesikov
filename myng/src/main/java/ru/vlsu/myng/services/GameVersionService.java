@@ -107,26 +107,7 @@ public class GameVersionService {
      *         </ul>
      */
     public String resolveEntryPoint(GameVersion version) {
-        Path baseDir = Paths.get(storagePath,
-                "gamefiles",
-                "game_" + version.getGame().getId(),
-                "ver_" + version.getId());
-
-        try (Stream<Path> walk = Files.walk(baseDir)) {
-            Path indexFile = walk
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equalsIgnoreCase("index.html"))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Entry file not found in " + baseDir));
-
-            Path storageRoot = Paths.get(storagePath).toAbsolutePath().normalize();
-            Path fullPath = indexFile.toAbsolutePath().normalize();
-            Path relative = storageRoot.relativize(fullPath);
-
-            return "http://localhost:" + port + "/static/" + relative.toString().replace("\\", "/");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to resolve entry point for version " + version.getId(), e);
-        }
+        return "http://localhost:" + port + "/static/gamefiles/game_" + version.getGame().getId() + "/ver_" + version.getId() + "/" + version.getEntryPoint(); // the path is most likely fucked up
     }
 
     /**
@@ -177,6 +158,8 @@ public class GameVersionService {
         githubService.validateCommitExists(game.getRepo(), dto.getCommitHash());
         githubService.validateFilesExistInCommit(game.getRepo(), dto.getCommitHash(), dto.getFiles());
 
+        System.out.println("publishing gameversion with files: " + dto.getFiles());
+        
         GameVersion version = new GameVersion();
         version.setGame(game);
         version.setCommitHash(dto.getCommitHash());
@@ -184,6 +167,7 @@ public class GameVersionService {
         version.setCreatedAt(Instant.now());
         version.setFiles(dto.getFiles());
         version.setChangelog(dto.getChangelog());
+        version.setEntryPoint(dto.getEntryPoint());
 
         gameVersionRepository.save(version);
 

@@ -18,6 +18,7 @@ public class GamePageDTO {
     private Integer id;
     private String name;
     private String description;
+    private String repoLink;
     private String themeColor;
     private Game.Genre genre;
     private User developer;

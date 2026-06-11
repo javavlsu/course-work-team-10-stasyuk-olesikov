@@ -38,6 +38,9 @@ public class GameVersion {
 
     @Column(columnDefinition = "TEXT")
     private String files;
+    
+    @Column(nullable = false)
+    private String entryPoint;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_game")

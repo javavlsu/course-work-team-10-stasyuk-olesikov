@@ -604,24 +604,20 @@
               ></div>
             </div>
 
-            <!-- Список файлов -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Список файлов
-              </label>
+              <!-- Load Tree Button -->
+              <div>
+                  <button
+                          type="button"
+                          class="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                          id="load-repo-tree"
+                  >
 
-              <textarea
-                name="files"
-                rows="4"
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
-                placeholder="folder/, folder2/, folder3/index.html"
-              ></textarea>
+                      <i class="fas fa-folder-tree"></i>
+                      Загрузить дерево репозитория
+                  </button>
+              </div>
 
-              <div
-                class="error-message text-red-500 text-sm mt-1 hidden"
-                data-error-for="files"
-              ></div>
-            </div>
+              <div id="repo-tree-fragment-container"></div>
 
             <!-- Список изменений -->
             <div>
@@ -1317,6 +1313,57 @@
           alert("Ошибка при удалении: " + data.message);
         }
       });
+        
+        const loadRepoTreeBtn = document.getElementById("load-repo-tree");
+        
+        loadRepoTreeBtn.addEventListener('click', async () => {
+            const repo = [[${game.repoLink}]]
+            
+            const commit =
+                document.querySelector("[name=commitHash]").value;
+            
+            if (!repo || !commit) {
+                throw new Error(
+                    "Сначала укажите репозиторий и хэш коммита"
+                );
+            }
+            
+            console.log('Загрузка дерева репозитория для коммита ' + commit + ' в репозитории ' + repo);
+            
+            const response = await fetch(
+                `/games/repo-tree?${new URLSearchParams({
+                    repoLink: repo,
+                    commitHash: commit
+                })}`
+            );
+            
+            if (!response.ok) {
+                throw new Error(
+                    "Не удалось загрузить фрагмент дерева репозитория"
+                );
+            }
+            
+            const html = await response.text();
+            
+            const container =
+                document.getElementById("repo-tree-fragment-container");
+            
+            container.innerHTML = html;
+                
+            container
+                .querySelectorAll("script")
+                .forEach(oldScript => {
+            
+                    const script =
+                        document.createElement("script");
+            
+                    script.textContent =
+                        oldScript.textContent;
+            
+                    document.body.appendChild(script);
+                    script.remove();
+                });
+        });
     </script>
   </section>
 </html>

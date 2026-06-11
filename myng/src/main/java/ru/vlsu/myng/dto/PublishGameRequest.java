@@ -26,7 +26,7 @@ public class PublishGameRequest {
             regexp = "^https://github\\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/?$",
             message = "Ссылка должна быть в формате https://github.com/user/repo"
     )
-    @UniqueRepo
+    //@UniqueRepo
     private String repoLink;
 
     @NotBlank(message = "Хэш коммита обязателен")

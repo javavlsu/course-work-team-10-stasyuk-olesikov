@@ -536,6 +536,7 @@ public class GameService {
                 .id(game.getId())
                 .name(game.getName())
                 .description(game.getDescr())
+                .repoLink(game.getRepo())
                 .themeColor(themeColor)
                 .genre(game.getGenre())
                 .developer(game.getDeveloper())
@@ -744,12 +745,15 @@ public class GameService {
 
         gameRepository.save(game);
 
+        System.out.println("publishing game with files: " + dto.getFiles());
+
         GameVersion version = new GameVersion();
         version.setGame(game);
         version.setCommitHash(dto.getCommitHash());
         version.setName(dto.getGameVer());
         version.setCreatedAt(game.getFirstReleaseDate());
         version.setFiles(dto.getFiles());
+        version.setEntryPoint(dto.getEntryPoint());
 
         gameVersionRepository.save(version);
 
