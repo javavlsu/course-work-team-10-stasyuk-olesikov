@@ -117,14 +117,14 @@
             Коллекции
           </button>
           <button
-            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 rounded-lg transition-all duration-200"
             data-target="reviews-section"
           >
             <i class="fas fa-star mr-2"></i>
             Отзывы
           </button>
           <button
-            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 rounded-lg transition-all duration-200"
             data-target="notifications-section"
           >
             <i class="fas fa-bell mr-2"></i>
@@ -231,12 +231,37 @@
             <form data-form="publish" class="space-y-6 rounded-2xl p-6 md:p-8 w-full max-w-lg mx-auto relative">
 
                 <!-- Header -->
-                <div class="flex flex-col items-center text-center mb-4">
+                <div class="flex flex-col items-center text-center mb-4 relative">
                     <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-2 shadow-lg">
                         <i class="fas fa-cloud-upload-alt text-white text-3xl"></i>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-900">Опубликовать игру</h2>
-                    <p class="text-gray-500 text-sm">Заполните форму, чтобы добавить вашу игру в платформу</p>
+
+                    <div class="flex items-center justify-center gap-2">
+                        <h2 class="text-xl font-bold text-gray-900">Опубликовать игру</h2>
+                        <button
+                                type="button"
+                                id="rules-toggle-btn"
+                                data-action="rules-toggle"
+                                class="w-5 h-5 flex items-center justify-center text-xs rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors focus:outline-none"
+                                title="Правила публикации"
+                        >
+                            <i class="fas fa-info text-[10px]"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Заполните форму, чтобы добавить вашу игру в платформу</p>
+                </div>
+
+                <div id="upload-rules-card" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-left text-sm text-slate-600 transition-all duration-200">
+                    <div class="flex items-center gap-2 font-semibold text-slate-800 mb-2">
+                        <i class="fas fa-gavel text-slate-500"></i>
+                        Правила публикации проектов
+                    </div>
+                    <ul class="space-y-1.5 list-disc list-inside text-xs leading-relaxed">
+                        <li>Репозиторий должен быть публичным и содержать исходный код игры.</li>
+                        <li>Обязательно наличие главной HTML-страницы (точки входа) для веб-запуска.</li>
+                        <li>Все ссылки на подключаемые файлы (script src="", link href="") обязательно должны использовать относительные пути (relative paths)</li>
+                        <li>Запрещено загружать вредоносное ПО, майнеры или чужую интеллектуальную собственность.</li>
+                    </ul>
                 </div>
 
                 <!-- Game Title -->
@@ -529,11 +554,17 @@
               showTab("collections-section");
 
               // Tab click
-              tabs.forEach(tab => {
-                tab.addEventListener("click", () => {
-                  showTab(tab.dataset.target);
+              const activeClasses = ["bg-blue-600", "text-white", "border-blue-600"];
+
+                tabs.forEach(tab => {
+                  tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove(...activeClasses));
+                    
+                    tab.classList.add(...activeClasses);
+                    
+                    showTab(tab.dataset.target);
+                  });
                 });
-              });
 
               // Delegated clicks
               document.addEventListener("click", e => {
@@ -882,6 +913,24 @@
                             document.body.appendChild(script);
                             script.remove();
                         });
+                }
+                
+                if (action === 'rules-toggle') {
+                    const rulesBtn = document.getElementById("rules-toggle-btn");
+                    const rulesCard = document.getElementById("upload-rules-card");
+                        
+                    if (rulesBtn && rulesCard) {
+                        const isHidden = rulesCard.classList.toggle("hidden");
+                        
+                        const icon = rulesBtn.querySelector("i");
+                        if (isHidden) {
+                            icon.className = "fas fa-info text-[10px]";
+                            rulesBtn.classList.replace("bg-slate-200", "bg-slate-100");
+                        } else {
+                            icon.className = "fas fa-times text-[10px]";
+                            rulesBtn.classList.replace("bg-slate-100", "bg-slate-200");
+                        }
+                    }
                 }
 
                 /* =========================

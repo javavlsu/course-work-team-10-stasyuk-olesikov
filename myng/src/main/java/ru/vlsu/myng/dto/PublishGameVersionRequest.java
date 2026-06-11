@@ -22,12 +22,12 @@ public class PublishGameVersionRequest {
             message = "Хэш должен быть 7-значным HEX"
     )
     private String commitHash;
-    
+
+    @NotBlank(message = "Точка входа обязательна")
     private String entryPoint;
 
-    @Pattern(
-            regexp = "^([a-zA-Z0-9_\\-./]+)(,\\s*[a-zA-Z0-9_\\-./]+)*$",
-            message = "Введите названия файлов и папок в формате: file.ext, folder, dir/file.ext"
+    @NotBlank(
+            message = "Выберите файлы нажатием ЛКМ"
     )
     private String files;
 

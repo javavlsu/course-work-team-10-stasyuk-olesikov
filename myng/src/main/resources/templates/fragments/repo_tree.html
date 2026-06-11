@@ -56,9 +56,9 @@
                     id="repo-tree"
                     class="max-h-96 overflow-y-auto py-2"
             >
-                <div class="p-4 text-gray-400 text-sm">
-                    Укажите репозиторий и хэш коммита
-                </div>
+<!--                <div class="p-4 text-gray-400 text-sm">-->
+<!--                    Укажите репозиторий и хэш коммита-->
+<!--                </div>-->
             </div>
         </div>
 
@@ -187,236 +187,241 @@
     </style>
 
     <script>
-        const selectedPaths = new Set();
-        let entryPoint = null;
+        // immediately invoked function expression
+        // to not pollute the scope of the parent pages
+        (function() {
+            const selectedPaths = new Set();
+            let entryPoint = null;
+            
+            const treeContainer = document.getElementById("repo-tree");
+            const loadingEl = document.getElementById("repo-tree-loading");
+            const fragmentContainer = document.getElementById("repo-tree-fragment");
+            const hiddenFilesInput = document.querySelector('[name="files"]');
+            const hiddenEntryInput = document.querySelector('[name="entryPoint"]');
+            const entryPointLabelContainer = document.getElementById("selected-entrypoint");
+            const entryPointLabelText = entryPointLabelContainer?.querySelector("span");
         
-        const treeContainer = document.getElementById("repo-tree");
-        const loadingEl = document.getElementById("repo-tree-loading");
-        const fragmentContainer = document.getElementById("repo-tree-fragment");
-        const hiddenFilesInput = document.querySelector('[name="files"]');
-        const hiddenEntryInput = document.querySelector('[name="entryPoint"]');
-        const entryPointLabelContainer = document.getElementById("selected-entrypoint");
-        const entryPointLabelText = entryPointLabelContainer?.querySelector("span");
-    
-        function updateVisualState() {
-            if (hiddenFilesInput) hiddenFilesInput.value = [...selectedPaths].join(",");
-            if (hiddenEntryInput) hiddenEntryInput.value = entryPoint ?? "";
-    
-            if (entryPointLabelContainer && entryPointLabelText) {
-                if (!entryPoint) {
-                    entryPointLabelContainer.classList.add("hidden");
-                } else {
-                    entryPointLabelText.textContent = entryPoint;
-                    entryPointLabelContainer.classList.remove("hidden");
-                }
-            }
-    
-            document.querySelectorAll(".repo-node").forEach(nodeEl => {
-                const path = nodeEl.dataset.path;
-                const rowEl = nodeEl.querySelector(".repo-row") || nodeEl; 
-                
-                rowEl.classList.remove("bg-green-100", "border-green-400", "bg-amber-100", "border-amber-400");
-    
-                if (entryPoint === path) {
-                    rowEl.classList.add("bg-amber-100", "border-amber-400");
-                } else if (nodeEl.classList.contains("file")) {
-                    if (selectedPaths.has(path)) {
-                        rowEl.classList.add("bg-green-100", "border-green-400");
+            function updateVisualState() {
+                if (hiddenFilesInput) hiddenFilesInput.value = [...selectedPaths].join(",");
+                if (hiddenEntryInput) hiddenEntryInput.value = entryPoint ?? "";
+        
+                if (entryPointLabelContainer && entryPointLabelText) {
+                    if (!entryPoint) {
+                        entryPointLabelContainer.classList.add("hidden");
+                    } else {
+                        entryPointLabelText.textContent = entryPoint;
+                        entryPointLabelContainer.classList.remove("hidden");
                     }
-                } else if (nodeEl.classList.contains("folder")) {
-                    const fileNodes = nodeEl.querySelectorAll(".repo-node.file");
-                    if (fileNodes.length > 0) {
-                        const allSelected = [...fileNodes].every(f => selectedPaths.has(f.dataset.path));
-                        if (allSelected) {
+                }
+        
+                document.querySelectorAll(".repo-node").forEach(nodeEl => {
+                    const path = nodeEl.dataset.path;
+                    const rowEl = nodeEl.querySelector(".repo-row") || nodeEl; 
+                    
+                    rowEl.classList.remove("bg-green-100", "border-green-400", "bg-amber-100", "border-amber-400");
+        
+                    if (entryPoint === path) {
+                        rowEl.classList.add("bg-amber-100", "border-amber-400");
+                    } else if (nodeEl.classList.contains("file")) {
+                        if (selectedPaths.has(path)) {
                             rowEl.classList.add("bg-green-100", "border-green-400");
                         }
-                    }
-                }
-            });
-        }
-    
-        function collectFiles(node, result = []) {
-            if (node.type === "file") result.push(node.path);
-            if (node.children) node.children.forEach(child => collectFiles(child, result));
-            return result;
-        }
-
-        function applyFileIcon(iconEl, fileName) {
-            iconEl.className = ""; // Clear existing classes
-            
-            const extensionMap = [
-                { regex: /\.html?$/i, classes: ["fab", "fa-html5"], color: "icon-html" },
-                { regex: /\.css$/i, classes: ["fas", "fa-paint-brush"], color: "icon-css" },
-                { regex: /\.js$/i, classes: ["fas", "fa-file-code"], color: "icon-js" },
-                { regex: /\.json$/i, classes: ["fas", "fa-code"], color: "icon-json" },
-                { regex: /\.md$/i, classes: ["fas", "fa-file-alt"], color: "icon-md" },
-                { regex: /\.(png|jpg|jpeg|gif|svg|webp)$/i, classes: ["fas", "fa-image"], color: "icon-image" },
-                { regex: /\.(mp3|wav|ogg)$/i, classes: ["fas", "fa-music"], color: "icon-audio" },
-                { regex: /\.(mp4|webm|avi)$/i, classes: ["fas", "fa-video"], color: "icon-video" },
-                { regex: /\.(zip|rar|7z|tar|gz)$/i, classes: ["fas", "fa-file-archive"], color: "icon-archive" }
-            ];
-    
-            const match = extensionMap.find(item => item.regex.test(fileName));
-            const iconClasses = match ? match.classes : ["fas", "fa-file"];
-            const colorClass = match ? match.color : "icon-file";
-    
-            iconEl.classList.add(...iconClasses, colorClass);
-        }
-    
-        function renderFile(file) {
-            const template = document.getElementById("tpl-repo-file");
-            const element = template.content.firstElementChild.cloneNode(true);
-            
-            element.dataset.path = file.path;
-            element.classList.add("repo-node", "file");
-            element.querySelector(".repo-name").textContent = file.name;
-            applyFileIcon(element.querySelector("i"), file.name);
-    
-            element.addEventListener("click", () => {
-                if (selectedPaths.has(file.path)) {
-                    selectedPaths.delete(file.path);
-                } else {
-                    selectedPaths.add(file.path);
-                }
-                updateVisualState();
-            });
-    
-            element.addEventListener("contextmenu", e => {
-                e.preventDefault();
-                if (!/\.html?$/i.test(file.name)) return;
-    
-                if (entryPoint === file.path) {
-                    entryPoint = null;
-                } else {
-                    entryPoint = file.path;
-                }
-                updateVisualState();
-            });
-    
-            return element;
-        }
-    
-        function renderFolder(folder, isRoot = false) {
-            const template = document.getElementById("tpl-repo-folder");
-            const element = template.content.firstElementChild.cloneNode(true);
-    
-            element.dataset.path = folder.path;
-            element.classList.add("repo-node", "folder");
-    
-            const nameEl = element.querySelector(".repo-name");
-            const childrenContainer = element.querySelector(".repo-children");
-            const folderIcon = element.querySelector(".fa-folder");
-            const chevronIcon = element.querySelector(".expand-icon i");
-            const expandButton = element.querySelector(".expand-icon");
-            const rowEl = element.querySelector(".repo-row");
-    
-            nameEl.textContent = folder.name;
-    
-            if (isRoot) {
-                folderIcon.classList.replace("fa-folder", "fa-box-open");
-                childrenContainer.classList.remove("hidden");
-                chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
-            }
-    
-            if (folder.children?.length) {
-                folder.children.forEach(child => childrenContainer.appendChild(renderNode(child)));
-            } else if (expandButton) {
-                expandButton.style.visibility = "hidden";
-            }
-    
-            expandButton?.addEventListener("click", e => {
-                e.stopPropagation();
-                const isHidden = childrenContainer.classList.toggle("hidden");
-                
-                if (isHidden) {
-                    chevronIcon.classList.replace("fa-chevron-down", "fa-chevron-right");
-                    if (!isRoot) folderIcon.classList.replace("fa-folder-open", "fa-folder");
-                } else {
-                    chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
-                    if (!isRoot) folderIcon.classList.replace("fa-folder", "fa-folder-open");
-                }
-            });
-    
-            rowEl.addEventListener("click", e => {
-                if (e.target.closest(".expand-icon")) return;
-    
-                const allFilePaths = collectFiles(folder);
-                const allSelected = allFilePaths.every(path => selectedPaths.has(path));
-    
-                if (allSelected) {
-                    // Deselect everything inside this folder completely
-                    allFilePaths.forEach(path => selectedPaths.delete(path));
-                } else {
-                    // Select all nested files
-                    allFilePaths.forEach(path => selectedPaths.add(path));
-                }
-                updateVisualState();
-            });
-    
-            return element;
-        }
-    
-        function renderNode(node, isRoot = false) {
-            return node.type === "directory" ? renderFolder(node, isRoot) : renderFile(node);
-        }
-    
-        async function loadRepositoryTree(repoLink, commit) {
-            const match = repoLink.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/);
-            if (!match) throw new Error("Invalid GitHub URL");
-            
-            const [, githubUsername, repoName] = match;
-    
-            try {
-                treeContainer.innerHTML = "";
-                loadingEl.classList.remove("hidden");
-    
-                const response = await fetch(
-                    `https://api.github.com/repos/${githubUsername}/${repoName}/git/trees/${commit}?recursive=1`
-                );
-                if (!response.ok) throw new Error("Failed to load repository tree");
-    
-                const githubTree = await response.json();
-                const root = { name: repoName, path: "", type: "directory", children: [] };
-    
-                for (const entry of githubTree.tree) {
-                    const parts = entry.path.split("/");
-                    let current = root;
-    
-                    for (let i = 0; i < parts.length; i++) {
-                        const part = parts[i];
-                        const isLast = i === parts.length - 1;
-                        let child = current.children.find(c => c.name === part);
-    
-                        if (!child) {
-                            child = {
-                                name: part,
-                                path: parts.slice(0, i + 1).join("/"),
-                                type: isLast ? (entry.type === "tree" ? "directory" : "file") : "directory",
-                                children: []
-                            };
-                            current.children.push(child);
+                    } else if (nodeEl.classList.contains("folder")) {
+                        const fileNodes = nodeEl.querySelectorAll(".repo-node.file");
+                        if (fileNodes.length > 0) {
+                            const allSelected = [...fileNodes].every(f => selectedPaths.has(f.dataset.path));
+                            if (allSelected) {
+                                rowEl.classList.add("bg-green-100", "border-green-400");
+                            }
                         }
-                        current = child;
                     }
+                });
+            }
+        
+            function collectFiles(node, result = []) {
+                if (node.type === "file") result.push(node.path);
+                if (node.children) node.children.forEach(child => collectFiles(child, result));
+                return result;
+            }
+    
+            function applyFileIcon(iconEl, fileName) {
+                iconEl.className = ""; // Clear existing classes
+                
+                const extensionMap = [
+                    { regex: /\.html?$/i, classes: ["fab", "fa-html5"], color: "icon-html" },
+                    { regex: /\.css$/i, classes: ["fas", "fa-paint-brush"], color: "icon-css" },
+                    { regex: /\.js$/i, classes: ["fas", "fa-file-code"], color: "icon-js" },
+                    { regex: /\.json$/i, classes: ["fas", "fa-code"], color: "icon-json" },
+                    { regex: /\.md$/i, classes: ["fas", "fa-file-alt"], color: "icon-md" },
+                    { regex: /\.(png|jpg|jpeg|gif|svg|webp)$/i, classes: ["fas", "fa-image"], color: "icon-image" },
+                    { regex: /\.(mp3|wav|ogg)$/i, classes: ["fas", "fa-music"], color: "icon-audio" },
+                    { regex: /\.(mp4|webm|avi)$/i, classes: ["fas", "fa-video"], color: "icon-video" },
+                    { regex: /\.(zip|rar|7z|tar|gz)$/i, classes: ["fas", "fa-file-archive"], color: "icon-archive" }
+                ];
+        
+                const match = extensionMap.find(item => item.regex.test(fileName));
+                const iconClasses = match ? match.classes : ["fas", "fa-file"];
+                const colorClass = match ? match.color : "icon-file";
+        
+                iconEl.classList.add(...iconClasses, colorClass);
+            }
+        
+            function renderFile(file) {
+                const template = document.getElementById("tpl-repo-file");
+                const element = template.content.firstElementChild.cloneNode(true);
+                
+                element.dataset.path = file.path;
+                element.classList.add("repo-node", "file");
+                element.querySelector(".repo-name").textContent = file.name;
+                applyFileIcon(element.querySelector("i"), file.name);
+        
+                element.addEventListener("click", () => {
+                    if (selectedPaths.has(file.path) && file.path !== entryPoint) {
+                        selectedPaths.delete(file.path);
+                    } else {
+                        selectedPaths.add(file.path);
+                    }
+                    updateVisualState();
+                });
+        
+                element.addEventListener("contextmenu", e => {
+                    e.preventDefault();
+                    if (!/\.html?$/i.test(file.name)) return;
+        
+                    if (entryPoint === file.path) {
+                        entryPoint = null;
+                    } else {
+                        entryPoint = file.path;
+                        selectedPaths.add(file.path);
+                    }
+                    updateVisualState();
+                });
+        
+                return element;
+            }
+        
+            function renderFolder(folder, isRoot = false) {
+                const template = document.getElementById("tpl-repo-folder");
+                const element = template.content.firstElementChild.cloneNode(true);
+        
+                element.dataset.path = folder.path;
+                element.classList.add("repo-node", "folder");
+        
+                const nameEl = element.querySelector(".repo-name");
+                const childrenContainer = element.querySelector(".repo-children");
+                const folderIcon = element.querySelector(".fa-folder");
+                const chevronIcon = element.querySelector(".expand-icon i");
+                const expandButton = element.querySelector(".expand-icon");
+                const rowEl = element.querySelector(".repo-row");
+        
+                nameEl.textContent = folder.name;
+        
+                if (isRoot) {
+                    folderIcon.classList.replace("fa-folder", "fa-box-open");
+                    childrenContainer.classList.remove("hidden");
+                    chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
                 }
-    
-                treeContainer.appendChild(renderNode(root, true));
-                updateVisualState(); // Initial check to apply styles if selectedPaths has defaults
-    
-            } catch (err) {
-                console.error(err);
-                treeContainer.innerHTML = `<div class="p-4 text-red-500">${err.message}</div>`;
-            } finally {
-                loadingEl.classList.add("hidden");
+        
+                if (folder.children?.length) {
+                    folder.children.forEach(child => childrenContainer.appendChild(renderNode(child)));
+                } else if (expandButton) {
+                    expandButton.style.visibility = "hidden";
+                }
+        
+                expandButton?.addEventListener("click", e => {
+                    e.stopPropagation();
+                    const isHidden = childrenContainer.classList.toggle("hidden");
+                    
+                    if (isHidden) {
+                        chevronIcon.classList.replace("fa-chevron-down", "fa-chevron-right");
+                        if (!isRoot) folderIcon.classList.replace("fa-folder-open", "fa-folder");
+                    } else {
+                        chevronIcon.classList.replace("fa-chevron-right", "fa-chevron-down");
+                        if (!isRoot) folderIcon.classList.replace("fa-folder", "fa-folder-open");
+                    }
+                });
+        
+                rowEl.addEventListener("click", e => {
+                    if (e.target.closest(".expand-icon")) return;
+        
+                    const allFilePaths = collectFiles(folder);
+                    const allSelected = allFilePaths.every(path => selectedPaths.has(path));
+        
+                    if (allSelected) {
+                        // Deselect everything inside this folder completely
+                        allFilePaths.forEach(path => selectedPaths.delete(path));
+                    } else {
+                        // Select all nested files
+                        allFilePaths.forEach(path => selectedPaths.add(path));
+                    }
+                    updateVisualState();
+                });
+        
+                return element;
             }
-        }
-    
-        if (fragmentContainer) {
-            const repo = fragmentContainer.dataset.repoLink;
-            const commitHash = fragmentContainer.dataset.commitHash;
-            if (repo && commitHash) {
-                loadRepositoryTree(repo, commitHash);
+        
+            function renderNode(node, isRoot = false) {
+                return node.type === "directory" ? renderFolder(node, isRoot) : renderFile(node);
             }
-        }
+        
+            async function loadRepositoryTree(repoLink, commit) {
+                const match = repoLink.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/);
+                if (!match) throw new Error("Invalid GitHub URL");
+                
+                const [, githubUsername, repoName] = match;
+        
+                try {
+                    treeContainer.innerHTML = "";
+                    loadingEl.classList.remove("hidden");
+        
+                    const response = await fetch(
+                        `https://api.github.com/repos/${githubUsername}/${repoName}/git/trees/${commit}?recursive=1`
+                    );
+                    if (!response.ok) throw new Error("Failed to load repository tree");
+        
+                    const githubTree = await response.json();
+                    const root = { name: repoName, path: "", type: "directory", children: [] };
+        
+                    for (const entry of githubTree.tree) {
+                        const parts = entry.path.split("/");
+                        let current = root;
+        
+                        for (let i = 0; i < parts.length; i++) {
+                            const part = parts[i];
+                            const isLast = i === parts.length - 1;
+                            let child = current.children.find(c => c.name === part);
+        
+                            if (!child) {
+                                child = {
+                                    name: part,
+                                    path: parts.slice(0, i + 1).join("/"),
+                                    type: isLast ? (entry.type === "tree" ? "directory" : "file") : "directory",
+                                    children: []
+                                };
+                                current.children.push(child);
+                            }
+                            current = child;
+                        }
+                    }
+        
+                    treeContainer.appendChild(renderNode(root, true));
+                    updateVisualState(); // Initial check to apply styles if selectedPaths has defaults
+        
+                } catch (err) {
+                    console.error(err);
+                    treeContainer.innerHTML = `<div class="p-4 text-red-500">${err.message}</div>`;
+                } finally {
+                    loadingEl.classList.add("hidden");
+                }
+            }
+        
+            if (fragmentContainer) {
+                const repo = fragmentContainer.dataset.repoLink;
+                const commitHash = fragmentContainer.dataset.commitHash;
+                if (repo && commitHash) {
+                    loadRepositoryTree(repo, commitHash);
+                }
+            }
+        })();
     </script>
 </div>

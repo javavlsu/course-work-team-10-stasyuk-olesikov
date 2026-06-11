@@ -1314,55 +1314,38 @@
         }
       });
         
-        const loadRepoTreeBtn = document.getElementById("load-repo-tree");
+        document.getElementById("load-repo-tree").addEventListener("click", async () => {
+            const form = document.getElementById("addVersionForm");
+            
+            const repoLink = [[${game.repoLink}]]
+            
+            const commitHash = form.querySelector('[name="commitHash"]').value;
         
-        loadRepoTreeBtn.addEventListener('click', async () => {
-            const repo = [[${game.repoLink}]]
-            
-            const commit =
-                document.querySelector("[name=commitHash]").value;
-            
-            if (!repo || !commit) {
-                throw new Error(
-                    "Сначала укажите репозиторий и хэш коммита"
-                );
+            if (!commitHash) {
+                alert("Пожалуйста, введите хэш коммита перед загрузкой дерева.");
+                return;
             }
-            
-            console.log('Загрузка дерева репозитория для коммита ' + commit + ' в репозитории ' + repo);
-            
-            const response = await fetch(
-                `/games/repo-tree?${new URLSearchParams({
-                    repoLink: repo,
-                    commitHash: commit
-                })}`
-            );
-            
-            if (!response.ok) {
-                throw new Error(
-                    "Не удалось загрузить фрагмент дерева репозитория"
-                );
-            }
-            
-            const html = await response.text();
-            
-            const container =
-                document.getElementById("repo-tree-fragment-container");
-            
-            container.innerHTML = html;
+        
+            try {
+                const response = await fetch(`/games/repo-tree?repoLink=${repoLink}&commitHash=${commitHash}`);
+                if (!response.ok) throw new Error("Не удалось загрузить структуру репозитория");
+        
+                const html = await response.text();
                 
-            container
-                .querySelectorAll("script")
-                .forEach(oldScript => {
-            
-                    const script =
-                        document.createElement("script");
-            
-                    script.textContent =
-                        oldScript.textContent;
-            
+                const container = document.getElementById("repo-tree-fragment-container");
+                container.innerHTML = html;
+        
+                container.querySelectorAll("script").forEach(oldScript => {
+                    const script = document.createElement("script");
+                    script.textContent = oldScript.textContent;
                     document.body.appendChild(script);
                     script.remove();
                 });
+        
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
         });
     </script>
   </section>
