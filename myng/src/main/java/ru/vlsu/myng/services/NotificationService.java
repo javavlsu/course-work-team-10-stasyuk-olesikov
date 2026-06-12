@@ -40,7 +40,7 @@ public class NotificationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        return notificationRepository.findByUsers(user);
+        return notificationRepository.findByUsersOrderByCreatedAtDesc(user);
     }
 
     /**

@@ -28,6 +28,7 @@ public class GameController {
     private final UserService userService;
     private final ReviewService reviewService;
     private final CollectionService collectionService;
+    private final GithubService githubService;
 
     @GetMapping("/{id}")
     public String getGamePage(@PathVariable Integer id, Model model, Principal principal) {
@@ -167,5 +168,13 @@ public class GameController {
         model.addAttribute("commitHash", commitHash);
 
         return "fragments/repo_tree :: repoTreeFragment";
+    }
+
+    @GetMapping("/repo-tree-json")
+    @ResponseBody
+    public String getRepoTree(  @RequestParam String owner,
+                                @RequestParam String repo,
+                                @RequestParam String commit) {
+        return githubService.getRepositoryTree(owner, repo, commit).block();
     }
 }

@@ -35,7 +35,6 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String myProfilePage(Principal principal, Model model) {
-        System.out.println("Profile GET endpoint reached");
         String email = principal.getName();
         User user = userService.findByEmail(email);
         model.addAttribute("user", user);

@@ -607,4 +607,19 @@ public class GithubService {
         return "<script>window.__GAME_ID__=" + version.getGame().getId() + "; window.__GAMEVER_ID__=" + version.getId() + "</script>\n"
                 + "<script src=\"/__myng-storage-patch.js\"></script>";
     }
+
+    /**
+     * Fetches the repository tree from GitHub using the configured WebClient.
+     *
+     * @param owner  The GitHub username or organization.
+     * @param repo   The repository name.
+     * @param commit The commit SHA or branch name.
+     * @return A Mono containing the raw JSON response as a String.
+     */
+    public Mono<String> getRepositoryTree(String owner, String repo, String commit) {
+        return this.webClient.get()
+                .uri("/repos/{owner}/{repo}/git/trees/{commit}?recursive=1", owner, repo, commit)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
 }

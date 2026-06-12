@@ -36,7 +36,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     List<Notification> findByType(Notification.Type type);
 
     /**
-     * Возвращает список уведомлений для указанного пользователя.
+     * Возвращает список уведомлений для указанного пользователя, отсортированный по дате создания в обратном порядке (от новых к старым).
      * <p>
      * Метод использует прямую связь через коллекцию {@code users} в сущности
      * Notification.
@@ -45,16 +45,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      * </p>
      *
      * @param user пользователь, для которого выполняется поиск уведомлений.
-     *             Не должен быть null. Должен быть персистентной сущностью (id !=
-     *             null).
+     * Не должен быть null. Должен быть персистентной сущностью (id !=
+     * null).
      *
-     * @return список уведомлений пользователя. Никогда не возвращает null.
-     *         Может быть пустым, если уведомлений для пользователя нет.
+     * @return список уведомлений пользователя, отсортированный по убыванию даты создания. 
+     * Никогда не возвращает null. Может быть пустым, если уведомлений для пользователя нет.
      *
      * @throws IllegalArgumentException                    если user равен null
      * @throws org.springframework.dao.DataAccessException при ошибке доступа к БД
      */
-    List<Notification> findByUsers(User user);
+    List<Notification> findByUsersOrderByCreatedAtDesc(User user);
 
     /**
      * Возвращает список уведомлений для пользователя по его ID.
