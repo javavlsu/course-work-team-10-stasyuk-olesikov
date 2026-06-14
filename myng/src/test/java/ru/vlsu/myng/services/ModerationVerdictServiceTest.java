@@ -93,6 +93,7 @@ class ModerationVerdictServiceTest extends BaseIntegrationTest {
         gameVersion.setCommitHash("abc123def456");
         gameVersion.setFiles("game.exe, data.zip");
         gameVersion.setCreatedAt(Instant.now());
+        gameVersion.setEntryPoint("index.html");
         gameVersion = gameVersionRepository.save(gameVersion);
 
         devApplication = new DevApplication();

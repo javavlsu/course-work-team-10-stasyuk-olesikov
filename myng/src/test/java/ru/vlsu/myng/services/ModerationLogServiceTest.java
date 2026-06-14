@@ -75,8 +75,8 @@ class ModerationLogServiceTest extends BaseIntegrationTest {
         game1 = createGame("Epic RPG", developer1, "https://github.com/dev1/epic-rpg");
         game2 = createGame("Space Shooter", developer2, "https://github.com/dev2/space-shooter");
 
-        gameVersion1 = createGameVersion(game1, "v1.0.0", "abc111", "First release");
-        gameVersion2 = createGameVersion(game2, "v2.0.0", "def222", "Major update");
+        gameVersion1 = createGameVersion(game1, "v1.0.0", "abc111", "First release", "index.html");
+        gameVersion2 = createGameVersion(game2, "v2.0.0", "def222", "Major update", "index.html");
 
         devApplication1 = createDevApplication(player1, "I want to publish games", "player1_github");
         devApplication2 = createDevApplication(player2, "Experienced developer", "player2_github");
@@ -349,7 +349,7 @@ class ModerationLogServiceTest extends BaseIntegrationTest {
     }
 
     private GameVersion createGameVersion(Game game, String versionName,
-            String commitHash, String changelog) {
+            String commitHash, String changelog, String entryPoint) {
         GameVersion version = new GameVersion();
         version.setGame(game);
         version.setName(versionName);
@@ -357,6 +357,7 @@ class ModerationLogServiceTest extends BaseIntegrationTest {
         version.setChangelog(changelog);
         version.setFiles("game.exe");
         version.setCreatedAt(Instant.now());
+        version.setEntryPoint(entryPoint);
         return gameVersionRepository.save(version);
     }
 

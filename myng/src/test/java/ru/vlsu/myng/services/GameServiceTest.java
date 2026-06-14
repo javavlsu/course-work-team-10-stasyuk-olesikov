@@ -155,6 +155,7 @@ class GameServiceTest extends BaseIntegrationTest {
         request.setTags("#action, #multiplayer");
         request.setGameVer("v1.0.0");
         request.setMainPic(image);
+        request.setEntryPoint("index.html");
 
         gameService.publishGame(request);
 
@@ -232,6 +233,7 @@ class GameServiceTest extends BaseIntegrationTest {
         gv.setName("v1.2");
         gv.setCommitHash("cafebabe");
         gv.setGame(game);
+        gv.setEntryPoint("index.html");
         
         gameVersionRepository.save(gv);
         
