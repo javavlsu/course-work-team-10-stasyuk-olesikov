@@ -1,7 +1,6 @@
 package ru.vlsu.myng.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.vlsu.myng.services.CustomUserDetailsService;
 
@@ -38,67 +37,58 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
-                                // ВРЕМЕННО отключаем CSRF (только для разработки!)
                                 .headers(headers -> headers.frameOptions(f -> f.sameOrigin()))
                                 .csrf(csrf -> csrf.disable())
                                 .addFilterBefore(banFilter, UsernamePasswordAuthenticationFilter.class)
                                 .authorizeHttpRequests(authz -> authz
-                                                // 1. ПУБЛИЧНЫЕ СТРАНИЦЫ (доступны всем)
                                                 .requestMatchers(
-                                                                "/", // главная
-                                                                "/auth/**", // вход/регистрация
-                                                                "/games/**", // просмотр игр
-                                                                "/reviews/more/**", // показать еще отзывы
-                                                                "/catalog", // список игр
-                                                                "/running-game/**", // игра
-                                                                "/main.css", // стили
-                                                                "/js/**", // скрипты
-                                                                "/images/**", // картинки
-                                                                "/static/gamefiles/**", // файлы игр
-                                                                "/banned", // страница бана
-                                                                "/catalog/tags/**", // теги каталога
-                                                                "/favicon.ico", // чтобы убать ошибку на всех страницах
-                                                                "/.well-known/**" // при открытом f12 вылетае ошибка...
-                                                ).permitAll()
+                                                                "/",
+                                                                "/auth/**",
+                                                                "/games/**",
+                                                                "/reviews/more/**",
+                                                                "/catalog",
+                                                                "/running-game/**",
+                                                                "/main.css",
+                                                                "/js/**",
+                                                                "/images/**",
+                                                                "/static/gamefiles/**",
+                                                                "/banned",
+                                                                "/catalog/tags/**",
+                                                                "/favicon.ico",
+                                                                "/.well-known/**")
+                                                .permitAll()
 
-                                                // 2. СТРАНИЦЫ ДЛЯ АВТОРИЗОВАННЫХ (user, dev, mod, admin)
                                                 .requestMatchers(
-                                                                "/profile/**", // личный кабинет
+                                                                "/profile/**",
                                                                 "/profile/*/edit")
                                                 .authenticated()
 
-                                                // 3. СТРАНИЦЫ ДЛЯ РАЗРАБОТЧИКОВ (dev, mod, admin)
                                                 .requestMatchers(
-                                                                "/games/new", // создание игры
-                                                                "/games/*/edit", // редактирование игры
-                                                                "/games/*/versions/new" // добавление версии
-                                                ).hasAnyRole("DEV", "MOD", "ADMIN")
+                                                                "/games/new",
+                                                                "/games/*/edit",
+                                                                "/games/*/versions/new")
+                                                .hasAnyRole("DEV", "MOD", "ADMIN")
 
-                                                // 4. СТРАНИЦЫ ДЛЯ МОДЕРАТОРОВ (mod, admin)
                                                 .requestMatchers(
-                                                                "/to_moderate/**" // панель модератора
-                                                ).hasAnyRole("MOD", "ADMIN")
+                                                                "/to_moderate/**")
+                                                .hasAnyRole("MOD", "ADMIN")
 
-                                                // 5. СТРАНИЦЫ ТОЛЬКО ДЛЯ АДМИНОВ
                                                 .requestMatchers(
-                                                                "/user-list/**", // управление пользователями
-                                                                "/moderation_log/**" // лог модераций
-                                                ).hasRole("ADMIN")
+                                                                "/user-list/**",
+                                                                "/moderation_log/**")
+                                                .hasRole("ADMIN")
 
-                                                // ВСЕ ОСТАЛЬНЫЕ СТРАНИЦЫ - только авторизованным
                                                 .anyRequest().authenticated())
 
-                                // НАСТРОЙКА ВХОДА
                                 .formLogin(form -> form
-                                                .loginPage("/auth") // страница с формой
-                                                .loginProcessingUrl("/auth/login") // куда отправлять форму
-                                                .defaultSuccessUrl("/") // куда после успеха
-                                                .failureUrl("/auth?error=true") // куда при ошибке
-                                                .usernameParameter("username") // поле для username или почты
-                                                .passwordParameter("password") // поле для пароля
+                                                .loginPage("/auth")
+                                                .loginProcessingUrl("/auth/login")
+                                                .defaultSuccessUrl("/")
+                                                .failureUrl("/auth?error=true")
+                                                .usernameParameter("username")
+                                                .passwordParameter("password")
                                                 .permitAll())
 
-                                // НАСТРОЙКА ВЫХОДА
                                 .logout(logout -> logout
                                                 .logoutUrl("/profile/logout")
                                                 .logoutSuccessUrl("/")
@@ -106,13 +96,11 @@ public class SecurityConfig {
                                                 .deleteCookies("JSESSIONID")
                                                 .permitAll())
 
-                                // ЗАПОМИНАНИЕ ПОЛЬЗОВАТЕЛЯ (remember-me)
                                 .rememberMe(remember -> remember
                                                 .key("myngSecretKey")
-                                                .tokenValiditySeconds(86400) // 24 часа
+                                                .tokenValiditySeconds(86400)
                                                 .rememberMeParameter("remember-me"))
 
-                                // Говорим Spring Security использовать наш UserDetailsService
                                 .userDetailsService(userDetailsService);
 
                 return http.build();
