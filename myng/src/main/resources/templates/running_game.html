@@ -1,0 +1,184 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::section})">
+
+    <section
+      id="game-run"
+      class="flex flex-col items-center justify-start min-h-screen p-4"
+      role="region"
+      aria-labelledby="game-run-title"
+    >
+      <h2 id="game-run-title" class="sr-only">Запущенная игра</h2>
+
+      <!-- Game container -->
+      <div
+        class="game-container bg-black rounded-xl overflow-hidden relative shadow-2xl border border-gray-700"
+        style="
+          width: 90%;
+          max-width: 1200px;
+          min-width: 600px;
+          aspect-ratio: 16/9;
+        "
+      >
+        <!-- Toolbar -->
+        <div
+          class="game-toolbar w-full flex justify-between items-center p-4 bg-gray-900/90 backdrop-blur-sm border-b border-gray-700"
+        >
+            <a th:href="@{/games/{id}(id=${game.id})}">
+                <button
+                        class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition-colors flex items-center gap-2 border border-gray-600"
+                        id="exit-game-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Выйти из игры
+                </button>
+            </a>
+
+          <div class="flex items-center gap-3">
+            <span class="text-gray-400 text-sm flex items-center gap-2">
+              <i class="fas fa-gamepad"></i>
+              <span th:text="${game.name}">Game Name</span>
+              <span class="text-gray-500 text-xs" th:text="${version.name}">v1.0</span>
+              <i class="fas fa-star text-yellow-500"></i>
+              <span th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}">0.0</span>
+            </span>
+            <button
+              class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors flex items-center gap-2"
+              id="fullscreen-btn"
+            >
+              <i class="fas fa-expand"></i>
+              Полный экран
+            </button>
+          </div>
+        </div>
+
+
+        <div
+          class="game-content w-full h-full flex items-center justify-center relative"
+          style="background: white"
+        >
+          <iframe
+              th:src="${entryPoint}"
+              sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+              class="w-full h-full border-0"
+              allow="fullscreen; autoplay"
+          >
+          </iframe>
+            
+        </div>
+      </div>
+
+        <style>
+            body {
+              font-family: "Inter", sans-serif;
+            }
+
+            /* Стили для полноэкранного режима */
+            .game-container:-webkit-full-screen {
+              width: 100vw;
+              height: 100vh;
+              max-width: none;
+              border-radius: 0;
+              background: black;
+            }
+
+            .game-container:-webkit-full-screen .game-content {
+              height: calc(100vh - 60px);
+            }
+
+            .game-container:-webkit-full-screen .game-toolbar {
+              padding: 1rem 2rem;
+              background: rgba(0, 0, 0, 0.8);
+            }
+
+            .game-container:fullscreen {
+              width: 100vw;
+              height: 100vh;
+              max-width: none;
+              border-radius: 0;
+              background: black;
+            }
+
+            .game-container:fullscreen .game-content {
+              height: calc(100vh - 60px);
+            }
+
+            .game-container:fullscreen .game-toolbar {
+              padding: 1rem 2rem;
+              background: rgba(0, 0, 0, 0.8);
+            }
+        </style>
+
+        <script>
+            (function () {
+              const fullscreenBtn = document.getElementById("fullscreen-btn");
+              const gameContainer = document.querySelector(".game-container");
+              const exitBtn = document.getElementById("exit-game-btn");
+
+              function isFullscreen() {
+                return (
+                  document.fullscreenElement ||
+                  document.webkitFullscreenElement ||
+                  document.mozFullScreenElement ||
+                  document.msFullscreenElement
+                );
+              }
+
+              function exitFullscreen() {
+                if (document.exitFullscreen) {
+                  document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                  document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                  document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                  document.msExitFullscreen();
+                }
+              }
+
+              fullscreenBtn.addEventListener("click", function () {
+                if (!isFullscreen()) {
+                  // Войти в полноэкранный режим
+                  if (gameContainer.requestFullscreen) {
+                    gameContainer.requestFullscreen();
+                  } else if (gameContainer.webkitRequestFullscreen) {
+                    gameContainer.webkitRequestFullscreen();
+                  } else if (gameContainer.mozRequestFullScreen) {
+                    gameContainer.mozRequestFullScreen();
+                  } else if (gameContainer.msRequestFullscreen) {
+                    gameContainer.msRequestFullscreen();
+                  }
+
+                  fullscreenBtn.innerHTML =
+                    '<i class="fas fa-compress"></i> Выйти из полного экрана';
+                } else {
+                  exitFullscreen();
+
+                  fullscreenBtn.innerHTML =
+                    '<i class="fas fa-expand"></i> Полный экран';
+                }
+              });
+
+              document.addEventListener("fullscreenchange", updateButtonText);
+              document.addEventListener("webkitfullscreenchange", updateButtonText);
+              document.addEventListener("mozfullscreenchange", updateButtonText);
+              document.addEventListener("MSFullscreenChange", updateButtonText);
+
+              function updateButtonText() {
+                if (isFullscreen()) {
+                  fullscreenBtn.innerHTML =
+                    '<i class="fas fa-compress"></i> Выйти из полного экрана';
+                } else {
+                  fullscreenBtn.innerHTML =
+                    '<i class="fas fa-expand"></i> Полный экран';
+                }
+              }
+
+              document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" && isFullscreen()) {
+                  updateButtonText();
+                }
+              });
+            })();
+        </script>
+    </section>
+</html>

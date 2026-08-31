@@ -1,0 +1,1309 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
+  <section class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Шапка с навигацией -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div>
+            <h1
+              class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
+            >
+              <i class="fas fa-users text-blue-500"></i>
+              Список пользователей
+            </h1>
+            <p class="text-gray-600 flex items-center gap-2">
+              <i class="fas fa-user-shield text-blue-500"></i>
+              Управление пользователями платформы и их правами
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Основной контент - таблица пользователей -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Фильтры и поиск -->
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex flex-col lg:flex-row gap-4">
+            <!-- Поиск -->
+            <div class="flex-1">
+              <div class="relative">
+                <i
+                  class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="text"
+                  id="user-search"
+                  placeholder="Поиск по имени, email, ID..."
+                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- Фильтр по роли -->
+            <div class="lg:w-48">
+              <select
+                id="role-filter"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
+              >
+                <option value="">Все роли</option>
+                <option value="user">Пользователь</option>
+                <option value="dev">Разработчик</option>
+                <option value="mod">Модератор</option>
+                <option value="admin">Администратор</option>
+              </select>
+            </div>
+
+            <!-- Фильтр по статусу -->
+            <div class="lg:w-48">
+              <select
+                id="status-filter"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
+              >
+                <option value="">Все статусы</option>
+                <option value="active">Активен</option>
+                <option value="blocked">Заблокирован</option>
+              </select>
+            </div>
+
+            <!-- Кнопка фильтра -->
+            <button
+              class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <i class="fas fa-filter"></i>
+              Применить
+            </button>
+          </div>
+
+          <!-- Активные фильтры -->
+          <div
+            class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100"
+            th:if="${searchFilter != null or roleFilter != null or statusFilter != null}"
+          >
+            <span class="text-sm text-gray-500 mr-2 py-1.5"
+              >Активные фильтры:</span
+            >
+
+            <!-- Фильтр поиска -->
+            <span
+              th:if="${searchFilter != null and searchFilter != ''}"
+              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
+            >
+              Поиск: <span th:text="${searchFilter}"></span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('search')"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </span>
+
+            <!-- Фильтр роли -->
+            <span
+              th:if="${roleFilter != null and roleFilter != ''}"
+              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
+            >
+              Роль:
+              <span th:switch="${roleFilter}">
+                <span th:case="'user'">Пользователь</span>
+                <span th:case="'dev'">Разработчик</span>
+                <span th:case="'mod'">Модератор</span>
+                <span th:case="'admin'">Администратор</span>
+                <span th:case="*" th:text="${roleFilter}"></span>
+              </span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('role')"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </span>
+
+            <!-- Фильтр статуса -->
+            <span
+              th:if="${statusFilter != null and statusFilter != ''}"
+              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg"
+            >
+              Статус:
+              <span th:switch="${statusFilter}">
+                <span th:case="'active'">Активен</span>
+                <span th:case="'blocked'">Заблокирован</span>
+                <span th:case="*" th:text="${statusFilter}"></span>
+              </span>
+              <button
+                class="hover:text-blue-900"
+                onclick="removeFilter('status')"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </span>
+
+            <!-- Кнопка сброса всех фильтров -->
+            <button
+              class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm"
+              onclick="resetFilters()"
+            >
+              <i class="fas fa-undo mr-1"></i>
+              Сбросить все
+            </button>
+          </div>
+        </div>
+
+        <!-- Таблица пользователей -->
+        <div class="users-table-container overflow-x-auto">
+          <table class="w-full min-w-[800px]">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Пользователь
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Роль
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Статус
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Регистрация
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Действия
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr
+                th:each="user : ${users}"
+                th:if="${users.totalElements > 0}"
+                class="hover:bg-blue-50/30 transition-colors"
+              >
+                <!-- Пользователь (без изменений) -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+                      th:text="${#strings.substring(user.username,0,1).toUpperCase()}"
+                    ></div>
+                    <div>
+                      <div
+                        class="font-medium text-gray-900"
+                        th:text="'@' + ${user.username}"
+                      ></div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Роль (без изменений) -->
+                <td class="px-6 py-4">
+                  <span
+                    th:switch="${user.role}"
+                    class="px-3 py-1.5 text-xs font-medium rounded-full inline-flex items-center gap-1"
+                  >
+                    <span th:case="'user'" class="bg-blue-50 text-blue-700">
+                      <i class="fas fa-user"></i> Пользователь
+                    </span>
+                    <span th:case="'dev'" class="bg-purple-50 text-purple-700">
+                      <i class="fas fa-code"></i> Разработчик
+                    </span>
+                    <span th:case="'mod'" class="bg-teal-50 text-teal-700">
+                      <i class="fas fa-shield-alt"></i> Модератор
+                    </span>
+                    <span th:case="'admin'" class="bg-red-50 text-red-700">
+                      <i class="fas fa-crown"></i> Администратор
+                    </span>
+                    <span
+                      th:case="*"
+                      th:text="${user.role}"
+                      class="bg-gray-50 text-gray-700"
+                    >
+                      Неизвестно
+                    </span>
+                  </span>
+                </td>
+
+                <!-- Статус (без изменений) -->
+                <td class="px-6 py-4">
+                  <span
+                    th:if="${bannedMap[user.id]}"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-lg"
+                  >
+                    <i class="fas fa-ban"></i>
+                    Заблокирован
+                  </span>
+                  <span
+                    th:if="${!bannedMap[user.id]}"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-lg"
+                  >
+                    <i class="fas fa-circle text-xs"></i>
+                    Активен
+                  </span>
+                </td>
+
+                <!-- Дата регистрации (без изменений) -->
+                <td class="px-6 py-4">
+                  <div
+                    class="text-sm text-gray-900"
+                    th:text="${#temporals.format(user.registeredAt, 'dd.MM.yyyy')}"
+                  ></div>
+                </td>
+
+                <!-- Действия (без изменений) -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
+                      onclick="openChangeRoleModal(this)"
+                    >
+                      <i class="fas fa-user-edit"></i>
+                      Роль
+                    </button>
+                    <button
+                      class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
+                      onclick="openWarningModal(this)"
+                    >
+                      <i class="fas fa-exclamation-triangle"></i>
+                      Предупр.
+                    </button>
+                    <button
+                      th:if="${!bannedMap[user.id]}"
+                      class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
+                      onclick="openBlockModal(this)"
+                    >
+                      <i class="fas fa-ban"></i>
+                      Блок
+                    </button>
+                    <button
+                      th:if="${bannedMap[user.id]}"
+                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                      th:attr="data-user-id=${user.id}"
+                      onclick="openUnblockModal(this)"
+                    >
+                      <i class="fas fa-lock-open"></i>
+                      Разблок.
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Строка, если пользователей нет -->
+              <tr th:if="${users.totalElements == 0}">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div
+                    class="flex flex-col items-center justify-center text-gray-400"
+                  >
+                    <i class="fas fa-users text-5xl mb-4"></i>
+                    <p class="text-lg">Пользователи не найдены</p>
+                    <p class="text-sm">Попробуйте изменить параметры поиска</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Пагинация и итоги -->
+        <div
+          class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
+        >
+          <div class="flex items-center gap-4">
+            <div class="text-sm text-gray-500">
+              Показано
+              <span
+                class="font-medium"
+                th:text="${users.number * users.size + 1}"
+                >1</span
+              >-<span
+                class="font-medium"
+                th:text="${users.number * users.size + users.numberOfElements}"
+                >5</span
+              >
+              из
+              <span class="font-medium" th:text="${totalElements}">1,547</span>
+              пользователей
+            </div>
+
+            <!-- Селектор количества элементов на странице -->
+            <select
+              id="pageSizeSelect"
+              class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-white"
+              onchange="changePageSize(this.value)"
+            >
+              <option value="10" th:selected="${pageSize == 10}">
+                10 на странице
+              </option>
+              <option value="25" th:selected="${pageSize == 25}">
+                25 на странице
+              </option>
+              <option value="50" th:selected="${pageSize == 50}">
+                50 на странице
+              </option>
+              <option value="100" th:selected="${pageSize == 100}">
+                100 на странице
+              </option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2" th:if="${totalPages > 1}">
+            <!-- Кнопка "Назад" -->
+            <a
+              th:if="${currentPage > 0}"
+              th:href="@{/user-list(page=${currentPage - 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </a>
+            <button
+              th:if="${currentPage == 0}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              disabled
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <!-- Первая страница -->
+            <a
+              th:if="${startPage > 0}"
+              th:href="@{/user-list(page=0, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              1
+            </a>
+            <span th:if="${startPage > 1}" class="text-gray-400">...</span>
+
+            <!-- Страницы вокруг текущей -->
+            <a
+              th:each="pageNum : ${#numbers.sequence(startPage, endPage)}"
+              th:href="@{/user-list(page=${pageNum}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              th:class="${pageNum == currentPage} ? 'px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors' : 'px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors'"
+              th:text="${pageNum + 1}"
+            >
+              1
+            </a>
+
+            <!-- Последняя страница -->
+            <span th:if="${endPage < totalPages - 2}" class="text-gray-400"
+              >...</span
+            >
+            <a
+              th:if="${endPage < totalPages - 1}"
+              th:href="@{/user-list(page=${totalPages - 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+              th:text="${totalPages}"
+            >
+              155
+            </a>
+
+            <!-- Кнопка "Вперед" -->
+            <a
+              th:if="${currentPage < totalPages - 1}"
+              th:href="@{/user-list(page=${currentPage + 1}, size=${pageSize}, search=${searchFilter}, role=${roleFilter}, status=${statusFilter})}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </a>
+            <button
+              th:if="${currentPage >= totalPages - 1}"
+              class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              disabled
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно изменения роли -->
+    <div
+      id="changeRoleModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-user-edit text-blue-500"></i>
+            Изменение роли пользователя
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('changeRoleModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Информация о пользователе (динамически заполняется) -->
+          <div class="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+            <div
+              id="changeRoleUserAvatar"
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+            >
+              A
+            </div>
+            <div>
+              <div id="changeRoleUserName" class="font-medium text-gray-900">
+                @username
+              </div>
+              <div class="text-xs text-gray-500">
+                Текущая роль:
+                <span
+                  id="changeRoleCurrentRole"
+                  class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs"
+                ></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="changeRoleUserId" />
+
+          <!-- Выбор новой роли -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Новая роль</label
+            >
+            <select
+              id="changeRoleSelect"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white"
+            >
+              <option value="user">Пользователь (user)</option>
+              <option value="dev">Разработчик (dev)</option>
+              <option value="mod">Модератор (mod)</option>
+              <option value="admin">Администратор (admin)</option>
+            </select>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('changeRoleModal')"
+            >
+              Отмена
+            </button>
+            <button
+              onclick="submitChangeRole()"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            >
+              <i class="fas fa-save"></i>
+              Сохранить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно предупреждения -->
+    <div
+      id="warnModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle text-amber-500"></i>
+            Выдать предупреждение
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('warnModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Информация о пользователе (динамически заполняется) -->
+          <div class="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+            <div
+              id="warnUserAvatar"
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold"
+            >
+              A
+            </div>
+            <div>
+              <div id="warnUserName" class="font-medium text-gray-900">
+                @username
+              </div>
+            </div>
+          </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="warnUserId" />
+
+          <!-- Причина предупреждения -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Причина предупреждения</label
+            >
+            <textarea
+              id="warnReason"
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-amber-100 focus:border-amber-500 outline-none transition-all"
+              placeholder="Опишите причину предупреждения..."
+              required
+            ></textarea>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('warnModal')"
+            >
+              Отмена
+            </button>
+            <button
+              onclick="submitWarning()"
+              class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            >
+              <i class="fas fa-exclamation-triangle"></i>
+              Выдать предупреждение
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно блокировки -->
+    <div
+      id="blockModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-ban text-red-500"></i>
+            Блокировка пользователя
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('blockModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Информация о пользователе (динамически заполняется) -->
+          <div class="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+            <div
+              id="blockUserAvatar"
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold uppercase"
+            >
+              A
+            </div>
+            <div>
+              <div id="blockUserName" class="font-medium text-gray-900">
+                @username
+              </div>
+              <div id="blockUserStatus" class="text-xs text-gray-500">
+                Статус: Активен
+              </div>
+            </div>
+          </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="blockUserId" />
+
+          <!-- Время блокировки -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Срок блокировки</label
+            >
+            <select
+              id="blockDuration"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-red-100 focus:border-red-500 outline-none transition-all bg-white"
+            >
+              <option value="1">1 час</option>
+              <option value="3">3 часа</option>
+              <option value="6">6 часов</option>
+              <option value="12">12 часов</option>
+              <option value="24">24 часа</option>
+              <option value="72">3 дня</option>
+              <option value="168">7 дней</option>
+              <option value="720">30 дней</option>
+              <option value="permanent">Навсегда</option>
+            </select>
+          </div>
+
+          <!-- Причина блокировки -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Причина блокировки (необязательно)</label
+            >
+            <textarea
+              id="blockReason"
+              rows="3"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-red-100 focus:border-red-500 outline-none transition-all"
+              placeholder="Укажите причину блокировки..."
+            ></textarea>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('blockModal')"
+            >
+              Отмена
+            </button>
+            <button
+              onclick="blockUser()"
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+            >
+              <i class="fas fa-ban"></i>
+              Заблокировать
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно разблокировки -->
+    <div
+      id="unblockModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-lock-open text-green-500"></i>
+            Разблокировка пользователя
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('unblockModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Информация о пользователе (динамически заполняется) -->
+          <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+            <div class="flex items-center gap-3">
+              <div
+                id="unblockUserAvatar"
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-bold"
+              >
+                ПС
+              </div>
+              <div>
+                <div id="unblockUserName" class="font-medium text-gray-900">
+                  @petr_s
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Скрытое поле для хранения ID пользователя -->
+          <input type="hidden" id="unblockUserId" />
+
+          <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+            <div class="flex items-start gap-2">
+              <i class="fas fa-info-circle text-yellow-600 mt-0.5"></i>
+              <div class="text-sm text-yellow-800">
+                <span class="font-medium">Подтвердите действие</span>
+                <p class="text-xs mt-1">
+                  Пользователь получит доступ к платформе после разблокировки.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопки -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+              onclick="closeModal('unblockModal')"
+            >
+              Отмена
+            </button>
+            <button
+              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              onclick="unblockUser()"
+            >
+              <i class="fas fa-lock-open"></i>
+              Разблокировать
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+        min-height: 100vh;
+      }
+
+      /* Кастомный скроллбар для таблицы */
+      .users-table-container::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+
+      .users-table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .users-table-container::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+      }
+
+      .users-table-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Анимация для новых пользователей */
+      @keyframes highlight-new {
+        0% {
+          background-color: rgba(59, 130, 246, 0.1);
+        }
+        100% {
+          background-color: transparent;
+        }
+      }
+
+      .new-user {
+        animation: highlight-new 2s ease-out;
+      }
+    </style>
+
+    <script>
+      // Функции для работы с модальными окнами
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      // Закрытие по клику на фон
+      document.querySelectorAll(".fixed.inset-0").forEach((modal) => {
+        modal.addEventListener("click", function (e) {
+          if (e.target === this) {
+            this.style.display = "none";
+          }
+        });
+      });
+
+      // Закрытие по Escape
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          document
+            .querySelectorAll('.fixed.inset-0[style*="flex"]')
+            .forEach((modal) => {
+              modal.style.display = "none";
+            });
+        }
+      });
+    </script>
+
+    <script>
+      // Функция открытия модального окна блокировки с данными пользователя
+      function openBlockModal(button) {
+        // Находим строку пользователя (родительский tr)
+        const row = button.closest("tr");
+
+        // Получаем данные пользователя из строки таблицы
+        const userId = button.getAttribute("data-user-id");
+        const username = row
+          .querySelector(".font-medium.text-gray-900")
+          .textContent.trim();
+
+        // Получаем первую букву имени (без @)
+        const firstLetter = username.replace("@", "").charAt(0).toUpperCase();
+
+        // Заполняем модальное окно
+        document.getElementById("blockUserId").value = userId;
+        document.getElementById("blockUserName").textContent = username;
+        document.getElementById("blockUserAvatar").textContent = firstLetter;
+
+        // Определяем статус (заблокирован или нет)
+        const statusElement = row.querySelector("td:nth-child(3) span");
+        const isBanned =
+          statusElement && statusElement.classList.contains("bg-red-100");
+        document.getElementById("blockUserStatus").textContent =
+          "Статус: " + (isBanned ? "Заблокирован" : "Активен");
+
+        // Очищаем поля ввода
+        document.getElementById("blockDuration").value = "24"; // значение по умолчанию
+        document.getElementById("blockReason").value = "";
+
+        // Открываем модальное окно
+        openModal("blockModal");
+      }
+
+      // Функция открытия модального окна разблокировки
+      function openUnblockModal(button) {
+        // Проверяем, что кнопка существует
+        if (!button) {
+          console.error("Кнопка не передана");
+          return;
+        }
+
+        const row = button.closest("tr");
+        if (!row) {
+          console.error("Не найдена строка таблицы для кнопки:", button);
+          return;
+        }
+
+        const userId = button.getAttribute("data-user-id");
+        if (!userId) {
+          console.error("Не найден data-user-id у кнопки");
+          return;
+        }
+
+        const usernameElement = row.querySelector(".font-medium.text-gray-900");
+        if (!usernameElement) {
+          console.error("Не найден элемент с именем пользователя");
+          return;
+        }
+
+        const username = usernameElement.textContent.trim();
+        const firstLetter = username.replace("@", "").charAt(0).toUpperCase();
+
+        // Заполняем модальное окно разблокировки с проверками
+        const userIdField = document.getElementById("unblockUserId");
+        if (userIdField) {
+          userIdField.value = userId;
+        } else {
+          console.error("Не найден элемент unblockUserId");
+        }
+
+        const userNameField = document.getElementById("unblockUserName");
+        if (userNameField) {
+          userNameField.textContent = username;
+        } else {
+          console.error("Не найден элемент unblockUserName");
+        }
+
+        const userAvatarField = document.getElementById("unblockUserAvatar");
+        if (userAvatarField) {
+          userAvatarField.textContent = firstLetter;
+        } else {
+          console.error("Не найден элемент unblockUserAvatar");
+        }
+
+        openModal("unblockModal");
+      }
+
+      // Обновленная функция блокировки
+      async function blockUser() {
+        const userId = document.getElementById("blockUserId").value;
+        const reason = document.getElementById("blockReason").value;
+        const durationSelect = document.getElementById("blockDuration");
+        const durationHours = durationSelect.value;
+        const isPermanent = durationHours === "permanent";
+
+        const requestData = {
+          userId: parseInt(userId),
+          reason: reason || "Причина не указана",
+          durationHours: isPermanent ? null : parseInt(durationHours),
+          permanent: isPermanent,
+        };
+
+        try {
+          const response = await fetch("/user-list/ban", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload();
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("blockModal");
+      }
+
+      // Обновленная функция разблокировки
+      async function unblockUser() {
+        const userId = document.getElementById("unblockUserId").value;
+
+        const requestData = {
+          userId: parseInt(userId),
+        };
+
+        try {
+          const response = await fetch("/user-list/unban", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload();
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("unblockModal");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Кнопки блокировки - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-red-600[data-user-id]")
+          .forEach((button) => {
+            // Убираем старый обработчик и ставим новый
+            button.onclick = function () {
+              openBlockModal(this);
+            };
+          });
+
+        // Кнопки разблокировки - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-green-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openUnblockModal(this);
+            };
+          });
+
+        // Кнопки смены роли - только те, что в таблице (с data-user-id)
+        document
+          .querySelectorAll("button.bg-blue-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openChangeRoleModal(this);
+            };
+          });
+
+        // Кнопки предупреждения - ищем по классу и data-user-id
+        document
+          .querySelectorAll("button.bg-amber-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openWarningModal(this);
+            };
+          });
+      });
+
+      // Функция открытия модального окна смены роли
+      function openChangeRoleModal(button) {
+        const row = button.closest("tr");
+        const userId = button.getAttribute("data-user-id");
+        const username = row
+          .querySelector(".font-medium.text-gray-900")
+          .textContent.trim();
+        const currentRole = row
+          .querySelector("td:nth-child(2) span span:not([th\\:case='*'])")
+          .textContent.trim();
+
+        // Определяем текущую роль для enum
+        let currentRoleEnum = "user";
+        if (currentRole.includes("Разработчик")) currentRoleEnum = "dev";
+        else if (currentRole.includes("Модератор")) currentRoleEnum = "mod";
+        else if (currentRole.includes("Администратор"))
+          currentRoleEnum = "admin";
+
+        // Заполняем модальное окно
+        document.getElementById("changeRoleUserId").value = userId;
+        document.getElementById("changeRoleUserName").textContent = username;
+        document.getElementById("changeRoleCurrentRole").textContent =
+          currentRole;
+
+        // Устанавливаем текущую роль в селекте
+        const select = document.getElementById("changeRoleSelect");
+        select.value = currentRoleEnum;
+
+        openModal("changeRoleModal");
+      }
+
+      // Отправка запроса на смену роли
+      async function submitChangeRole() {
+        const userId = document.getElementById("changeRoleUserId").value;
+        const newRole = document.getElementById("changeRoleSelect").value;
+
+        const requestData = {
+          userId: parseInt(userId),
+          newRole: newRole,
+        };
+
+        try {
+          const response = await fetch("/user-list/change-role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload();
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("changeRoleModal");
+      }
+
+      // Функция открытия модального окна предупреждения
+      function openWarningModal(button) {
+        if (!button) {
+          console.error("Кнопка не передана");
+          return;
+        }
+
+        const row = button.closest("tr");
+        if (!row) {
+          console.error("Не найдена строка таблицы для кнопки:", button);
+          return;
+        }
+
+        const userId = button.getAttribute("data-user-id");
+        if (!userId) {
+          console.error("Не найден data-user-id у кнопки");
+          return;
+        }
+
+        const usernameElement = row.querySelector(".font-medium.text-gray-900");
+        if (!usernameElement) {
+          console.error("Не найден элемент с именем пользователя");
+          return;
+        }
+
+        const username = usernameElement.textContent.trim();
+        const firstLetter = username.replace("@", "").charAt(0).toUpperCase();
+
+        // Заполняем модальное окно
+        const userIdField = document.getElementById("warnUserId");
+        if (userIdField) {
+          userIdField.value = userId;
+        }
+
+        const userNameField = document.getElementById("warnUserName");
+        if (userNameField) {
+          userNameField.textContent = username;
+        }
+
+        const userAvatarField = document.getElementById("warnUserAvatar");
+        if (userAvatarField) {
+          userAvatarField.textContent = firstLetter;
+        }
+
+        // Очищаем поле причины
+        const reasonField = document.getElementById("warnReason");
+        if (reasonField) {
+          reasonField.value = "";
+        }
+
+        openModal("warnModal");
+      }
+
+      // Отправка запроса на выдачу предупреждения
+      async function submitWarning() {
+        const userId = document.getElementById("warnUserId").value;
+        const reason = document.getElementById("warnReason").value;
+
+        if (!reason || reason.trim() === "") {
+          alert("Укажите причину предупреждения");
+          return;
+        }
+
+        const requestData = {
+          userId: parseInt(userId),
+          reason: reason.trim(),
+        };
+
+        try {
+          const response = await fetch("/user-list/warning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(result.message);
+            location.reload();
+          } else {
+            alert("Ошибка: " + result.message);
+          }
+        } catch (error) {
+          alert("Ошибка при отправке запроса");
+        }
+
+        closeModal("warnModal");
+      }
+    </script>
+
+    <!-- JS отображения на страницах (пагинация) -->
+    <script>
+      // Функция для применения фильтров
+      function applyFilters() {
+        const search = document.getElementById("user-search").value;
+        const role = document.getElementById("role-filter").value;
+        const status = document.getElementById("status-filter").value;
+        const size = document.getElementById("pageSizeSelect")?.value || 10;
+
+        // Формируем URL с параметрами
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      // Функция для изменения количества элементов на странице
+      function changePageSize(size) {
+        const search = document.getElementById("user-search").value;
+        const role = document.getElementById("role-filter").value;
+        const status = document.getElementById("status-filter").value;
+
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      // Функция для сброса фильтров
+      function resetFilters() {
+        document.getElementById("user-search").value = "";
+        document.getElementById("role-filter").value = "";
+        document.getElementById("status-filter").value = "";
+        window.location.href =
+          "/user-list?page=0&size=" +
+          (document.getElementById("pageSizeSelect")?.value || 10);
+      }
+
+      // Функция для удаления отдельного фильтра
+      function removeFilter(filterType) {
+        const search =
+          filterType === "search"
+            ? ""
+            : document.getElementById("user-search").value;
+        const role =
+          filterType === "role"
+            ? ""
+            : document.getElementById("role-filter").value;
+        const status =
+          filterType === "status"
+            ? ""
+            : document.getElementById("status-filter").value;
+        const size = document.getElementById("pageSizeSelect")?.value || 10;
+
+        let url = "/user-list?page=0&size=" + size;
+        if (search) url += "&search=" + encodeURIComponent(search);
+        if (role) url += "&role=" + encodeURIComponent(role);
+        if (status) url += "&status=" + encodeURIComponent(status);
+
+        window.location.href = url;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Привязываем обработчики к фильтрам
+        const applyButton = document.querySelector("button.bg-blue-600");
+        if (applyButton) {
+          applyButton.onclick = applyFilters;
+        }
+
+        // Привязываем обработчик к кнопке сброса
+        const resetButton = document.querySelector("button:has(.fa-undo)");
+        if (resetButton) {
+          resetButton.onclick = resetFilters;
+        }
+
+        // Привязываем обработчики к крестикам фильтров
+        document.querySelectorAll(".bg-blue-50 button").forEach((button) => {
+          button.onclick = function () {
+            const filterText = this.closest(".bg-blue-50")?.textContent.trim();
+            if (filterText?.includes("Роль:")) removeFilter("role");
+            else if (filterText?.includes("Статус:")) removeFilter("status");
+            else removeFilter("search");
+          };
+        });
+
+        // Остальной код для модальных окон...
+
+        // Кнопки блокировки
+        document
+          .querySelectorAll("button.bg-red-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openBlockModal(this);
+            };
+          });
+
+        // Кнопки разблокировки
+        document
+          .querySelectorAll("button.bg-green-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openUnblockModal(this);
+            };
+          });
+
+        // Кнопки смены роли
+        document
+          .querySelectorAll("button.bg-blue-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openChangeRoleModal(this);
+            };
+          });
+
+        // Кнопки предупреждения
+        document
+          .querySelectorAll("button.bg-amber-600[data-user-id]")
+          .forEach((button) => {
+            button.onclick = function () {
+              openWarningModal(this);
+            };
+          });
+      });
+    </script>
+  </section>
+</html>

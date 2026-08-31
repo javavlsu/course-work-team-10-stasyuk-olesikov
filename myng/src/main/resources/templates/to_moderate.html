@@ -1,0 +1,802 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
+  <section class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Шапка с навигацией -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div>
+            <h1
+              class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
+            >
+              <i class="fas fa-clipboard-list text-blue-500"></i>
+              Ожидает модерации
+            </h1>
+            <p class="text-gray-600 flex items-center gap-2">
+              <i class="fas fa-shield-alt text-blue-500"></i>
+              Таблица с фильтрами: версии игр, заявки на статус разработчика,
+              отзывы
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Основной контент - таблица модерации -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <!-- ФИЛЬТРЫ -->
+          <form method="get"
+                th:action="@{/to-moderate}"
+                class="p-6 border-b border-gray-200">
+
+              <!-- keep page size -->
+              <input type="hidden"
+                     name="size"
+                     th:value="${moderationPage.size}" />
+
+              <div class="flex flex-col lg:flex-column gap-4">
+
+                  <!-- SEARCH -->
+                  <div class="flex-1">
+                      <div class="relative">
+
+                          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+                          <input
+                                  type="text"
+                                  name="search"
+
+                                  th:value="${param.search}"
+
+                                  placeholder="Поиск по ID сущности, username пользователя, username модератора, причине..."
+
+                                  class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                          />
+                      </div>
+                  </div>
+
+                  <div class="flex flex-col lg:flex-row gap-4">
+                      <!-- TYPE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="type"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="">Все типы</option>
+
+                              <option value="GAME_VERSION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'GAME_VERSION'}">
+                                  Версии игр
+                              </option>
+
+                              <option value="DEV_APPLICATION"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'DEV_APPLICATION'}">
+                                  Заявки
+                              </option>
+
+                              <option value="REVIEW"
+                                      th:selected="${param.type != null and !#lists.isEmpty(param.type) and param.type[0] == 'REVIEW'}">
+                                  Отзывы
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- DATE -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="period"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="">За всё время</option>
+
+                              <option value="today"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'today'}">
+                                  Сегодня
+                              </option>
+
+                              <option value="week"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'week'}">
+                                  Неделя
+                              </option>
+
+                              <option value="month"
+                                      th:selected="${param.period != null and !#lists.isEmpty(param.period) and param.period[0] == 'month'}">
+                                  Месяц
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- SORT -->
+                      <div class="lg:w-48">
+                          <select
+                                  name="sort"
+
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white">
+
+                              <option value="newest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'newest'}">
+                                  Сначала новые
+                              </option>
+
+                              <option value="oldest"
+                                      th:selected="${param.sort == null or #lists.isEmpty(param.sort) or param.sort[0] == 'oldest'}">
+                                  Сначала старые
+                              </option>
+                          </select>
+                      </div>
+
+                      <!-- APPLY -->
+                      <div>
+                          <button
+                                  type="submit"
+
+                                  class="w-full lg:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+
+                              <i class="fas fa-filter mr-2"></i>
+                              Применить
+                          </button>
+                      </div>
+
+                  </div>
+              </div>
+
+              <!-- ACTIVE FILTERS -->
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+
+                  <!-- LABEL -->
+                  <span class="text-sm text-gray-500 mr-2 py-1.5">
+                        Активные фильтры:
+                    </span>
+
+                  <!-- TYPE -->
+                  <span th:if="${param.type != null and !#strings.isEmpty(param.type[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-sm rounded-lg">
+
+                        Тип:
+                        <span class="text-blue-700"
+                              th:text="${param.type[0]}"></span>
+                    </span>
+
+                  <!-- STATUS -->
+                  <span th:if="${param.status != null and !#strings.isEmpty(param.status[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 text-sm rounded-lg">
+                    
+                        Статус:
+                        <span class="text-green-700"
+                              th:text="${param.status[0]}"></span>
+                    </span>
+
+                  <!-- PERIOD -->
+                  <span th:if="${param.period != null and !#strings.isEmpty(param.period[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-lg">
+                    
+                        Период:
+                        <span class="text-purple-700"
+                              th:text="${param.period[0]}"></span>
+                    </span>
+
+                  <!-- SORT -->
+                  <span th:if="${param.sort != null and !#strings.isEmpty(param.sort[0])}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 text-sm rounded-lg">
+                    
+                        Сортировка:
+                        <span class="text-red-700"
+                              th:text="${param.sort[0]}"></span>
+                    </span>
+
+                  <!-- RESET -->
+                  <a th:href="@{/to-moderate(size=${moderationPage.size})}"
+                     class="px-3 py-1.5 text-gray-500 hover:text-gray-700 text-sm">
+
+                      <i class="fas fa-undo mr-1"></i>
+                      Сбросить все
+                  </a>
+
+              </div>
+
+          </form>
+
+        <!-- Таблица модерации -->
+        <div class="moderation-table-container overflow-x-auto">
+          <table class="w-full min-w-[1000px]">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  ID
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Тип сущности
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Краткая информация
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Доп. данные
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Создано
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Действия
+                </th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200">
+              <tr
+                th:each="item : ${moderationItems}"
+                th:attr="data-id=${item.moderationVerdictId}"
+                class="moderation-item hover:bg-blue-50/30 transition-colors"
+              >
+                <!-- ID -->
+                <td class="px-6 py-4">
+                  <span
+                    class="inline-flex px-2.5 py-1.5 rounded-lg bg-gray-100 font-mono text-sm"
+                    th:text="'#' + ${item.id}"
+                  >
+                  </span>
+                </td>
+
+                <!-- TYPE -->
+                <td class="px-6 py-4">
+                  <div th:switch="${item.type}">
+                    <span
+                      th:case="'GAME_VERSION'"
+                      class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs rounded-full"
+                    >
+                      <i class="fas fa-gamepad"></i> game_version
+                    </span>
+
+                    <span
+                      th:case="'DEV_APPLICATION'"
+                      class="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs rounded-full"
+                    >
+                      <i class="fas fa-code"></i> dev_application
+                    </span>
+
+                    <span
+                      th:case="'REVIEW'"
+                      class="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs rounded-full"
+                    >
+                      <i class="fas fa-star"></i> review
+                    </span>
+                  </div>
+                </td>
+
+                <!-- SHORT INFO -->
+                <td class="px-6 py-4">
+                  <!-- GAME VERSION -->
+                  <div th:if="${item.type == 'GAME_VERSION'}">
+                    <div class="text-sm">
+                      Game #
+                      <span th:text="${item.gameId}"></span>
+                      — commit:
+                    </div>
+                    <code
+                      class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
+                      th:text="${item.commitHash}"
+                    >
+                    </code>
+                  </div>
+
+                  <!-- DEV APPLICATION -->
+                  <div th:if="${item.type == 'DEV_APPLICATION'}">
+                    <div class="text-sm">
+                      user:
+                      <span th:text="${item.username}"></span>
+                    </div>
+                    <code
+                      class="px-2 py-1 bg-gray-100 rounded text-xs font-mono"
+                      th:text="${item.githubLogin}"
+                    >
+                    </code>
+                  </div>
+
+                  <!-- REVIEW -->
+                  <div th:if="${item.type == 'REVIEW'}">
+                    <div class="text-sm">
+                      Игра #
+                      <span th:text="${item.gameId}"></span>
+                      — рейтинг:
+                      <span th:text="${item.rating}"></span>/5
+                    </div>
+                    <a
+                      th:href="@{/games/{id}(id=${item.gameId})}"
+                      class="text-blue-600 text-xs"
+                    >
+                      К игре
+                    </a>
+                  </div>
+                </td>
+
+                <!-- EXTRA -->
+                <td class="px-6 py-4">
+                  <div th:if="${item.type == 'GAME_VERSION'}">
+                    <a
+                      th:href="${item.repoUrl + '/tree/' + item.commitHash}"
+                      target="_blank"
+                      class="text-blue-600 text-xs"
+                    >
+                      Ссылка на репозиторий
+                    </a>
+                  </div>
+
+                  <div th:if="${item.type == 'DEV_APPLICATION'}">
+
+                      <a th:if="${item.type == 'DEV_APPLICATION'}"
+                         th:href="@{/mod-item/dev-apps/{id}(id=${item.id})}"
+                         target="_blank"
+                         class="text-purple-600 text-xs">
+                          Просмотреть заявку
+                      </a>
+                  </div>
+
+                  <div th:if="${item.type == 'REVIEW'}">
+                          <a th:if="${item.type == 'REVIEW'}"
+                             th:href="@{/mod-item/reviews/{id}(id=${item.id})}"
+                             target="_blank"
+                             class="text-yellow-600 text-xs">
+                              Просмотреть отзыв
+                          </a>
+                    <span
+                      class="text-red-600 text-xs"
+                      th:text="'report_count: ' + ${item.reportCount}"
+                    >
+                    </span>
+                  </div>
+                </td>
+
+                <!-- CREATED -->
+                <td class="px-6 py-4">
+                  <div
+                    th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd')}"
+                  ></div>
+                  <div
+                    class="text-xs text-gray-500"
+                    th:text="${#temporals.format(item.createdAt, 'HH:mm')}"
+                  ></div>
+                </td>
+
+                <td class="px-6 py-4">
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      data-action="open-modal"
+                      data-modal="accept"
+                      th:attr="data-id=${item.moderationVerdictId}"
+                      class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg transition-colors"
+                    >
+                      <span th:if="${item.type == 'REVIEW'}">Оставить</span>
+                      <span th:if="${item.type == 'GAME_VERSION'}"
+                        >Опубликовать</span
+                      >
+                      <span th:if="${item.type == 'DEV_APPLICATION'}"
+                        >Одобрить</span
+                      >
+                    </button>
+
+                    <button
+                      type="button"
+                      data-action="open-modal"
+                      data-modal="decline"
+                      th:attr="data-id=${item.moderationVerdictId}"
+                      class="px-3 py-1.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 text-xs rounded-lg transition-colors"
+                    >
+                      <span th:if="${item.type == 'REVIEW'}">Удалить</span>
+                      <span th:if="${item.type == 'GAME_VERSION'}"
+                        >Отклонить</span
+                      >
+                      <span th:if="${item.type == 'DEV_APPLICATION'}"
+                        >Отказать</span
+                      >
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+          <!-- Пагинация -->
+          <div
+                  class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4"
+          >
+
+              <div class="flex flex-row items-center gap-4">
+                  <!-- INFO -->
+                  <div class="text-sm text-gray-500">
+                      Показано
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + 1}">
+                    </span>
+
+                      -
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.number * moderationPage.size + moderationItems.size()}">
+                    </span>
+
+                      из
+
+                      <span class="font-medium"
+                            th:text="${moderationPage.totalElements}">
+                    </span>
+
+                      записей
+                  </div>
+
+                  <form method="get"
+                        th:action="@{/to-moderate}"
+                        class="flex items-center gap-2">
+
+                      <!-- keep current page -->
+                      <input type="hidden"
+                             name="page"
+                             th:value="${moderationPage.number}" />
+
+                      <select
+                              name="size"
+
+                              onchange="this.form.submit()"
+
+                              class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+
+                          <option value="10"
+                                  th:selected="${moderationPage.size == 10}">
+                              10 на странице
+                          </option>
+
+                          <option value="25"
+                                  th:selected="${moderationPage.size == 25}">
+                              25 на странице
+                          </option>
+
+                          <option value="50"
+                                  th:selected="${moderationPage.size == 50}">
+                              50 на странице
+                          </option>
+
+                          <option value="75"
+                                  th:selected="${moderationPage.size == 75}">
+                              75 на странице
+                          </option>
+
+                          <option value="100"
+                                  th:selected="${moderationPage.size == 100}">
+                              100 на странице
+                          </option>
+
+                      </select>
+                  </form>
+              </div>
+
+              <!-- BUTTONS -->
+              <div class="flex items-center gap-2">
+
+                  <!-- PREVIOUS -->
+                  <a th:if="${moderationPage.hasPrevious()}"
+                     th:href="@{/to-moderate(page=${moderationPage.number - 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-left"></i>
+                  </a>
+
+                  <span th:unless="${moderationPage.hasPrevious()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+            
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+
+                  <!-- PAGE NUMBERS -->
+                  <th:block
+                          th:with="
+                            start=${T(java.lang.Math).max(0, moderationPage.number - 2)},
+                            end=${T(java.lang.Math).min(moderationPage.totalPages - 1, moderationPage.number + 2)}
+                        "
+                  >
+
+                      <th:block th:each="i : ${#numbers.sequence(start, end)}">
+
+                          <a th:href="@{/to-moderate(
+                                page=${i},
+                                size=${moderationPage.size}
+                            )}"
+
+                             th:text="${i + 1}"
+
+                             class="px-3 py-1.5 border text-sm font-medium rounded-lg transition-colors"
+
+                             th:classappend="${
+                                    i == moderationPage.number
+                                    ? ' bg-blue-600 text-white border-blue-600 '
+                                    : ' bg-white border-gray-300 text-gray-600 hover:bg-gray-50 '
+                               }">
+                          </a>
+
+                      </th:block>
+
+                  </th:block>
+
+                  <!-- NEXT -->
+                  <a th:if="${moderationPage.hasNext()}"
+                     th:href="@{/to-moderate(page=${moderationPage.number + 1}, size=${moderationPage.size})}"
+                     class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+
+                      <i class="fas fa-chevron-right"></i>
+                  </a>
+
+                  <span th:unless="${moderationPage.hasNext()}"
+                        class="px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-400 cursor-not-allowed">
+
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+
+              </div>
+          </div>
+          </div>
+
+    <div
+      id="modal-overlay"
+      class="fixed inset-0 bg-black/50 hidden z-50 flex justify-center overflow-y-auto"
+    >
+      <div
+        class="flex-1 flex items-center justify-center min-h-screen px-4 py-8"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        >
+          <div class="p-6 md:p-8">
+            <div id="modal-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <template id="tpl-decline">
+      <form data-form="decline" class="space-y-4">
+        <!-- Header -->
+        <div class="text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-1">Отклонить</h3>
+          <p class="text-gray-500 text-sm">
+            Пожалуйста, укажите причину отклонения.
+          </p>
+        </div>
+
+        <!-- Reason input -->
+        <textarea
+          name="reason"
+          placeholder="Причина отклонения"
+          rows="4"
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"
+          required
+        ></textarea>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-2">
+          <button
+            type="button"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+            data-action="cancel"
+          >
+            Отмена
+          </button>
+          <button
+            type="submit"
+            data-action="confirm"
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
+          >
+            <i class="fas fa-check"></i> Ок
+          </button>
+        </div>
+      </form>
+    </template>
+
+    <template id="tpl-accept">
+      <form data-form="accept" class="space-y-4">
+        <!-- Header -->
+        <div class="text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-1">Подтвердить</h3>
+          <p class="text-gray-500 text-sm">
+            Вы уверены, что хотите принять этот элемент?
+          </p>
+        </div>
+
+        <p class="from-error"></p>
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-2">
+          <button
+            type="button"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+            data-action="cancel"
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            data-action="confirm"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+          >
+            <i class="fas fa-check"></i> Да
+          </button>
+        </div>
+      </form>
+    </template>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+        min-height: 100vh;
+      }
+
+      /* Кастомный скроллбар для таблицы */
+      .moderation-table-container::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+
+      .moderation-table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .moderation-table-container::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+      }
+
+      .moderation-table-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+
+    <script>
+      const modalOverlay = document.getElementById("modal-overlay");
+      const modalContent = document.getElementById("modal-content");
+
+      function openModal(templateId, onConfirm) {
+        modalContent.innerHTML = "";
+
+        const template = document.getElementById(templateId);
+        const clone = template.content.cloneNode(true);
+        modalContent.appendChild(clone);
+
+        modalOverlay.classList.remove("hidden");
+        modalOverlay.classList.add("flex");
+
+        const cancelBtn = modalContent.querySelector('[data-action="cancel"]');
+        if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+        const confirmBtn = modalContent.querySelector(
+          '[data-action="confirm"]',
+        );
+        if (confirmBtn && typeof onConfirm === "function") {
+          confirmBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            onConfirm();
+            //closeModal();
+          });
+        }
+      }
+
+      function closeModal() {
+        modalOverlay.classList.add("hidden");
+        modalOverlay.classList.remove("flex");
+        modalContent.innerHTML = "";
+      }
+
+      document.addEventListener("click", async (e) => {
+        const actionEl = e.target.closest("[data-action]");
+        if (!actionEl) return;
+        const action = actionEl.dataset.action;
+
+        if (action === "open-modal") {
+          const modalType = actionEl.dataset.modal;
+          const id = actionEl.dataset.id;
+
+          if (modalType === "decline") {
+            openModal("tpl-decline", async () => {
+              const form = document.querySelector('form[data-form="decline"]');
+              const formData = new FormData(form);
+
+              const reason = formData.get("reason");
+
+              const response = await fetch(`/to-moderate/reject/${id}`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                  reason: reason,
+                }),
+              });
+
+              if (!response.ok) {
+                console.error("Reject failed");
+                return;
+              }
+
+              console.log("Rejected with reason:", reason);
+              closeModal();
+              removeItemFromList(id);
+            });
+          }
+
+          if (modalType === "accept") {
+            openModal("tpl-accept", async () => {
+              const form = document.querySelector('form[data-form="accept"]');
+              const confirmBtn = form.querySelector('[data-action="confirm"]');
+
+              const originalHTML = confirmBtn.innerHTML;
+
+              confirmBtn.disabled = true;
+              confirmBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Загрузка...`;
+
+              try {
+                const response = await fetch(`/to-moderate/approve/${id}`, {
+                  method: "POST",
+                });
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  throw new Error(errorText || "Approve failed");
+                }
+
+                console.log("Accepted!");
+                closeModal();
+                removeItemFromList(id);
+              } catch (err) {
+                console.error(err);
+
+                showFormError(form, err.message);
+              } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalHTML;
+              }
+            });
+          }
+        }
+      });
+
+      function showFormError(form, message) {
+        let errorEl = form.querySelector(".form-error");
+
+        if (!errorEl) {
+          errorEl = document.createElement("div");
+          errorEl.className = "form-error text-red-600 text-sm";
+          form.prepend(errorEl);
+        }
+
+        errorEl.textContent = message;
+      }
+
+      function removeItemFromList(id) {
+        const item = document.querySelector(
+          `.moderation-item[data-id="${id}"]`,
+        );
+        if (item) {
+          item.remove();
+        }
+      }
+    </script>
+  </section>
+</html>

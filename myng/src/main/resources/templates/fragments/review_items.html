@@ -1,0 +1,51 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="reviewList(reviews)">
+      <article
+        th:each="review : ${reviews}"
+        class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow mb-4"
+      >
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm"
+              th:text="${#strings.substring(review.user.username, 0, 2).toUpperCase()}"
+            ></div>
+            <div>
+              <div
+                class="font-semibold text-gray-900"
+                th:text="${review.user.username}"
+              ></div>
+              <div
+                class="text-xs text-gray-500"
+                th:text="${#temporals.format(review.createdAt, 'dd MMMM yyyy', new java.util.Locale('ru'))}"
+              ></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-yellow-500 text-sm">
+            <i
+              th:each="i : ${#numbers.sequence(1, 5)}"
+              th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"
+            ></i>
+          </div>
+        </div>
+
+        <p
+          class="text-gray-700 text-sm leading-relaxed"
+          th:text="${review.text}"
+        ></p>
+
+        <div class="flex items-center gap-3 mt-3 text-xs">
+          <button
+            th:if="${isAuthenticated and currentUserId != review.user.id}"
+            th:data-review-id="${review.id}"
+            class="report-btn text-gray-500 hover:text-blue-600 transition-colors"
+          >
+            <i class="far fa-flag mr-1"></i> <span>Пожаловаться</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </body>
+</html>

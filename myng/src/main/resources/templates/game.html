@@ -1,0 +1,1352 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
+  <section
+    id="game"
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+    role="region"
+    aria-labelledby="game-title"
+  >
+    <!-- Flash сообщения -->
+    <div
+      th:if="${session.success != null}"
+      class="fixed top-20 right-4 z-50 mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-lg animate-pulse"
+      role="alert"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${session.success}"></span>
+      </div>
+    </div>
+
+    <div
+      th:if="${session.error != null}"
+      class="fixed top-20 right-4 z-50 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-lg animate-pulse"
+      role="alert"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${session.error}"></span>
+      </div>
+    </div>
+
+    <script>
+      // Автоматическое скрытие flash-сообщений через 5 секунд
+      setTimeout(() => {
+        const successMsg = document.querySelector('[class*="bg-green-100"]');
+        const errorMsg = document.querySelector('[class*="bg-red-100"]');
+        if (successMsg) successMsg.style.display = "none";
+        if (errorMsg) errorMsg.style.display = "none";
+      }, 5000);
+    </script>
+
+    <!-- Шапка с навигацией -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+      >
+        <div>
+          <h1
+            id="game-title"
+            class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3"
+          >
+            <i class="fas fa-gamepad text-blue-500"></i>
+            <span id="game-name" th:text="${game.name}">Cyber Knight</span>
+          </h1>
+          <p class="text-gray-600 flex items-center gap-2">
+            <i class="fas fa-user-circle text-blue-500"></i>
+            Автор:
+            <span th:text="'@' + ${game.developer.username}">@dev_studio</span>
+            <span th:if="${not #lists.isEmpty(game.tags)}">
+              •
+              <span th:text="${#strings.listJoin(game.tags.![name], ', ')}"
+                >Платформер, RPG</span
+              >
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
+      <!-- ===== LEFT COLUMN ===== -->
+      <div class="flex flex-col gap-6">
+        <!-- Аватарка (иконка, картинка) игры -->
+        <div
+          class="relative bg-white rounded-xl shadow-lg overflow-hidden group"
+        >
+          <a
+            id="avatarLink"
+            th:href="${game.latestVersion != null} ? @{/running-game/{id}(id=${game.latestVersion.id})} : '#'"
+          >
+            <div
+              th:if="${game.base64Image != null}"
+              id="game-avatar-image"
+              class="w-full h-[400px] relative"
+            >
+              <img
+                th:src="${game.base64Image}"
+                alt="Обложка игры"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <div
+              th:if="${game.base64Image == null}"
+              id="game-avatar"
+              th:classappend="${game.themeColor}"
+              class="w-full h-[400px] bg-gradient-to-br flex items-center justify-center text-white cursor-pointer"
+            >
+              <i class="fas fa-play text-6xl opacity-50"></i>
+            </div>
+          </a>
+
+          <div
+            th:if="${isDeveloper}"
+            id="avatarOverlay"
+            class="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center cursor-pointer transition-all duration-200"
+          >
+            <div class="text-white text-center">
+              <i class="fas fa-camera text-5xl mb-2"></i>
+              <div class="text-sm font-medium">Загрузить изображение</div>
+            </div>
+          </div>
+
+          <input
+            th:if="${isDeveloper}"
+            type="file"
+            id="avatarInput"
+            accept="image/*"
+            class="hidden"
+          />
+        </div>
+
+        <!-- Meta Block -->
+        <div class="bg-white rounded-xl shadow-lg p-5 text-sm text-gray-700">
+          <div class="space-y-3">
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Дата публикации</span>
+              <span
+                class="font-medium"
+                th:text="${#temporals.format(game.firstReleaseDate, 'dd MMMM yyyy', new java.util.Locale('ru'))}"
+                >12 января 2025</span
+              >
+            </div>
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Жанр</span>
+              <span class="font-medium" th:text="${game.genre}">RPG</span>
+            </div>
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Теги</span>
+              <span
+                class="font-medium"
+                th:text="${#strings.listJoin(game.tags.![name], ', ')}"
+                >Приключения, RPG, Онлайн</span
+              >
+            </div>
+            <div class="flex justify-between pb-2 border-b border-gray-100">
+              <span class="text-gray-500">Последняя версия</span>
+              <span
+                class="font-medium"
+                th:text="${game.latestVersion != null ? game.latestVersion.name : 'Нет версий'}"
+                >1.3</span
+              >
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Всего версий</span>
+              <span class="font-medium" th:text="${#lists.size(game.versions)}"
+                >4</span
+              >
+            </div>
+            <div
+              th:if="${game.lastUpdateDate != null}"
+              class="flex justify-between pt-2 border-t border-gray-100"
+            >
+              <span class="text-gray-500">Последнее обновление</span>
+              <span
+                class="font-medium"
+                th:text="${#temporals.format(game.lastUpdateDate, 'dd MMMM yyyy', new java.util.Locale('ru'))}"
+                >10 февраля 2025</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RIGHT COLUMN ===== -->
+      <div class="flex flex-col gap-6">
+        <!-- Description Block -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Описание</h3>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex flex-wrap gap-3 mb-6">
+            <a
+              id="playBtn"
+              th:href="${game.latestVersion != null} ? @{/running-game/{id}(id=${game.latestVersion.id})} : '#'"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-play"></i> Играть
+            </a>
+
+            <!-- Внутри секции кнопок -->
+            <div th:if="${isAuthenticated}" class="flex items-center gap-2">
+              <!-- Если есть коллекции, куда можно добавить -->
+              <div
+                th:if="${not #lists.isEmpty(userCollections)}"
+                class="flex gap-2"
+              >
+                <select
+                  id="collectionSelect"
+                  class="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled selected>
+                    Добавить в коллекцию...
+                  </option>
+                  <option
+                    th:each="col : ${userCollections}"
+                    th:value="${col.id}"
+                    th:text="${col.name}"
+                  ></option>
+                </select>
+                <button
+                  id="confirmAddBtn"
+                  th:data-game-id="${game.id}"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <!-- Если вообще нет коллекций -->
+              <a
+                th:if="${#lists.isEmpty(userCollections) && currentUserId != null}"
+                href="/profile"
+                class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium rounded-lg transition flex items-center gap-2"
+              >
+                <i class="fas fa-folder-plus"></i> Создать коллекцию
+              </a>
+            </div>
+
+            <!-- Кнопка редактирования только для dev -->
+            <button
+              th:if="${isDeveloper}"
+              id="editBtn"
+              class="ml-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2 shadow-sm"
+            >
+              <i class="fas fa-edit"></i>
+              <span id="editBtnText">Редактировать</span>
+            </button>
+          </div>
+
+          <p
+            id="game-description"
+            class="text-gray-700 leading-relaxed"
+            th:text="${game.description}"
+          >
+            Cyber Knight — это киберпанк-платформер с элементами RPG...
+          </p>
+
+          <div class="mt-4 flex items-center gap-4 text-sm">
+            <span class="flex items-center gap-1 text-gray-600">
+              <i class="fas fa-star text-yellow-500"></i>
+              <span
+                th:text="${#numbers.formatDecimal(game.averageRating, 1, 1)}"
+                >4.5</span
+              >
+              (<span th:text="${game.reviewsCount}">128</span> отзывов)
+            </span>
+            <span class="flex items-center gap-1 text-gray-600">
+              <i class="fas fa-eye"></i>
+              <span th:text="${game.totalViews}">1500</span>
+            </span>
+            <span class="flex items-center gap-1 text-gray-600">
+              <i class="fas fa-play-circle"></i>
+              <span th:text="${game.totalLaunches}">890</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Versions Block -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h4
+            class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-code-branch text-blue-500"></i>
+            Версии игры
+          </h4>
+
+          <div
+            class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4"
+          >
+            <select
+              id="versionSelect"
+              class="px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white text-sm"
+              autocomplete="off"
+            >
+              <option
+                th:each="version : ${game.versions}"
+                th:value="${version.id}"
+                th:selected="${game.latestVersion != null && version.id == game.latestVersion.id}"
+                th:data-changelog="${version.changelog != null ? version.changelog : 'Нет описания изменений'}"
+                th:data-name="${version.name}"
+                th:data-date="${version.createdAt != null ? #temporals.format(version.createdAt, 'dd MMM yyyy') : ''}"
+                th:text="${version.name + ' (' + #temporals.format(version.createdAt, 'dd.MM.yyyy') + ')'}"
+              >
+                v1.3 (10.02.2025)
+              </option>
+            </select>
+
+            <!-- Кнопки управления версиями (только для dev) -->
+            <div th:if="${isDeveloper}" class="flex gap-2">
+              <button
+                data-action="open-modal"
+                data-modal="add_game_ver"
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
+              >
+                <i class="fas fa-plus"></i> Добавить
+              </button>
+              <button
+                data-action="open-modal"
+                data-modal="delete_game_ver"
+                class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1"
+              >
+                <i class="fas fa-trash-alt"></i> Удалить
+              </button>
+            </div>
+          </div>
+
+          <!-- Changelog preview (динамический) -->
+          <div
+            class="bg-gray-50 rounded-lg p-3 text-sm"
+            id="changelogContainer"
+          >
+            <span
+              class="font-medium text-gray-700"
+              th:text="${game.latestVersion != null ? game.latestVersion.name + ' — ' + #temporals.format(game.latestVersion.createdAt, 'dd MMM yyyy') : 'Нет данных'}"
+            >
+              v1.3 — 10 фев 2025
+            </span>
+            <p
+              class="text-gray-600 text-xs mt-1"
+              th:text="${game.latestVersion != null && game.latestVersion.changelog != null ? game.latestVersion.changelog : 'Нет описания изменений'}"
+            >
+              • Добавлен новый уровень<br />• Исправлены баги физики
+            </p>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <i class="fas fa-star text-yellow-500"></i>
+              <span th:if="${isDeveloper}">Отзывы к вашей игре</span>
+              <span th:unless="${isDeveloper}">Отзывы</span>
+              <span
+                class="text-sm font-normal text-gray-500 ml-2"
+                th:text="${game.reviewsCount + ' ' + (game.reviewsCount == 1 ? 'отзыв' : (game.reviewsCount < 5 ? 'отзыва' : 'отзывов'))}"
+              >
+              </span>
+            </h3>
+
+            <!-- Кнопка написания отзыва -->
+            <div>
+              <!-- Если разработчик - показываем инфо -->
+              <div
+                th:if="${isDeveloper}"
+                class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg flex items-center gap-2"
+              >
+                <i class="fas fa-info-circle"></i>
+                Разработчик не может оставлять отзывы к своей игре
+              </div>
+
+              <!-- Если не разработчик -->
+              <div th:unless="${isDeveloper}">
+                <!-- Авторизован и еще не оставлял отзыв -->
+                <button
+                  th:if="${isAuthenticated and !hasUserReviewed}"
+                  data-action="open-modal"
+                  data-modal="review"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2"
+                >
+                  <i class="fas fa-pen"></i> Написать отзыв
+                </button>
+
+                <!-- Авторизован и уже оставил отзыв -->
+                <div
+                  th:if="${isAuthenticated and hasUserReviewed}"
+                  class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg flex items-center gap-2"
+                >
+                  <i class="fas fa-check-circle text-green-500"></i> Вы уже
+                  оставили отзыв
+                </div>
+
+                <!-- Не авторизован -->
+                <a
+                  th:unless="${isAuthenticated}"
+                  href="/auth"
+                  class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition flex items-center gap-2"
+                >
+                  <i class="fas fa-sign-in-alt"></i> Зарегистрируйтесь или
+                  войдите для написания отзыва
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Список отзывов -->
+          <div class="space-y-4">
+            <div
+              id="reviewsContainer"
+              th:data-current-user-id="${currentUserId}"
+            >
+              <div
+                th:replace="~{fragments/review_items :: reviewList(reviews=${game.recentReviews})}"
+              ></div>
+            </div>
+
+            <div
+              th:if="${#lists.isEmpty(game.recentReviews)}"
+              class="text-center py-8 text-gray-500"
+            >
+              <i class="fas fa-comment-dots text-4xl mb-2 opacity-50"></i>
+              <p>Пока нет отзывов. Будьте первым!</p>
+            </div>
+          </div>
+
+          <div th:if="${game.reviewsCount > 5}" class="mt-6 text-center">
+            <button
+              id="loadMoreBtn"
+              data-page="1"
+              th:data-game-id="${game.id}"
+              class="px-6 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-full text-sm font-medium transition-all"
+            >
+              Показать еще отзывы <i class="fas fa-chevron-down ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно для отзыва -->
+    <div
+      th:if="${isAuthenticated and !hasUserReviewed and !isDeveloper}"
+      id="reviewModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-pen text-blue-500"></i>
+            Написать отзыв об игре
+            <span th:text="${game.name}"></span>
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('reviewModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <form
+          id="reviewForm"
+          method="post"
+          th:action="@{/reviews/game/{id}(id=${game.id})}"
+        >
+          <div class="space-y-4">
+            <!-- Рейтинг звездами -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Ваша оценка *</label
+              >
+              <div class="flex gap-2 text-2xl" id="starRating">
+                <i
+                  class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                  data-rating="1"
+                ></i>
+                <i
+                  class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                  data-rating="2"
+                ></i>
+                <i
+                  class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                  data-rating="3"
+                ></i>
+                <i
+                  class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                  data-rating="4"
+                ></i>
+                <i
+                  class="far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star"
+                  data-rating="5"
+                ></i>
+              </div>
+              <input
+                type="hidden"
+                id="reviewRating"
+                name="rating"
+                minlength="1"
+                value="0"
+                required
+              />
+            </div>
+
+            <!-- Текст отзыва -->
+            <div>
+              <label
+                for="reviewText"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Текст отзыва *</label
+              >
+              <textarea
+                id="reviewText"
+                name="text"
+                rows="4"
+                minlength="10"
+                maxlength="1000"
+                required
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                placeholder="Поделитесь впечатлениями об игре..."
+              ></textarea>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+                onclick="closeModal('reviewModal')"
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              >
+                <i class="fas fa-paper-plane"></i>
+                Опубликовать отзыв
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модальное окно добавления версии (только для dev) -->
+    <div
+      th:if="${isDeveloper}"
+      id="addVersionModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-plus-circle text-blue-500"></i>
+            Добавить версию игры
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('addVersionModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <form id="addVersionForm" enctype="multipart/form-data">
+          <div class="space-y-4">
+            <!-- Версия игры -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Версия игры *
+              </label>
+
+              <input
+                type="text"
+                name="gameVerName"
+                placeholder="Например: 1.4.0"
+                required
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+              />
+
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="gameVerName"
+              ></div>
+            </div>
+
+            <!-- Хеш коммита -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Хеш коммита
+              </label>
+
+              <input
+                type="text"
+                name="commitHash"
+                placeholder="a1b2c3d..."
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-mono"
+              />
+
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="commitHash"
+              ></div>
+            </div>
+
+              <!-- Load Tree Button -->
+              <div>
+                  <button
+                          type="button"
+                          class="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                          id="load-repo-tree"
+                  >
+
+                      <i class="fas fa-folder-tree"></i>
+                      Загрузить дерево репозитория
+                  </button>
+              </div>
+
+              <div id="repo-tree-fragment-container"></div>
+
+            <!-- Список изменений -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Список изменений
+              </label>
+
+              <textarea
+                name="changelog"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all"
+                placeholder="• Добавлено...&#10;• Исправлено...&#10;• Улучшено..."
+              ></textarea>
+
+              <div
+                class="error-message text-red-500 text-sm mt-1 hidden"
+                data-error-for="changelog"
+              ></div>
+            </div>
+
+            <!-- Общая ошибка -->
+            <div
+              class="general-error hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
+            ></div>
+
+            <!-- Кнопки -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+                onclick="closeModal('addVersionModal')"
+              >
+                Отмена
+              </button>
+
+              <button
+                type="submit"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                th:data-game-id="${game.id}"
+              >
+                <i class="fas fa-plus"></i>
+                Добавить версию
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Модальное окно удаления версии (только для dev) -->
+    <div
+      th:if="${isDeveloper}"
+      id="deleteVersionModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+      style="display: none"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle text-red-500"></i>
+            Удаление версии
+          </h3>
+          <button
+            class="text-gray-400 hover:text-gray-600"
+            onclick="closeModal('deleteVersionModal')"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <form
+          id="deleteVersionForm"
+          method="post"
+          th:action="@{/games/{id}/versions/delete(gameId=${game.id})}"
+        >
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Выберите версию для удаления</label
+              >
+              <select
+                name="versionId"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-white text-sm"
+              >
+                <option
+                  th:each="version : ${game.versions}"
+                  th:value="${version.id}"
+                  th:text="${version.name + ' (' + #temporals.format(version.createdAt, 'dd.MM.yyyy') + ')'}"
+                >
+                  Версия 1.3
+                </option>
+              </select>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex items-center gap-3 text-red-800 mb-2">
+                <i class="fas fa-info-circle"></i>
+                <span class="text-sm font-medium"
+                  >Вы уверены, что хотите удалить эту версию?</span
+                >
+              </div>
+              <p class="text-xs text-red-600 ml-7">
+                Это действие нельзя отменить. Все файлы версии будут удалены.
+              </p>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                class="px-4 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium rounded-lg transition-colors"
+                onclick="closeModal('deleteVersionModal')"
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg"
+                th:data-game-id="${game.id}"
+              >
+                <i class="fas fa-trash-alt"></i> Удалить
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+      // Редактирование игры (только если есть кнопка)
+      const editBtn = document.getElementById("editBtn");
+      if (editBtn) {
+        const editBtnText = document.getElementById("editBtnText");
+        const nameEl = document.getElementById("game-name");
+        const descEl = document.getElementById("game-description");
+        const avatarEl = document.getElementById("game-avatar");
+        const avatarOverlay = document.getElementById("avatarOverlay");
+        const avatarInput = document.getElementById("avatarInput");
+
+        const gameId = /*[[${game.id}]]*/ 0;
+        let isEditing = false;
+        let selectedFile = null;
+
+        editBtn.addEventListener("click", () => {
+          isEditing = !isEditing;
+
+          if (isEditing) {
+            enableEditing();
+          } else {
+            disableEditing();
+          }
+        });
+
+        function enableEditing() {
+          editBtnText.textContent = "Сохранить";
+          editBtn.classList.remove("bg-purple-600");
+          editBtn.classList.add("bg-green-600");
+
+          nameEl.contentEditable = true;
+          descEl.contentEditable = true;
+
+          nameEl.classList.add("editable-active");
+          descEl.classList.add("editable-active");
+
+          if (avatarOverlay) {
+            avatarOverlay.classList.remove("hidden");
+            avatarOverlay.classList.add("flex");
+          }
+        }
+
+        async function disableEditing() {
+          editBtnText.textContent = "Редактировать";
+          editBtn.classList.remove("bg-green-600");
+          editBtn.classList.add("bg-purple-600");
+
+          nameEl.contentEditable = false;
+          descEl.contentEditable = false;
+
+          nameEl.classList.remove("editable-active");
+          descEl.classList.remove("editable-active");
+
+          if (avatarOverlay) {
+            avatarOverlay.classList.add("hidden");
+            avatarOverlay.classList.remove("flex");
+          }
+
+          const formData = new FormData();
+          formData.append("name", nameEl.textContent.trim());
+          formData.append("description", descEl.textContent.trim());
+
+          if (selectedFile) {
+            formData.append("image", selectedFile);
+          }
+
+          try {
+            const response = await fetch(`/games/${gameId}/edit`, {
+              method: "POST",
+              headers: {
+                "X-CSRF-TOKEN":
+                  document.querySelector('meta[name="_csrf"]')?.content,
+              },
+              body: formData,
+            });
+
+            if (response.ok) {
+              console.log("Игра успешно обновлена!");
+              selectedFile = null;
+            } else {
+              const errorMsg = await response.text();
+              alert("Ошибка при сохранении: " + errorMsg);
+            }
+          } catch (error) {
+            console.error("Ошибка сети:", error);
+            alert("Не удалось связаться с сервером.");
+          }
+        }
+
+        if (avatarOverlay) {
+          avatarOverlay.addEventListener("click", () => {
+            if (!isEditing) return;
+            avatarInput.click();
+          });
+        }
+
+        if (avatarInput) {
+          avatarInput.addEventListener("change", () => {
+            const file = avatarInput.files[0];
+            if (!file) return;
+
+            selectedFile = file;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const imgEl = document.querySelector("#game-avatar-image img");
+              if (imgEl) {
+                imgEl.src = e.target.result;
+              } else if (avatarEl) {
+                avatarEl.style.backgroundImage = `url(${e.target.result})`;
+                avatarEl.style.backgroundSize = "cover";
+                avatarEl.style.backgroundPosition = "center";
+                const playIcon = avatarEl.querySelector("i");
+                if (playIcon) playIcon.style.display = "none";
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+
+      // Функции для работы с модальными окнами
+      function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = "flex";
+      }
+
+      function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = "none";
+      }
+
+      // Привязка кнопок к модальным окнам
+      document.querySelectorAll("[data-modal]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const modalId = button.getAttribute("data-modal");
+          const modalMap = {
+            review: "reviewModal",
+            add_game_ver: "addVersionModal",
+            delete_game_ver: "deleteVersionModal",
+          };
+          if (modalMap[modalId]) {
+            openModal(modalMap[modalId]);
+          }
+        });
+      });
+
+      // Логика звездного рейтинга
+      const stars = document.querySelectorAll("#starRating .star");
+      let currentRating = 0;
+
+      if (stars.length > 0) {
+        stars.forEach((star) => {
+          star.addEventListener("mouseover", function () {
+            const rating = parseInt(this.dataset.rating);
+            highlightStars(rating);
+          });
+
+          star.addEventListener("mouseout", function () {
+            highlightStars(currentRating);
+          });
+
+          star.addEventListener("click", function () {
+            currentRating = parseInt(this.dataset.rating);
+            highlightStars(currentRating);
+            document.getElementById("reviewRating").value = currentRating;
+          });
+        });
+      }
+
+      function highlightStars(rating) {
+        if (stars.length === 0) return;
+        stars.forEach((star, index) => {
+          if (index < rating) {
+            star.className =
+              "fas fa-star text-yellow-400 cursor-pointer transition star";
+          } else {
+            star.className =
+              "far fa-star text-gray-400 hover:text-yellow-400 cursor-pointer transition star";
+          }
+        });
+      }
+
+      // Переключение changelog и обновление ссылок динамически в DOM
+      const versionSelect = document.getElementById("versionSelect");
+      const playBtn = document.getElementById("playBtn");
+      const avatarLink = document.getElementById("avatarLink");
+      const changelogContainer = document.getElementById("changelogContainer");
+
+      if (versionSelect) {
+        window.addEventListener("pageshow", function () {
+          versionSelect.selectedIndex = 0;
+        });
+
+        versionSelect.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex];
+          if (!selectedOption) return;
+
+          const versionId = selectedOption.value;
+          const changelog = selectedOption.getAttribute("data-changelog");
+          const versionName = selectedOption.getAttribute("data-name");
+          const versionDate = selectedOption.getAttribute("data-date");
+
+          if (changelogContainer) {
+            changelogContainer.innerHTML = `
+              <span class="font-medium text-gray-700">${versionName} — ${versionDate}</span>
+              <p class="text-gray-600 text-xs mt-1">${changelog}</p>
+            `;
+          }
+
+          const newUrl = `/running-game/${versionId}`;
+          if (playBtn) {
+            playBtn.setAttribute("href", newUrl);
+          }
+          if (avatarLink) {
+            avatarLink.setAttribute("href", newUrl);
+          }
+        });
+      }
+
+      let storageKey = "user_reports_map";
+      let currentUserId = null;
+
+      // Функция для получения списка жалоб
+      function getReportedIds() {
+        const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        return data[currentUserId] || [];
+      }
+
+      // Функция для сохранения новой жалобы
+      function saveReport(reviewId) {
+        const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        if (!data[currentUserId]) data[currentUserId] = [];
+        if (!data[currentUserId].includes(reviewId)) {
+          data[currentUserId].push(reviewId);
+        }
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      }
+
+      // Функция перевода кнопки в состояние "Отправлено"
+      function setReportedState(btn) {
+        btn.disabled = true;
+        btn.classList.remove("hover:text-blue-600", "text-gray-500");
+        btn.classList.add("text-blue-600", "cursor-default");
+        btn.querySelector("span").textContent = "Жалоба отправлена";
+        btn.querySelector("i").classList.replace("far", "fas");
+      }
+
+      // ГЛАВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КНОПОК жалоб
+      function initReportButtons() {
+        if (!currentUserId) return;
+
+        const reportedReviews = getReportedIds();
+
+        document.querySelectorAll(".report-btn").forEach((btn) => {
+          const reviewId = btn.getAttribute("data-review-id");
+
+          if (reportedReviews.includes(reviewId)) {
+            setReportedState(btn);
+          }
+
+          if (!btn.dataset.bound) {
+            btn.dataset.bound = "true";
+            btn.addEventListener("click", async function () {
+              try {
+                const response = await fetch(`/reviews/${reviewId}/report`, {
+                  method: "POST",
+                  headers: {
+                    "X-CSRF-TOKEN":
+                      document.querySelector('meta[name="_csrf"]')?.content,
+                  },
+                });
+
+                if (response.ok) {
+                  saveReport(reviewId);
+                  setReportedState(btn);
+                }
+              } catch (error) {
+                console.error("Ошибка:", error);
+              }
+            });
+          }
+        });
+      }
+
+      // Инициализация при загрузке страницы
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("reviewsContainer");
+        if (container) {
+          currentUserId = container.getAttribute("data-current-user-id");
+          initReportButtons();
+        }
+      });
+
+      // Обработчик "Показать еще"
+      document
+        .getElementById("loadMoreBtn")
+        ?.addEventListener("click", async function () {
+          const btn = this;
+          const page = parseInt(btn.getAttribute("data-page"));
+          const gameId = btn.getAttribute("data-game-id");
+
+          try {
+            const response = await fetch(
+              `/reviews/more/game/${gameId}?page=${page}`,
+            );
+            if (response.ok) {
+              const htmlText = await response.text();
+
+              document
+                .getElementById("reviewsContainer")
+                .insertAdjacentHTML("beforeend", htmlText);
+
+              initReportButtons();
+
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(htmlText, "text/html");
+              const newReviewsCount = doc.querySelectorAll("article").length;
+
+              if (newReviewsCount < 5) {
+                btn.parentElement.remove();
+              } else {
+                btn.setAttribute("data-page", page + 1);
+              }
+            }
+          } catch (error) {
+            console.error("Ошибка загрузки отзывов:", error);
+          }
+        });
+
+      // Валидация формы перед отправкой
+      document
+        .getElementById("reviewForm")
+        ?.addEventListener("submit", function (e) {
+          const rating = parseInt(
+            document.getElementById("reviewRating").value,
+          );
+          const text = document.getElementById("reviewText").value.trim();
+
+          if (rating === 0) {
+            e.preventDefault();
+            alert("Пожалуйста, поставьте оценку от 1 до 5 звезд");
+            return false;
+          }
+
+          if (text.length < 10) {
+            e.preventDefault();
+            alert("Пожалуйста, напишите отзыв (минимум 10 символов)");
+            return false;
+          }
+
+          return true;
+        });
+
+      // Закрытие по клику на фон
+      document.querySelectorAll(".fixed.inset-0").forEach((modal) => {
+        modal.addEventListener("click", function (e) {
+          if (e.target === this) {
+            this.style.display = "none";
+          }
+        });
+      });
+
+      // Закрытие по Escape
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          document
+            .querySelectorAll('.fixed.inset-0[style*="flex"]')
+            .forEach((modal) => {
+              modal.style.display = "none";
+            });
+        }
+      });
+
+      document
+        .getElementById("confirmAddBtn")
+        ?.addEventListener("click", async function () {
+          const select = document.getElementById("collectionSelect");
+          const collectionId = select.value;
+          const gameId = this.getAttribute("data-game-id");
+
+          if (!collectionId) return;
+
+          const response = await fetch(
+            `/collections/${collectionId}/add-game/${gameId}`,
+            {
+              method: "POST",
+              headers: {
+                "X-CSRF-TOKEN":
+                  document.querySelector('meta[name="_csrf"]')?.content,
+              },
+            },
+          );
+
+          if (response.ok) {
+            // Удаляем вариант из списка
+            select.options[select.selectedIndex].remove();
+
+            // Если это была последняя коллекция
+            if (select.options.length <= 1) {
+              this.closest(".flex").innerHTML =
+                '<span class="text-green-600 text-sm font-medium"><i class="fas fa-check"></i> Во всех коллекциях</span>';
+            }
+          }
+        });
+
+      /* boilerplate for form validation */
+
+      const addVersionForm = document.getElementById("addVersionForm");
+
+      const clearAllErrors = (form) => {
+        form.querySelectorAll(".error-message").forEach((el) => {
+          el.textContent = "";
+          el.classList.add("hidden");
+        });
+
+        // Remove error styling from inputs
+        form.querySelectorAll(".error-input").forEach((el) => {
+          el.classList.remove("error-input", "border-red-500");
+        });
+
+        // Hide general error
+        const generalError = form.querySelector(".general-error");
+        if (generalError) {
+          generalError.classList.add("hidden");
+        }
+      };
+
+      const displayErrors = (form, errors) => {
+        for (const [fieldName, errorMessage] of Object.entries(errors)) {
+          const errorElement = form.querySelector(
+            `[data-error-for="${fieldName}"]`,
+          );
+          const inputElement = form.querySelector(`[name="${fieldName}"]`);
+
+          if (errorElement) {
+            errorElement.textContent = errorMessage;
+            errorElement.classList.remove("hidden");
+          }
+
+          if (inputElement) {
+            inputElement.classList.add("error-input", "border-red-500");
+          }
+        }
+
+        // Scroll to first error
+        const firstError = form.querySelector(".error-message:not(.hidden)");
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      };
+
+      const showGeneralMessage = (form, type, message) => {
+        const generalError = form.querySelector(".general-error");
+        if (generalError) {
+          generalError.textContent = message;
+          generalError.classList.remove("hidden");
+
+          if (type === "success") {
+            generalError.classList.remove(
+              "bg-red-50",
+              "border-red-200",
+              "text-red-600",
+            );
+            generalError.classList.add(
+              "bg-green-50",
+              "border-green-200",
+              "text-green-600",
+            );
+          } else {
+            generalError.classList.remove(
+              "bg-green-50",
+              "border-green-200",
+              "text-green-600",
+            );
+            generalError.classList.add(
+              "bg-red-50",
+              "border-red-200",
+              "text-red-600",
+            );
+          }
+        }
+      };
+
+      addVersionForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Real-time validation - clear errors as user types
+        addVersionForm
+          .querySelectorAll("input, textarea, select")
+          .forEach((input) => {
+            input.addEventListener("input", () => {
+              const errorElement = addVersionForm.querySelector(
+                `[data-error-for="${input.name}"]`,
+              );
+              if (errorElement) {
+                errorElement.classList.add("hidden");
+              }
+              input.classList.remove("error-input", "border-red-500");
+            });
+          });
+
+        clearAllErrors(addVersionForm);
+
+        const formData = new FormData(addVersionForm);
+        const submitButton = addVersionForm.querySelector(`[type="submit"]`);
+
+        formData.append("gameId", submitButton.getAttribute("data-game-id"));
+
+        const response = await fetch(`/games/publish/gamever`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (!data.success) {
+          showGeneralMessage(addVersionForm, "error", data.message);
+
+          if (data.errors) {
+            displayErrors(addVersionForm, data.errors);
+          }
+
+          return;
+        }
+
+        alert("Версия успешно добавлена");
+        closeModal("addVersionModal");
+      });
+
+      //Удаление версии игры
+      const deleteVersionForm = document.getElementById("deleteVersionForm");
+
+      deleteVersionForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const submitButton = deleteVersionForm.querySelector(`[type="submit"]`);
+        const gameId = submitButton.getAttribute("data-game-id");
+        const versionId =
+          deleteVersionForm.querySelector(`[name="versionId"]`).value;
+
+        if (!versionId) {
+          alert("Выберите версию для удаления");
+          return;
+        }
+
+        // Создаем FormData или обычный URL-запрос. Сделаем через URL-запросы, так как параметров мало
+        const response = await fetch(`/games/${gameId}/versions/${versionId}`, {
+          method: "DELETE",
+          headers: {
+            // Если у вас настроена Spring Security CSRF защита, добавьте токен (как в game.html для коллекций):
+            "X-CSRF-TOKEN":
+              document.querySelector('meta[name="_csrf"]')?.content,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Версия успешно удалена");
+          closeModal("deleteVersionModal");
+          location.reload(); // Перезагружаем страницу для обновления списка версий
+        } else {
+          alert("Ошибка при удалении: " + data.message);
+        }
+      });
+        
+        document.getElementById("load-repo-tree").addEventListener("click", async () => {
+            const form = document.getElementById("addVersionForm");
+            
+            const repoLink = [[${game.repoLink}]]
+            
+            const commitHash = form.querySelector('[name="commitHash"]').value;
+        
+            if (!commitHash) {
+                alert("Пожалуйста, введите хэш коммита перед загрузкой дерева.");
+                return;
+            }
+        
+            try {
+                const response = await fetch(`/games/repo-tree?repoLink=${repoLink}&commitHash=${commitHash}`);
+                if (!response.ok) throw new Error("Не удалось загрузить структуру репозитория");
+        
+                const html = await response.text();
+                
+                const container = document.getElementById("repo-tree-fragment-container");
+                container.innerHTML = html;
+        
+                container.querySelectorAll("script").forEach(oldScript => {
+                    const script = document.createElement("script");
+                    script.textContent = oldScript.textContent;
+                    document.body.appendChild(script);
+                    script.remove();
+                });
+        
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+        });
+    </script>
+  </section>
+</html>

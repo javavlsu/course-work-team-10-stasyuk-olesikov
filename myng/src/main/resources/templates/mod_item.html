@@ -1,0 +1,215 @@
+<!doctype html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        th:replace="layout :: layout(~{::section})"
+>
+<section
+        class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+>
+
+    <div th:if="${type == 'review'}">
+
+        <div th:if="${review != null}">
+            <article class="review-edit-card bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+
+                <div class="flex items-start justify-between mb-4">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold"
+                             th:text="${#strings.substring(review.user.username,0,2).toUpperCase()}">
+                        </div>
+
+                        <div>
+                            <div class="font-semibold text-gray-900"
+                                 th:text="${review.user.username}">
+                            </div>
+
+                            <div class="text-sm text-gray-500 pl-6"
+                                 th:text="${#temporals.format(review.createdAt,'dd MMM yyyy')}">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="review-rating text-xl view-mode">
+                        <span th:each="i : ${#numbers.sequence(1,5)}"
+                              th:text="${i <= review.rating ? '★' : '☆'}"></span>
+                    </div>
+
+                </div>
+
+                <p class="text-gray-700 view-mode"
+                   th:text="${review.text}">
+                </p>
+
+                <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
+    
+                    <span class="text-sm text-gray-500">
+                    <i class="fas fa-gamepad mr-1"></i>
+                    <span th:text="${review.game.name}"></span>
+                    </span>
+
+                </div>
+            </article>
+        </div>
+
+        <div th:if="${review == null}"
+             class="bg-white rounded-xl shadow-sm p-10 text-center border border-dashed border-gray-200">
+
+            <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+
+                <i class="fas fa-folder-open text-2xl text-gray-400"></i>
+
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                Отзыв не найден
+            </h3>
+
+            <p class="text-gray-500 max-w-md mx-auto leading-relaxed">
+                Этот отзыв больше не существует
+                или был удален.
+            </p>
+
+        </div>
+        
+    </div>
+
+
+
+    <div th:if="${type == 'devapp'}">
+
+        <div th:if="${devapp != null}">
+
+            <article class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+
+                <!-- HEADER -->
+                <div class="flex items-start justify-between mb-6">
+
+                    <!-- LEFT -->
+                    <div class="flex items-center gap-4">
+
+                        <!-- USER INFO -->
+                        <div>
+
+                            <div class="flex items-center gap-2">
+
+                                <h3 class="text-lg font-bold text-gray-900 tracking-tight"
+                                    th:text="${devapp.user.username}">
+                                </h3>
+
+                                <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-semibold">
+                            DEV
+                        </span>
+
+                            </div>
+
+                                <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+
+                                <span class="flex items-center gap-1.5">
+        
+                                    <i class="fas fa-calendar-alt text-violet-400 px-2"></i>
+        
+                                    <span th:text="${#temporals.format(devapp.createdAt,'dd MMM yyyy')}"></span>
+        
+                                </span>
+
+                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+
+                                <span class="flex items-center gap-1.5">
+
+                                    <i class="fas fa-code text-fuchsia-400 px-2"></i>
+                                    <span>Developer Application</span>
+        
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- GITHUB -->
+                <div class="mb-6">
+
+                    <div class="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-2">
+                        GitHub Profile
+                    </div>
+
+                    <a th:href="@{'https://github.com/' + ${devapp.githubUsername}}"
+                       target="_blank"
+                       class="group flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-2xl px-4 py-3 border border-gray-100 transition-all">
+
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center">
+
+                                <i class="fab fa-github text-lg"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors"
+                                     th:text="${devapp.githubUsername}">
+                                </div>
+
+                                <div class="text-sm text-gray-500">
+                                    github.com/<span th:text="${devapp.githubUsername}"></span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <i class="fas fa-arrow-up-right-from-square text-gray-400 group-hover:text-violet-500 transition-colors"></i>
+
+                    </a>
+
+                </div>
+
+                <!-- APPLICATION TEXT -->
+                <div class="relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-5">
+
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-violet-100/30 rounded-full blur-3xl"></div>
+
+                    <div class="relative">
+
+                        <p class="text-gray-700 whitespace-pre-line leading-8"
+                           th:text="${devapp.text}">
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+        <div th:if="${devapp == null}"
+             class="bg-white rounded-xl shadow-sm p-10 text-center border border-dashed border-gray-200">
+
+            <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
+
+                <i class="fas fa-folder-open text-2xl text-gray-400"></i>
+
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                Заявка не найдена
+            </h3>
+
+            <p class="text-gray-500 max-w-md mx-auto leading-relaxed">
+                Эта заявка разработчика больше не существует
+                или была удалена.
+            </p>
+
+        </div>
+        
+    </div>
+</section>
+</html>

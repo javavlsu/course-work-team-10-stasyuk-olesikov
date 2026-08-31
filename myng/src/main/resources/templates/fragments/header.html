@@ -1,0 +1,113 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main</title>
+  </head>
+  <body>
+    <div th:fragment="header">
+      <header class="site-header bg-transparent py-4" role="banner">
+        <div
+          class="container mx-auto px-6 flex items-center justify-between"
+          role="navigation"
+        >
+          <!-- Brand -->
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-4">
+              <img
+                th:src="@{/images/MyNG.png}"
+                alt="Логотип MyNG"
+                style="width: 128px; height: 128px"
+                class="object-contain rounded-xl flex-shrink-0"
+              />
+
+              <div class="flex flex-col justify-center">
+                <div class="font-extrabold text-xl leading-none mb-1">MyNG</div>
+                <div class="text-gray-500 text-xs leading-tight">
+                  Платформа для онлайн инди-игр
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="flex gap-2 flex-wrap" aria-label="Главная навигация">
+            <!-- Публичные ссылки (доступны всем) -->
+            <div>
+              <a
+                href="/"
+                class="px-3 py-2 rounded-lg font-semibold text-gray-800 hover:bg-gray-100 transition"
+                >Главная</a
+              >
+              <a
+                href="/catalog"
+                class="px-3 py-2 rounded-lg font-semibold text-gray-800 hover:bg-gray-100 transition"
+                >Каталог</a
+              >
+            </div>
+
+            <!-- Ссылки для АВТОРИЗОВАННЫХ пользователей -->
+            <div sec:authorize="isAuthenticated()">
+              <a
+                href="/profile"
+                class="px-3 py-2 rounded-lg font-semibold text-gray-800 hover:bg-gray-100 transition"
+                >Профиль</a
+              >
+            </div>
+
+            <!-- Ссылки для АДМИНОВ -->
+            <div sec:authorize="hasRole('ADMIN')">
+              <a
+                href="/user-list"
+                class="px-3 py-2 rounded-lg font-semibold text-gray-800 hover:bg-gray-100 transition"
+                >Пользователи</a
+              >
+            </div>
+
+            <!-- Блок для НЕАВТОРИЗОВАННЫХ -->
+            <div sec:authorize="!isAuthenticated()">
+              <a
+                href="/auth"
+                class="px-3 py-2 rounded-lg font-semibold text-gray-800 hover:bg-gray-100 transition"
+                >Вход / Регистрация</a
+              >
+            </div>
+
+            <!-- Блок для АВТОРИЗОВАННЫХ (имя + выход) -->
+            <div
+              sec:authorize="isAuthenticated()"
+              class="flex items-center gap-3 ml-4"
+            >
+              <!-- Имя пользователя со ссылкой на профиль -->
+              <a
+                href="/profile"
+                class="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+              >
+                <i class="fas fa-user text-blue-600"></i>
+                <span
+                  class="font-semibold text-blue-700"
+                  sec:authentication="name"
+                ></span>
+              </a>
+
+              <!-- Кнопка выхода -->
+              <form th:action="@{/profile/logout}" method="post" class="inline">
+                <button
+                  type="submit"
+                  class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-1"
+                >
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span class="hidden md:inline">Выйти</span>
+                </button>
+              </form>
+            </div>
+          </nav>
+        </div>
+      </header>
+    </div>
+  </body>
+</html>

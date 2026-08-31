@@ -1,0 +1,242 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout :: layout(~{::section})"
+>
+  <section
+    class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+  >
+    <section
+      id="auth"
+      class="max-w-7xl mx-auto w-full"
+      role="region"
+      aria-labelledby="auth-title"
+    >
+      <!-- Заголовок -->
+      <div class="text-center mb-12">
+        <h2
+          id="auth-title"
+          class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4"
+        >
+          Добро пожаловать!
+        </h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Войдите в аккаунт или создайте новый, чтобы начать путешествие в мир
+          инди-игр
+        </p>
+      </div>
+
+      <!-- Контейнер с карточками -->
+      <div class="flex flex-col lg:flex-row gap-8 items-stretch justify-center">
+        <!-- Карточка входа -->
+        <div class="flex-1 max-w-md mx-auto lg:mx-0 w-full">
+          <div
+            class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden h-full"
+          >
+            <!-- Верхний акцент -->
+            <div class="h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+
+            <div class="p-8">
+              <!-- Заголовок с иконкой -->
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center"
+                >
+                  <i class="fas fa-sign-in-alt text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900">Вход в аккаунт</h3>
+              </div>
+
+              <!-- Блок для ошибок входа -->
+              <div
+                th:if="${param.error}"
+                class="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm flex items-center gap-2"
+              >
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Неверный email или пароль</span>
+              </div>
+              <p class="text-gray-500 text-sm mb-8 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-500"></i>
+                Вход по логину/почте и паролю
+              </p>
+              <form th:action="@{/auth/login}" method="post" class="space-y-6">
+                <!-- Логин (email или username) -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user text-gray-400 mr-2"></i>
+                    Логин
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Email или имя пользователя"
+                    required
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                  <small class="text-gray-400"
+                    >Введите email или имя пользователя</small
+                  >
+                </div>
+
+                <!-- Пароль -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock text-gray-400 mr-2"></i>
+                    Пароль
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    required
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                </div>
+
+                <!-- Кнопка входа -->
+                <div class="space-y-3 pt-4">
+                  <button
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Карточка регистрации -->
+        <div class="flex-1 max-w-md mx-auto lg:mx-0 w-full">
+          <div
+            class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden h-full border-2 border-transparent hover:border-blue-100"
+          >
+            <!-- Верхний акцент -->
+            <div
+              class="h-2 bg-gradient-to-r from-green-500 to-emerald-600"
+            ></div>
+
+            <div class="p-8">
+              <!-- Заголовок с иконкой -->
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center"
+                >
+                  <i class="fas fa-user-plus text-green-600 text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900">Регистрация</h3>
+              </div>
+
+              <!-- Блок для сообщений об ошибках -->
+              <div
+                th:if="${param.error}"
+                class="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm flex items-center gap-2"
+              >
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${errorMessage}">Ошибка регистрации</span>
+              </div>
+
+              <!-- Блок для сообщений об успехе -->
+              <div
+                th:if="${param.success}"
+                class="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-lg text-sm flex items-center gap-2"
+              >
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${successMessage}">Регистрация успешна</span>
+              </div>
+
+              <p class="text-gray-500 text-sm mb-8 flex items-center gap-2">
+                <i class="fas fa-info-circle text-green-500"></i>
+                Создайте аккаунт игрока
+              </p>
+
+              <form
+                th:action="@{/auth/register}"
+                th:object="${userRegistrationDto}"
+                method="post"
+                class="space-y-6"
+              >
+                <!-- Имя пользователя -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user text-gray-400 mr-2"></i>
+                    Имя пользователя
+                  </label>
+                  <input
+                    type="text"
+                    th:field="*{username}"
+                    placeholder="nickname"
+                    required
+                    maxlength="20"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-green-100 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                  <small class="text-gray-400">Максимум 20 символов</small>
+                </div>
+
+                <!-- Email -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    th:field="*{email}"
+                    placeholder="your@email.com"
+                    required
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-green-100 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                </div>
+
+                <!-- Пароль -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock text-gray-400 mr-2"></i>
+                    Пароль
+                  </label>
+                  <input
+                    type="password"
+                    th:field="*{password}"
+                    placeholder="••••••••"
+                    required
+                    minlength="6"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-green-100 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                  <small class="text-gray-400">Минимум 6 символов</small>
+                </div>
+
+                <!-- Подтверждение пароля -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock text-gray-400 mr-2"></i>
+                    Подтвердите пароль
+                  </label>
+                  <input
+                    type="password"
+                    th:field="*{confirmPassword}"
+                    placeholder="••••••••"
+                    required
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-4 focus:ring-green-100 focus:border-green-500 outline-none transition-all bg-gray-50 focus:bg-white"
+                  />
+                </div>
+
+                <!-- Кнопка регистрации -->
+                <div class="pt-4">
+                  <button
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <i class="fas fa-user-plus"></i>
+                    Создать аккаунт
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+</html>

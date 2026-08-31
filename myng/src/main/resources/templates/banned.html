@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Banned</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        .mono-sharp {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+
+<body class="bg-white flex items-center justify-center min-h-screen text-black">
+
+<div class="text-center px-6">
+
+    <!-- RED HEADER -->
+    <div class="text-red-600 text-4xl md:text-5xl font-black uppercase tracking-tight mb-10">
+        ВЫ ЗАБЛОКИРОВАНЫ
+    </div>
+
+    <!-- TIMER -->
+    <div id="countdown"
+         class="mono-sharp text-7xl md:text-8xl font-extrabold text-black tracking-tighter mb-6">
+    </div>
+
+    <!-- REASON -->
+    <div class="mono-sharp text-xl md:text-2xl font-bold uppercase tracking-tight mb-12">
+        ПРИЧИНА:
+        <span class="font-extrabold text-black"
+              th:text="${ban.reason}">
+        </span>
+    </div>
+
+    <!-- BUTTON (RED, SHARP) -->
+    <a href="/profile/logout"
+       class="inline-block bg-red-600 text-white border-2 border-red-600
+              px-10 py-4 text-lg font-bold uppercase tracking-widest
+              hover:bg-white hover:text-red-600 transition-none">
+        ВЫЙТИ
+    </a>
+
+    <!-- hidden end time -->
+    <p id="endTime" th:text="${ban.endTime}" class="hidden"></p>
+
+</div>
+
+<script>
+    const endTime = new Date(document.getElementById("endTime").innerText).getTime();
+    const countdownEl = document.getElementById("countdown");
+
+    function updateTimer() {
+        const now = Date.now();
+        const diff = endTime - now;
+
+        if (diff <= 0) {
+            countdownEl.innerText = "00:00:00";
+            return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        countdownEl.innerText =
+            `${String(hours).padStart(2, '0')}:` +
+            `${String(minutes).padStart(2, '0')}:` +
+            `${String(seconds).padStart(2, '0')}`;
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+</script>
+
+</body>
+</html>

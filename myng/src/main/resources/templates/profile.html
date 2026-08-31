@@ -1,0 +1,1221 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="layout :: layout(~{::section})">
+    <section
+      id="profile"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      role="region"
+      aria-labelledby="profile-title"
+    >
+      <!-- Заголовок -->
+      <h2
+        id="profile-title"
+        class="text-3xl md:text-4xl font-bold text-gray-900 mb-8"
+      >
+        Профиль
+      </h2>
+
+        <!-- Профиль -->
+        <div
+                id="profile-block"
+                class="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8"
+        >
+            <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                <!-- Аватар -->
+                <div class="w-24 h-24 relative rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden cursor-pointer">
+                    <img
+                            id="avatar-img"
+                            th:if="${user.profilePic != null}"
+                            th:src="@{'/profile/' + ${user.id} + '/avatar'}"
+                            alt="Avatar"
+                            class="w-full h-full object-cover rounded-full"
+                    />
+                    <!--<span id="avatar-text" th:if="${user.profilePic == null}">AB</span>-->
+                    <input type="file" id="avatar-input" class="absolute inset-0 opacity-0 cursor-pointer hidden" />
+                </div>
+
+                <!-- Информация -->
+                <div class="flex-1">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <!-- Username -->
+                            <h3 class="text-2xl font-bold text-gray-900 mb-1">
+                                <span id="username-text" th:text="${user.username}">Александр Б.</span>
+                                <input
+                                        type="text"
+                                        id="username-input"
+                                        class="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
+                                        th:value="${user.username}"
+                                />
+                            </h3>
+
+                            <!-- Role (read-only) -->
+                            <p class="text-gray-500 flex items-center gap-2">
+                                <i class="fas fa-user-circle text-sm"></i>
+                                <span id="role-text" th:text="${user.role}">пользователь</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="flex flex-wrap gap-3 mt-4">
+                        <button
+                                id="edit-profile-btn"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
+                        >
+                            <i class="fas fa-edit"></i>
+                            Редактировать профиль
+                        </button>
+
+                        <button
+                                id="cancel-edit-btn"
+                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg flex items-center gap-2 hidden"
+                        >
+                            Отмена
+                        </button>
+
+                        <button
+                                id="save-profile-btn"
+                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg flex items-center gap-2 hidden"
+                        >
+                            Сохранить
+                        </button>
+
+                        <button
+                                id="logoutBtn"
+                                data-action="open-modal"
+                                data-modal="logout"
+                                class="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg flex items-center gap-2"
+                        >
+                            <i class="fas fa-sign-out-alt"></i>
+                            Выйти
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Me -->
+            <div class="mt-6">
+                <p id="about-text" class="text-gray-700" th:text="${user.bio}"></p>
+                <textarea
+                        id="about-input"
+                        class="mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 hidden"
+                ></textarea>
+            </div>
+        </div>
+
+        <!-- Вкладки профиля -->`
+      <div class="mb-6">
+        <!-- Основные вкладки -->
+        <div class="flex flex-wrap gap-2 border-b border-gray-200 pb-2">
+          <button
+            class="tab-btn px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-blue-600 text-white border-blue-600"
+            data-target="collections-section"
+          >
+            <i class="fas fa-layer-group mr-2"></i>
+            Коллекции
+          </button>
+          <button
+            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 rounded-lg transition-all duration-200"
+            data-target="reviews-section"
+          >
+            <i class="fas fa-star mr-2"></i>
+            Отзывы
+          </button>
+          <button
+            class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 rounded-lg transition-all duration-200"
+            data-target="notifications-section"
+          >
+            <i class="fas fa-bell mr-2"></i>
+            Уведомления
+          </button>
+          <button
+            sec:authorize="hasRole('USER')"
+            class="ml-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
+            data-action="open-modal"
+            data-modal="become_dev"
+          >
+            <i class="fas fa-code"></i>
+            Стать разработчиком
+          </button>
+        </div>
+
+        <!-- Вкладки разработчика/модератора -->
+        <div
+          class="flex flex-wrap items-center gap-3 mt-4 p-3 bg-gray-100 rounded-lg"
+        >
+          <!-- Разработчик -->
+          <button
+            class="px-3 py-1.5 bg-white text-gray-700 hover:text-blue-600 focus:text-gray-700 active:text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
+            data-target="games-section"
+            sec:authorize="hasRole('DEV')"
+          >
+            <i class="fas fa-gamepad"></i>
+            Мои игры
+          </button>
+          <button
+            class="px-3 py-1.5 bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
+            data-action="open-modal"
+            data-modal="publish"
+            sec:authorize="hasRole('DEV')"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            Опубликовать игру
+          </button>
+
+          <!-- Модератор -->
+            <button
+                    class="px-3 py-1.5 bg-white hover:bg-amber-50 text-gray-700 hover:text-amber-600 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
+                    sec:authorize="hasRole('MOD') or hasRole('ADMIN')"
+            >
+                <a th:href="@{/to-moderate}">
+                    <i class="fas fa-clipboard-check"></i>
+                    На модерации
+                </a>
+            </button>
+
+            <!-- Админ -->
+          <button
+            class="px-3 py-1.5 bg-white hover:bg-red-50 text-gray-700 hover:text-red-600 text-sm font-medium rounded-lg transition-colors duration-200 border border-gray-200 flex items-center gap-2"
+            sec:authorize="hasRole('ADMIN')"
+          >
+              <a th:href="@{/moderation-log}">
+                    <i class="fas fa-history"></i>
+                    Лог модераций
+              </a>
+          </button>
+        </div>
+      </div>
+
+        <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden z-50 flex justify-center overflow-y-auto">
+            <div class="flex-1 flex items-center justify-center min-h-screen px-4 py-8">
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 md:p-8">
+                        <div id="modal-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DELETE COLLECTION TEMPLATE ===== -->
+        <template id="tpl-delete-collection">
+            <form data-form="delete_collection" class="space-y-6">
+                <!-- Warning Icon -->
+                <div class="flex flex-col items-center text-center gap-3">
+                    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-800 text-lg font-semibold">
+                        Вы уверены, что хотите удалить коллекцию?
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Это действие необратимо. Все игры внутри коллекции останутся, но сама коллекция будет удалена.
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition" data-action="cancel">
+                        Отмена
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition flex items-center gap-2"
+                            data-action="confirm">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </form>
+        </template>
+
+        <template id="tpl-publish">
+            <form data-form="publish" class="space-y-6 rounded-2xl p-6 md:p-8 w-full max-w-lg mx-auto relative">
+
+                <!-- Header -->
+                <div class="flex flex-col items-center text-center mb-4 relative">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-2 shadow-lg">
+                        <i class="fas fa-cloud-upload-alt text-white text-3xl"></i>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-2">
+                        <h2 class="text-xl font-bold text-gray-900">Опубликовать игру</h2>
+                        <button
+                                type="button"
+                                id="rules-toggle-btn"
+                                data-action="rules-toggle"
+                                class="w-5 h-5 flex items-center justify-center text-xs rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors focus:outline-none"
+                                title="Правила публикации"
+                        >
+                            <i class="fas fa-info text-[10px]"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Заполните форму, чтобы добавить вашу игру в платформу</p>
+                </div>
+
+                <div id="upload-rules-card" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-left text-sm text-slate-600 transition-all duration-200">
+                    <div class="flex items-center gap-2 font-semibold text-slate-800 mb-2">
+                        <i class="fas fa-gavel text-slate-500"></i>
+                        Правила публикации проектов
+                    </div>
+                    <ul class="space-y-1.5 list-disc list-inside text-xs leading-relaxed">
+                        <li>Репозиторий должен быть публичным и содержать исходный код игры.</li>
+                        <li>Обязательно наличие главной HTML-страницы (точки входа) для веб-запуска.</li>
+                        <li>Все ссылки на подключаемые файлы (script src="", link href="") обязательно должны использовать относительные пути (relative paths)</li>
+                        <li>Запрещено загружать вредоносное ПО, майнеры или чужую интеллектуальную собственность.</li>
+                    </ul>
+                </div>
+
+                <!-- Game Title -->
+                <div>
+                    <input name="title" placeholder="Название игры"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="title"></div>
+                </div>
+
+                <!-- Main Image -->
+                <div>
+                    <input name="mainPic" type="file" accept="image/*"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="mainPic"></div>
+                </div>
+
+                <!-- Description -->
+                <div>
+            <textarea name="description" placeholder="Описание"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="description"></div>
+                </div>
+
+                <!-- Genre -->
+                <div>
+                    <select name="genre"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                        <option value="" disabled selected>Выберите жанр</option>
+                        <option value="action">Экшн</option>
+                        <option value="adventure">Приключения</option>
+                        <option value="rpg">RPG</option>
+                        <option value="simulation">Симулятор</option>
+                        <option value="strategy">Стратегия</option>
+                        <option value="sports">Спортивная игра</option>
+                        <option value="puzzle">Головоломка</option>
+                        <option value="horror">Хоррор</option>
+                        <option value="platformer">Платформер</option>
+                        <option value="sandbox">Песочница</option>
+                        <option value="visual_novel">Визуальная новелла</option>
+                        <option value="roguelike">Roguelike</option>
+                    </select>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="genre"></div>
+                </div>
+
+                <!-- Repo Link & Commit Hash -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <input name="repoLink" placeholder="Ссылка на репозиторий"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="repoLink"></div>
+                    </div>
+                    <div>
+                        <input name="commitHash" placeholder="Хэш коммита"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                        <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="commitHash"></div>
+                    </div>
+                </div>
+
+                <!-- Load Tree Button -->
+                <div>
+                    <button
+                            type="button"
+                            class="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                            data-action="load-repo-tree"
+                    >
+
+                        <i class="fas fa-folder-tree"></i>
+                        Загрузить дерево репозитория
+                    </button>
+                </div>
+
+                <div id="repo-tree-fragment-container"></div>
+
+                <!-- Tags -->
+                <div>
+            <textarea name="tags" placeholder="Теги"
+                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="tags"></div>
+                </div>
+
+                <!-- Game Version -->
+                <div>
+                    <input name="gameVer" placeholder="Версия игры"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+                    <div class="error-message text-red-500 text-sm mt-1 hidden" data-error-for="gameVer"></div>
+                </div>
+
+                <!-- General error message -->
+                <div class="general-error hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"></div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-4 mt-4">
+                    <button type="button" data-action="cancel"
+                            class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition">
+                        Отмена
+                    </button>
+                    <button type="button"
+                            class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition flex items-center gap-2"
+                            data-action="confirm">
+                        <i class="fas fa-paper-plane"></i>
+                        Опубликовать
+                    </button>
+                </div>
+            </form>
+        </template>
+
+        <template id="tpl-become-dev">
+            <form data-form="become_dev" class="space-y-4">
+                <!-- Sexy header -->
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-1">Станьте разработчиком!</h3>
+                    <p class="text-gray-500 text-sm">Расскажите о себе, чтобы мы могли познакомиться с вашим стилем и идеями.</p>
+                </div>
+
+                <!-- Form fields -->
+                <input
+                        name="githubUsername"
+                        placeholder="Github username"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <textarea
+                        name="text"
+                        placeholder="Расскажите о себе как о разработчике"
+                        rows="6"
+                        class="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                ></textarea>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-3 mt-2">
+                    <button
+                            type="button"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+                            data-action="cancel"
+                    >
+                        Отмена
+                    </button>
+                    <button
+                            type="button"
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                            data-action="confirm"
+                    >
+                        <i class="fas fa-paper-plane"></i> Отправить
+                    </button>
+                </div>
+            </form>
+        </template>
+
+        <template id="tpl-logout-confirm">
+            <div class="text-center p-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Вы уверены?</h3>
+                <p class="text-gray-500 mb-6">
+                    Вы действительно хотите выйти?
+                </p>
+                <div class="flex justify-center gap-3">
+                    <button
+                            type="button"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+                            data-action="cancel"
+                    >
+                        Отмена
+                    </button>
+                    <button
+                            type="button"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                            id="confirmLogout"
+                            data-action="confirm"
+                    >
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <template id="tpl-create-collection">
+            <form data-form="create_collection" class="space-y-4">
+                <!-- Header -->
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-1 flex items-center justify-center gap-2">
+                        <i class="fas fa-plus-circle text-blue-500"></i>
+                        Создать коллекцию
+                    </h3>
+                    <p class="text-gray-500 text-sm">Введите название новой коллекции</p>
+                </div>
+
+                <!-- Input field -->
+                <div>
+                    <input
+                            name="collection_name"
+                            placeholder="Название коллекции"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                    />
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-3 mt-2">
+                    <button
+                            type="button"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
+                            data-action="cancel"
+                    >
+                        Отмена
+                    </button>
+                    <button
+                            type="submit"
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+                            data-action="confirm"
+                    >
+                        <i class="fas fa-check"></i> OK
+                    </button>
+                </div>
+            </form>
+        </template>
+
+        <template id="tpl-delete-review">
+            <form data-form="delete_review" class="space-y-6">
+                <!-- Warning Icon -->
+                <div class="flex flex-col items-center text-center gap-3">
+                    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-800 text-lg font-semibold">
+                        Вы уверены, что хотите удалить отзыв?
+                    </p>
+                    <p class="text-gray-500 text-sm">
+                        Это действие необратимо.
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition"
+                            data-action="cancel">
+                        Отмена
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition flex items-center gap-2"
+                            data-action="confirm">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </form>
+        </template>
+
+        <script>
+            // fragment caching is an option for improving performance
+
+            document.addEventListener("DOMContentLoaded", () => {
+              const userId = [[${user.id}]];
+
+              // Section wrappers mapped to tab targets
+              const wrappers = {
+                "collections-section": document.getElementById("collections-wrapper"),
+                "reviews-section": document.getElementById("reviews-wrapper"),
+                "notifications-section": document.getElementById("notifications-wrapper"),
+                "games-section": document.getElementById("my-games-wrapper"),
+                "collection-games": document.getElementById("collection-games-wrapper")
+              };
+
+              // Tab buttons
+              const tabs = document.querySelectorAll("[data-target]");
+
+              // Utility functions
+              const hideAll = () => Object.values(wrappers).forEach(w => w.classList.add("hidden"));
+              const load = (url, wrapper) => fetch(url).then(r => r.text()).then(html => wrapper.innerHTML = html);
+
+              // Show specific tab
+              const showTab = (target) => {
+                const wrapper = wrappers[target];
+                if (!wrapper) return;
+                hideAll();
+                wrapper.classList.remove("hidden");
+
+                switch(target) {
+                  case "collections-section":
+                    load(`/collections/user/${userId}`, wrapper);
+                    break;
+                  case "reviews-section":
+                    load(`/reviews/user/${userId}`, wrapper);
+                    break;
+                  case "notifications-section":
+                    load(`/notifications/user/${userId}`, wrapper);
+                    break;
+                  case "games-section":
+                    load(`/games/developer/${userId}`, wrapper);
+                    break;
+                }
+              };
+
+              // Initial load: collections tab
+              showTab("collections-section");
+
+              // Tab click
+              const activeClasses = ["bg-blue-600", "text-white", "border-blue-600"];
+
+                tabs.forEach(tab => {
+                  tab.addEventListener("click", () => {
+                    tabs.forEach(t => t.classList.remove(...activeClasses));
+                    
+                    tab.classList.add(...activeClasses);
+                    
+                    showTab(tab.dataset.target);
+                  });
+                });
+
+              // Delegated clicks
+              document.addEventListener("click", e => {
+                // Open a specific collection's games
+                const card = e.target.closest(".collection-card");
+                if (card) {
+                  const collectionId = card.dataset.collectionId;
+                  hideAll();
+                  const wrapper = wrappers["collection-games"];
+                  wrapper.classList.remove("hidden");
+                  load(`/collections/${collectionId}`, wrapper);
+                  return;
+                }
+
+                // Back button from collection games
+                if (e.target.id === "back-to-collections") {
+                  showTab("collections-section");
+                  wrappers["collection-games"].innerHTML = '';
+                  return;
+                }
+              });
+
+              // ========== PROFILE EDIT LOGIC ==========
+              const editBtn = document.getElementById("edit-profile-btn");
+              const cancelBtn = document.getElementById("cancel-edit-btn");
+              const saveBtn = document.getElementById("save-profile-btn");
+
+              const usernameText = document.getElementById("username-text");
+              const usernameInput = document.getElementById("username-input");
+              const aboutText = document.getElementById("about-text");
+              const aboutInput = document.getElementById("about-input");
+
+              const avatarInput = document.getElementById("avatar-input");
+              //const avatarText = document.getElementById("avatar-text");
+              const avatarImg = document.getElementById("avatar-img");
+
+              editBtn.addEventListener("click", () => {
+                usernameInput.value = usernameText.textContent;
+                aboutInput.value = aboutText.textContent.replace("Обо мне: ", "");
+                [usernameText, aboutText].forEach(el => el.classList.add("hidden"));
+                [usernameInput, aboutInput, avatarInput, cancelBtn, saveBtn].forEach(el => el.classList.remove("hidden"));
+                editBtn.classList.add("hidden");
+              });
+
+              cancelBtn.addEventListener("click", () => {
+                [usernameText, aboutText].forEach(el => el.classList.remove("hidden"));
+                [usernameInput, aboutInput, cancelBtn, saveBtn].forEach(el => el.classList.add("hidden"));
+                editBtn.classList.remove("hidden");
+                //if (avatarImg.src) avatarImg.classList.add("hidden");
+                //avatarText.classList.remove("hidden");
+              });
+
+              saveBtn.addEventListener("click", async () => {
+                  const formData = new FormData();
+                  formData.append("username", usernameInput.value);
+                  formData.append("about", aboutInput.value);
+
+                  if (avatarInput.files[0]) {
+                    formData.append("avatar", avatarInput.files[0]);
+                  }
+
+                  const response = await fetch(`/profile/${userId}/edit`, {
+                    method: "POST",
+                    body: formData
+                  });
+
+                  if (response.ok) {
+                    usernameText.textContent = usernameInput.value;
+                    aboutText.textContent = aboutInput.value;
+                    cancelBtn.click();
+                  } else {
+                    console.error("Ошибка при сохранении профиля");
+                  }
+              });
+
+              avatarInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  avatarImg.src = reader.result;
+                  avatarImg.classList.remove("hidden");
+                  //avatarText.classList.add("hidden");
+                };
+                reader.readAsDataURL(file);
+              });
+
+              const modalOverlay = document.getElementById("modal-overlay");
+              const modalContent = document.getElementById("modal-content");
+
+              function openModal(templateId, onConfirm) {
+                modalContent.innerHTML = "";
+
+                const template = document.getElementById(templateId);
+                const clone = template.content.cloneNode(true);
+                modalContent.appendChild(clone);
+
+                modalOverlay.classList.remove("hidden");
+                modalOverlay.classList.add("flex");
+
+                const cancelBtn = modalContent.querySelector('[data-action="cancel"]');
+                if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+                const confirmBtn = modalContent.querySelector('[data-action="confirm"]');
+                if (confirmBtn && typeof onConfirm === "function") {
+                  confirmBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    onConfirm();
+                    //closeModal();
+                  });
+                }
+              }
+
+              function closeModal() {
+                modalOverlay.classList.add("hidden");
+                modalOverlay.classList.remove("flex");
+                modalContent.innerHTML = "";
+              }
+
+              document.addEventListener("click", async (e) => {
+                const actionEl = e.target.closest("[data-action]");
+                if (!actionEl) return;
+
+                const action = actionEl.dataset.action;
+
+                /* =========================
+                   EDIT COLLECTION TITLE
+                   ========================= */
+
+                if (action === "edit-collection") {
+                  const collectionId = actionEl.dataset.collectionId;
+                  const textEl = document.getElementById(`collection-${collectionId}-title-text`);
+                  const inputEl = document.getElementById(`collection-${collectionId}-title-input`);
+
+                  // toggle visibility
+                  textEl.classList.toggle("hidden");
+                  inputEl.classList.toggle("hidden");
+
+                  if (!inputEl.classList.contains("hidden")) {
+                    inputEl.value = textEl.textContent.trim();
+                    inputEl.focus();
+
+                    const save = async () => {
+                      const newName = inputEl.value.trim();
+                      if (newName === "") return;
+
+                      try {
+                        const response = await fetch(`/collections/${collectionId}/edit`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                            //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content // if Spring Security CSRF enabled
+                          },
+                          body: JSON.stringify({ name: newName })
+                        });
+
+                        if (response.ok) {
+                          textEl.textContent = newName;
+                        } else {
+                          console.error("Failed to save collection name");
+                        }
+                      } catch (err) {
+                        console.error("Error saving collection:", err);
+                      } finally {
+                        // hide input, show text
+                        textEl.classList.remove("hidden");
+                        inputEl.classList.add("hidden");
+                        inputEl.removeEventListener("keydown", keyHandler);
+                      }
+                    };
+
+                    const keyHandler = (evt) => {
+                      if (evt.key === "Enter") save();
+                      if (evt.key === "Escape") {
+                        inputEl.value = textEl.textContent.trim();
+                        textEl.classList.remove("hidden");
+                        inputEl.classList.add("hidden");
+                      }
+                    };
+
+                    inputEl.addEventListener("keydown", keyHandler);
+                    inputEl.addEventListener("blur", save, { once: true });
+                  }
+                }
+
+                if (action === "edit-review") {
+                    const editBtn = e.target.closest(".review-edit-btn")
+                    const cancelBtn = e.target.closest(".cancel-review-edit-btn")
+                    const saveBtn = e.target.closest(".save-review-edit-btn")
+                    const star = e.target.closest(".star")
+
+                    /* EDIT */
+
+                    if (editBtn) {
+                        console.log("clicked on review edit button");
+
+                        const card = editBtn.closest(".review-edit-card")
+
+                        card.querySelectorAll(".view-mode").forEach(el => el.classList.add("hidden"))
+                        card.querySelectorAll(".edit-mode").forEach(el => el.classList.remove("hidden"))
+
+                        return
+                    }
+
+                    /* CANCEL */
+
+                    if (cancelBtn) {
+
+                        console.log("clicked on review edit cancel")
+
+                        const card = cancelBtn.closest(".review-edit-card")
+
+                        card.querySelectorAll(".edit-mode").forEach(el => el.classList.add("hidden"))
+                        card.querySelectorAll(".view-mode").forEach(el => el.classList.remove("hidden"))
+
+                        return
+                    }
+
+                    /* STAR RATING */
+
+                    if (star) {
+
+                        console.log("clicked on star rating editing")
+
+                        const card = star.closest(".review-edit-card")
+                        const stars = card.querySelectorAll(".star")
+                        const ratingInput = card.querySelector(".rating-input")
+
+                        const value = star.dataset.value
+                        ratingInput.value = value
+
+                        stars.forEach(s => {
+                            s.classList.toggle("text-yellow-500", s.dataset.value <= value)
+                        })
+
+                        return
+                    }
+
+                    /* SAVE */
+
+                    if (saveBtn) {
+
+                        console.log("clicked save review")
+
+                        const card = saveBtn.closest(".review-edit-card")
+
+                        const id = card.dataset.reviewId
+                        const text = card.querySelector("textarea").value
+                        const rating = card.querySelector(".rating-input").value
+
+                        await fetch(`/reviews/update/${id}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                text: text,
+                                rating: rating
+                            })
+                        })
+
+                        showTab("reviews-section")
+                    }
+                }
+
+                if (action === "delete-notification") {
+                    const notificationId = actionEl.dataset.notificationId;
+
+                    await fetch(`/notifications/delete/${notificationId}`, {
+                        method: "POST"
+                    });
+
+                    showTab("notifications-section");
+                }
+
+                if (action === "remove-game-from-collection") {
+                    const gameId = actionEl.dataset.gameId;
+                    const collectionId = actionEl.dataset.collectionId;
+
+                    try {
+                        const res = await fetch(`/collections/${collectionId}/remove-game/${gameId}`, {
+                            method: "POST"
+                        });
+
+                        if (res.ok) {
+                            actionEl.closest("li").remove();
+
+                            if (document.querySelectorAll("#games-list li.group").length === 0) {
+                                location.reload();
+                            }
+                        } else {
+                            alert("Ошибка при удалении");
+                        }
+
+                    } catch (e) {
+                        console.error(e);
+                        alert("Ошибка сети");
+                    }
+                }
+                
+                if (action === "load-repo-tree") {                
+                    const repo =
+                        document.querySelector("[name=repoLink]").value;
+                    
+                    const commit =
+                        document.querySelector("[name=commitHash]").value;
+                    
+                    if (!repo || !commit) {
+                        throw new Error(
+                            "Сначала укажите репозиторий и хэш коммита"
+                        );
+                    }
+                    
+                    console.log('Загрузка дерева репозитория для коммита ' + commit + ' в репозитории ' + repo);
+                    
+                    const response = await fetch(
+                        `/games/repo-tree?${new URLSearchParams({
+                            repoLink: repo,
+                            commitHash: commit
+                        })}`
+                    );
+                    
+                    if (!response.ok) {
+                        throw new Error(
+                            "Не удалось загрузить фрагмент дерева репозитория"
+                        );
+                    }
+                    
+                    const html = await response.text();
+                    
+                    const container =
+                        document.getElementById("repo-tree-fragment-container");
+                    
+                    container.innerHTML = html;
+                        
+                    container
+                        .querySelectorAll("script")
+                        .forEach(oldScript => {
+                    
+                            const script =
+                                document.createElement("script");
+                    
+                            script.textContent =
+                                oldScript.textContent;
+                    
+                            document.body.appendChild(script);
+                            script.remove();
+                        });
+                }
+                
+                if (action === 'rules-toggle') {
+                    const rulesBtn = document.getElementById("rules-toggle-btn");
+                    const rulesCard = document.getElementById("upload-rules-card");
+                        
+                    if (rulesBtn && rulesCard) {
+                        const isHidden = rulesCard.classList.toggle("hidden");
+                        
+                        const icon = rulesBtn.querySelector("i");
+                        if (isHidden) {
+                            icon.className = "fas fa-info text-[10px]";
+                            rulesBtn.classList.replace("bg-slate-200", "bg-slate-100");
+                        } else {
+                            icon.className = "fas fa-times text-[10px]";
+                            rulesBtn.classList.replace("bg-slate-100", "bg-slate-200");
+                        }
+                    }
+                }
+
+                /* =========================
+                   OPEN MODALS
+                   ========================= */
+
+                if (action === "open-modal") {
+
+                  const modalType = actionEl.dataset.modal;
+
+                  if (modalType === "delete_collection") {
+                    const collectionId = actionEl.dataset.collectionId;
+
+                      openModal("tpl-delete-collection", async () => {
+
+                        await fetch(`/collections/delete/${collectionId}`, {
+                          method: "POST"
+                        });
+
+                        showTab("collections-section");
+                        closeModal();
+                      });
+                  }
+
+                  if (modalType === "publish") {
+                    openModal("tpl-publish", async () => {
+                        const form = modalContent.querySelector('form[data-form="publish"]');
+                        const submitButton = form.querySelector('button[data-action="confirm"]');
+                        const originalButtonText = submitButton.innerHTML;
+
+                        // Helper functions for error handling
+                        const clearAllErrors = () => {
+                            // Clear all error messages
+                            form.querySelectorAll('.error-message').forEach(el => {
+                                el.textContent = '';
+                                el.classList.add('hidden');
+                            });
+
+                            // Remove error styling from inputs
+                            form.querySelectorAll('.error-input').forEach(el => {
+                                el.classList.remove('error-input', 'border-red-500');
+                            });
+
+                            // Hide general error
+                            const generalError = form.querySelector('.general-error');
+                            if (generalError) {
+                                generalError.classList.add('hidden');
+                            }
+                        };
+
+                        const displayErrors = (errors) => {
+                            for (const [fieldName, errorMessage] of Object.entries(errors)) {
+                                const errorElement = form.querySelector(`[data-error-for="${fieldName}"]`);
+                                const inputElement = form.querySelector(`[name="${fieldName}"]`);
+
+                                if (errorElement) {
+                                    errorElement.textContent = errorMessage;
+                                    errorElement.classList.remove('hidden');
+                                }
+
+                                if (inputElement) {
+                                    inputElement.classList.add('error-input', 'border-red-500');
+                                }
+                            }
+
+                            // Scroll to first error
+                            const firstError = form.querySelector('.error-message:not(.hidden)');
+                            if (firstError) {
+                                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        };
+
+                        const showGeneralMessage = (type, message) => {
+                            const generalError = form.querySelector('.general-error');
+                            if (generalError) {
+                                generalError.textContent = message;
+                                generalError.classList.remove('hidden');
+
+                                if (type === 'success') {
+                                    generalError.classList.remove('bg-red-50', 'border-red-200', 'text-red-600');
+                                    generalError.classList.add('bg-green-50', 'border-green-200', 'text-green-600');
+                                } else {
+                                    generalError.classList.remove('bg-green-50', 'border-green-200', 'text-green-600');
+                                    generalError.classList.add('bg-red-50', 'border-red-200', 'text-red-600');
+                                }
+                            }
+                        };
+
+                        // Real-time validation - clear errors as user types
+                        form.querySelectorAll('input, textarea, select').forEach(input => {
+                            input.addEventListener('input', () => {
+                                const errorElement = form.querySelector(`[data-error-for="${input.name}"]`);
+                                if (errorElement) {
+                                    errorElement.classList.add('hidden');
+                                }
+                                input.classList.remove('error-input', 'border-red-500');
+                            });
+                        });
+
+                        clearAllErrors();
+
+                        console.log("publish: before try-catch-finally");
+
+                        let hasValidationErrors = false;
+
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = `
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Проверка...
+                        `;
+
+                        try {
+                            const formData = new FormData(form);
+
+                            console.log('Submitting form data:', Object.fromEntries(formData));
+
+                            const response = await fetch('/games/publish', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            console.log('Response status:', response.status);
+
+                            const result = await response.json();
+                            console.log('Response result:', result);
+
+                            if (!response.ok) {
+                                console.log("Response not OK");
+                                // Check if it's a validation error (400 Bad Request)
+                                if (response.status === 400 && result.errors) {
+                                    console.log("Validation errors:", result.errors);
+                                    displayErrors(result.errors);
+                                    showGeneralMessage('error', result.message || 'Пожалуйста, исправьте ошибки в форме');
+                                    hasValidationErrors = true;
+                                    // Don't throw - we want to stay in the form
+                                } else {
+                                    throw new Error(result.message || 'Failed to publish game');
+                                }
+                            } else {
+                                // Success case
+                                if (result.success) {
+                                    console.log("Game published successfully:", result);
+                                    showGeneralMessage('success', result.message);
+
+                                    // Wait a moment to show success message before closing
+                                    setTimeout(() => {
+                                        alert('Игра успешно опубликована!');
+                                        closeModal();
+                                    }, 1000);
+                                    // Don't restore button - modal will close
+                                    return;
+                                } else {
+                                    // Handle case where response is 200 but success is false
+                                    if (result.errors) {
+                                        console.log("Success false with errors:", result.errors);
+                                        displayErrors(result.errors);
+                                        showGeneralMessage('error', result.message);
+                                        hasValidationErrors = true;
+                                    } else {
+                                        throw new Error(result.message || 'Unknown error occurred');
+                                    }
+                                }
+                            }
+
+                        } catch (error) {
+                            console.error("Error publishing game:", error);
+                            showGeneralMessage('error', `Ошибка при публикации: ${error.message}`);
+                            hasValidationErrors = true;
+                        } finally {
+                            // Only restore button if we're staying on the form (has errors)
+                            if (hasValidationErrors) {
+                                console.log("Restoring submit button");
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalButtonText;
+                            }
+                            // If success, the modal will close and we don't need to restore
+                        }
+                    });
+
+                  }
+
+                  if (modalType === "become_dev") {
+                    openModal("tpl-become-dev", async () => {
+                        const form = modalContent.querySelector('form[data-form="become_dev"]');
+                        const submitBtn = form.querySelector('button[type="submit"]');
+
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData);
+
+                        console.log(data);
+
+                        const response = await fetch("/dev-applications", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                            //"X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]').content
+                          },
+                          body: JSON.stringify(data)
+                        });
+
+                        if (response.ok) {
+                          console.log("Dev application submitted successfully");
+                          closeModal();
+                        } else {
+                          console.log("Failed to submit dev application");
+                          alert("Ошибка: вы уже подали заявку");
+                        }
+                    });
+
+                    console.log("become dev form opened");
+                  }
+
+                    if (modalType === "create_collection") {
+                      openModal("tpl-create-collection", async () => {
+
+                        const form = modalContent.querySelector('form[data-form="create_collection"]');
+                        const formData = new FormData(form);
+
+                        const name = formData.get("collection_name").trim();
+                        const userId = [[${user.id}]];
+
+                        if (!name) return;
+
+                        try {
+                          const response = await fetch("/collections/create", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: new URLSearchParams({
+                              name: name,
+                              userId: userId
+                            })
+                          });
+
+                          const data = await response.json();
+
+                          console.log("Collection created:", data);
+                        } catch (err) {
+                          console.error("Failed to create collection", err);
+                        } finally {
+                          closeModal();
+                          showTab("collections-section");
+                        }
+
+                      });
+                    }
+
+                  if (modalType === "logout") {
+                    openModal("tpl-logout-confirm", async () => {
+                      console.log("Кнопка выйти нажата");
+                      await fetch("profile/logout",
+                        { method: "POST" });
+                      window.location.href = "/";
+                    });
+
+                    console.log("Открыта форма выхода");
+                  }
+
+                  if (modalType === "delete_review") {
+                      const reviewId = actionEl.dataset.reviewId;
+
+                      openModal("tpl-delete-review", async () => {
+
+                        await fetch(`/reviews/delete/${reviewId}`, {
+                          method: "POST"
+                        });
+
+                        showTab("reviews-section");
+                        closeModal();
+                      });
+                  }
+
+                }
+
+              });
+            });
+        </script>
+
+        <!-- ===== SECTION WRAPPERS ===== -->
+        <div id="collections-wrapper" class="hidden"></div>
+        <div id="reviews-wrapper" class="hidden"></div>
+        <div id="notifications-wrapper" class="hidden"></div>
+        <div id="my-games-wrapper" class="hidden"></div>
+        <div id="collection-games-wrapper" class="hidden"></div>
+
+    </section>
+</html>
